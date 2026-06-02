@@ -57,6 +57,10 @@ class BuilderConfig:
     def from_dict(data: dict[str, Any], base_dir: Path) -> "BuilderConfig":
         """Parse and validate JSON configuration for the builder."""
         input_csv = _resolve_path(base_dir, data.get("input_csv"), required=True)
+        if input_csv.name == _SAMPLE_CSV_NAME:
+            real_csv = _discover_real_csv(input_csv.parent)
+            if real_csv is not None:
+                input_csv = real_csv
         output_html = _resolve_path(base_dir, data.get("output_html", "impact_delta_report.html"))
         output_json = _resolve_path(base_dir, data.get("output_json", "impact_delta_report_data.json"))
         output_discarded_csv = _resolve_path(
@@ -151,6 +155,9 @@ COLUMN_ALIASES: dict[str, str] = {
 }
 
 
+_SAMPLE_CSV_NAME = "sales_carts_sample.csv"
+
+
 def _resolve_path(base_dir: Path, raw_path: Any, required: bool = False) -> Path:
     """Resolve relative paths against a configuration directory."""
     value = str(raw_path or "").strip()
@@ -160,6 +167,18 @@ def _resolve_path(base_dir: Path, raw_path: Any, required: bool = False) -> Path
     if not path.is_absolute():
         path = (base_dir / path).resolve()
     return path
+
+
+def _discover_real_csv(input_data_dir: Path) -> Path | None:
+    """Return the most recently modified non-sample CSV in input_data_dir, or None."""
+    if not input_data_dir.is_dir():
+        return None
+    candidates = sorted(
+        (p for p in input_data_dir.glob("*.csv") if p.name != _SAMPLE_CSV_NAME),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    return candidates[0] if candidates else None
 
 
 def _parse_margin(value: Any) -> float | None:
@@ -1102,7 +1121,10 @@ class DeltaHtmlRenderer:
     }}
 
     function dateToKey(dateObject) {{
-      return dateObject.toISOString().slice(0, 10);
+      const y = dateObject.getFullYear();
+      const m = String(dateObject.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObject.getDate()).padStart(2, '0');
+      return `${{y}}-${{m}}-${{d}}`;
     }}
 
     function addDays(dateObject, days) {{
@@ -1257,14 +1279,13 @@ class DeltaHtmlRenderer:
         const preGroupRevenue = groupLines.filter((line) => line.date >= dateToKey(preStart) && line.date < state.eventDate).reduce((accumulator, row) => accumulator + row.revenue, 0);
         const postGroupRevenue = groupLines.filter((line) => line.date >= state.eventDate && line.date <= dateToKey(postEnd)).reduce((accumulator, row) => accumulator + row.revenue, 0);
         const postGroupOrders = groupOrders.filter((order) => order.date >= state.eventDate && order.date <= dateToKey(postEnd));
-        const postRevenueOrders = postGroupOrders.reduce((accumulator, order) => accumulator + order.revenue, 0);
         return {{
           name: group.name,
           productCount: group.products.length,
           products: group.products,
           postRevenue: postGroupRevenue,
           postOrders: postGroupOrders.length,
-          postAvgTicket: postGroupOrders.length > 0 ? postRevenueOrders / postGroupOrders.length : 0,
+          postAvgTicket: postGroupOrders.length > 0 ? postGroupRevenue / postGroupOrders.length : 0,
           deltaRevenue: pctChange(preGroupRevenue, postGroupRevenue),
         }};
       }});
@@ -1425,11 +1446,14 @@ class DeltaHtmlRenderer:
     }}
 
     function renderKpis(scope) {{
+      const ticketLabel = state.selectedProducts.size > 0
+        ? 'Ticket prom carrito pos'
+        : 'Ticket promedio pos';
       const kpis = [
         {{ label: 'Revenue pos', value: formatCurrency(scope.postLine.revenue), delta: scope.deltas.revenue, accent: 'positive' }},
         {{ label: 'Unidades pos', value: `${{formatNumber(scope.postLine.units)}} u`, delta: scope.deltas.units, accent: 'positive' }},
         {{ label: 'Ordenes impactadas', value: formatNumber(scope.postOrder.orders), delta: scope.deltas.orders, accent: 'neutral' }},
-        {{ label: 'Ticket promedio pos', value: formatCurrency(scope.postOrder.avgTicket), delta: scope.deltas.ticket, accent: 'warning' }},
+        {{ label: ticketLabel, value: formatCurrency(scope.postOrder.avgTicket), delta: scope.deltas.ticket, accent: 'warning' }},
       ];
 
       refs.kpiGrid.innerHTML = kpis.map((item) => {{
