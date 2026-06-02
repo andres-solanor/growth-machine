@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Sales report",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/reports/report_generator.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Delta report",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/reports/delta_builder/delta_builder.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}

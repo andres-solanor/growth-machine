@@ -7,8 +7,8 @@
 ║  de ventas. Diseñado para ser extensible y reutilizable.            ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
-USO:
-    python report_generator.py --input ventas.csv --output report.html
+USO (desde la raíz del repo o desde este directorio):
+    python report_generator.py --input input_data/ventas.csv --output report.html
 
     O como módulo:
         from report_generator import ReportGenerator
@@ -37,6 +37,15 @@ import sys
 from pathlib import Path
 import logging
 from calendar import monthrange
+
+# Directorio del proyecto (donde viven input_data/, report.html, etc.)
+PROJECT_DIR = Path(__file__).resolve().parent
+
+
+def resolve_project_path(path: str | Path) -> Path:
+    """Resuelve rutas relativas contra PROJECT_DIR (no contra cwd)."""
+    p = Path(path)
+    return p if p.is_absolute() else (PROJECT_DIR / p).resolve()
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -3140,12 +3149,9 @@ class ReportGenerator:
 # 7. CLI
 # ═══════════════════════════════════════════════════════════════════════
 
-def discover_default_input_csv() -> Optional[str]:
-    """Encuentra un CSV usable para ejecución sin argumentos (botón Run de VS Code)."""
-    cwd = Path.cwd()
-
-    # Primero buscar en input_data/ (ruta canónica del proyecto)
-    input_data_dir = cwd / "input_data"
+def _discover_csv_in(base: Path) -> Optional[str]:
+    """Busca el CSV más reciente en base/input_data/ o archivos de prueba en base/."""
+    input_data_dir = base / "input_data"
     if input_data_dir.is_dir():
         input_data_csvs = sorted(
             input_data_dir.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True
@@ -3153,19 +3159,27 @@ def discover_default_input_csv() -> Optional[str]:
         if input_data_csvs:
             return str(input_data_csvs[0])
 
-    preferred = [
-        "test_data_with_margins_normalized.csv",
-        "test_data_with_margins.csv",
-    ]
-    for filename in preferred:
-        candidate = cwd / filename
-        if candidate.exists() and candidate.is_file():
-            return str(candidate)
+    fixtures_dir = base / "fixtures"
+    for filename in ("test_data_with_margins_normalized.csv", "test_data_with_margins.csv"):
+        for parent in (fixtures_dir, base):
+            candidate = parent / filename
+            if candidate.is_file():
+                return str(candidate)
 
-    csv_files = sorted(cwd.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
+    csv_files = sorted(base.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
     if csv_files:
         return str(csv_files[0])
+    return None
 
+
+def discover_default_input_csv() -> Optional[str]:
+    """Encuentra un CSV usable sin --input (funciona desde cualquier cwd)."""
+    found = _discover_csv_in(PROJECT_DIR)
+    if found:
+        return found
+    cwd = Path.cwd()
+    if cwd != PROJECT_DIR:
+        return _discover_csv_in(cwd)
     return None
 
 if __name__ == "__main__":
@@ -3181,16 +3195,19 @@ if __name__ == "__main__":
     input_path = args.input or discover_default_input_csv()
     if not input_path:
         parser.error(
-            "No se encontró un CSV automáticamente en el directorio actual. "
-            "Usa --input <archivo.csv> o coloca un .csv en el workspace."
+            "No se encontró un CSV automáticamente. "
+            f"Usa --input <archivo.csv> o coloca CSVs en {PROJECT_DIR / 'input_data'}."
         )
+
+    input_path = str(resolve_project_path(input_path))
+    output_path = str(resolve_project_path(args.output))
 
     if not args.input:
         logger.info("Sin --input explícito. CSV detectado automáticamente: %s", input_path)
 
     config = ReportConfig(store_name=args.store)
     gen = ReportGenerator(input_path, config)
-    gen.run(args.output)
+    gen.run(output_path)
 
 
 # ═══════════════════════════════════════════════════════════════════════
