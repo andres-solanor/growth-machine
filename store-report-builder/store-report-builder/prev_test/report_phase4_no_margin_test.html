@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store 900421032 — Sales Analytics Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0f14; --surface: #151921; --surface2: #1c2230;
+  --border: #2a3040; --text: #e2e6ed; --text-muted: #8a92a3;
+  --accent: #f59e0b; --accent2: #3b82f6; --accent3: #10b981;
+  --accent4: #ef4444; --accent5: #8b5cf6;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; line-height:1.6; }
+.container { max-width:1200px; margin:0 auto; padding:40px 24px; }
+.header { margin-bottom:48px; padding-bottom:32px; border-bottom:1px solid var(--border); }
+.header-label { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:12px; }
+.header h1 { font-size:32px; font-weight:700; letter-spacing:-0.5px; margin-bottom:8px; }
+.header .subtitle { font-size:15px; color:var(--text-muted); }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:48px; }
+.kpi { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; position:relative; overflow:hidden; }
+.kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.kpi:nth-child(1)::before { background:linear-gradient(135deg,#f59e0b,#f97316); }
+.kpi:nth-child(2)::before { background:linear-gradient(135deg,#3b82f6,#6366f1); }
+.kpi:nth-child(3)::before { background:linear-gradient(135deg,#10b981,#06b6d4); }
+.kpi:nth-child(4)::before { background:linear-gradient(135deg,#ef4444,#f97316); }
+.kpi:nth-child(5)::before { background:linear-gradient(135deg,#f59e0b,#f97316); }
+.kpi:nth-child(6)::before { background:linear-gradient(135deg,#3b82f6,#6366f1); }
+.kpi-label { font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:8px; font-family:'JetBrains Mono',monospace; }
+.kpi-value { font-size:26px; font-weight:700; letter-spacing:-0.5px; }
+.kpi-sub { font-size:12px; color:var(--text-muted); margin-top:4px; }
+.section { margin-bottom:56px; }
+.section-header { display:flex; align-items:baseline; gap:12px; margin-bottom:24px; }
+.section-num { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); font-weight:500; }
+.section-title { font-size:20px; font-weight:700; }
+.section-desc { font-size:14px; color:var(--text-muted); margin-top:-16px; margin-bottom:24px; max-width:700px; }
+.section-explainer { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:10px; padding:12px 14px; margin:-10px 0 18px 0; font-size:13px; color:#b9c3d8; line-height:1.6; }
+.chart-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.chart-row.full { grid-template-columns:1fr; }
+.chart-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; min-height:350px; }
+.chart-box-title { font-size:13px; font-weight:500; color:var(--text-muted); margin-bottom:12px; font-family:'JetBrains Mono',monospace; letter-spacing:0.5px; }
+.data-table { width:100%; border-collapse:collapse; font-size:13px; }
+.data-table th { text-align:left; padding:10px 12px; border-bottom:2px solid var(--border); color:var(--text-muted); font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:1px; font-weight:500; }
+.data-table td { padding:10px 12px; border-bottom:1px solid var(--border); }
+.data-table tr:hover td { background:var(--surface2); }
+.mono { font-family:'JetBrains Mono',monospace; font-size:12px; }
+.insight-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.insight { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:20px; }
+.insight.green { border-left-color:var(--accent3); }
+.insight.yellow { border-left-color:var(--accent); }
+.insight.red { border-left-color:var(--accent4); }
+.insight-title { font-weight:700; font-size:14px; margin-bottom:8px; }
+.insight-body { font-size:13px; color:var(--text-muted); line-height:1.7; }
+.insight-meta { margin-top:10px; font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+.pill { display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; font-size:11px; margin-right:8px; }
+.pill.high { border-color:#ef4444; color:#ef4444; }
+.pill.medium { border-color:#f59e0b; color:#f59e0b; }
+.pill.low { border-color:#10b981; color:#10b981; }
+.mini-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px; }
+.mini-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.mini-title { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-family:'JetBrains Mono',monospace; margin-bottom:6px; }
+.mini-value { font-size:22px; font-weight:700; }
+.classification-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-top:12px; }
+.class-badge { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; font-size:12px; font-weight:500; }
+.info-box { background:var(--surface); border-left:3px solid var(--accent2); border-radius:8px; padding:16px; margin-top:16px; font-size:13px; line-height:1.6; }
+.info-box ul { margin-left:20px; margin-top:8px; }
+.info-box li { margin-bottom:6px; }
+.info-box code { background:var(--surface2); padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:12px; }
+.footer { margin-top:48px; padding-top:24px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+@media(max-width:768px) { .chart-row,.insight-grid { grid-template-columns:1fr; } .kpi-grid { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <div class="header-label">Rappi · Analytics · Store 900421032</div>
+  <h1>Sales & Cart Analysis Report</h1>
+  <div class="subtitle">02 Jan – 20 Apr 2026 · 7,964 órdenes · 81 productos</div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Revenue Total</div><div class="kpi-value">$185.1M</div><div class="kpi-sub">COP</div></div>
+  <div class="kpi"><div class="kpi-label">Órdenes</div><div class="kpi-value">7,964</div><div class="kpi-sub">02 Jan – 20 Apr 2026</div></div>
+  <div class="kpi"><div class="kpi-label">Ticket Promedio</div><div class="kpi-value">$23,244</div><div class="kpi-sub">COP por orden</div></div>
+  <div class="kpi"><div class="kpi-label">Items / Orden</div><div class="kpi-value">1.8</div><div class="kpi-sub">47.7% con 2+ items</div></div>
+  <div class="kpi"><div class="kpi-label">Unidades</div><div class="kpi-value">18,361</div><div class="kpi-sub">vendidas en total</div></div>
+  <div class="kpi"><div class="kpi-label">80% Revenue</div><div class="kpi-value">27 items</div><div class="kpi-sub">de 81 totales</div></div>
+</div>
+<div class="section-explainer"><strong>Cómo leer este bloque:</strong> resume salud comercial del período. Si baja <em>items/orden</em>, priorizar cross-sell; si sube la concentración (Pareto), aumentar foco operativo en los SKUs tractores para reducir riesgo de quiebres.</div>
+
+<div class="section">
+    <div class="section-header"><span class="section-num">00</span><span class="section-title">Qué Haría Esta Semana</span></div>
+    <div class="section-desc">Recomendaciones accionables priorizadas automáticamente con la información disponible.</div>
+    <div class="section-explainer"><strong>Cómo usarlo:</strong> este bloque traduce hallazgos en decisiones concretas. Ejecuta primero acciones de impacto <em>ALTO</em>, revisa resultado en 1-2 semanas y reitera.</div>
+    <div class="mini-grid"><div class="mini-card"><div class="mini-title">ALTO · Catálogo · 1 semana</div><div style="font-size:14px">Blindar disponibilidad y visibilidad de los 27 SKUs que concentran el 80% del revenue.</div></div><div class="mini-card"><div class="mini-title">MEDIO · Growth · 2 semanas</div><div style="font-size:14px">Ejecutar test de upsell en la franja 17:00 (alto tráfico con ticket por debajo de la media).</div></div><div class="mini-card"><div class="mini-title">ALTO · Growth + Comercial · 2 semanas</div><div style="font-size:14px">Probar bundle guiado para Almojábana + Pandequeso (lift 2.05).</div></div></div>
+</div>
+
+<div class="section">
+    <div class="section-header"><span class="section-num">DQ</span><span class="section-title">Data Quality</span></div>
+    <div class="section-desc">Cobertura del 97/109 días entre 2026-01-02 y 2026-04-20.</div>
+    <div class="section-explainer"><strong>Cómo leerlo:</strong> mide confiabilidad del reporte. Riesgo alto implica decisiones tácticas de corto plazo, pero evita conclusiones estratégicas hasta corregir cobertura y calidad.</div>
+    <div><span class="pill high">Riesgo HIGH</span></div>
+    <div class="mini-grid">
+        <div class="mini-card"><div class="mini-title">Filas válidas</div><div class="mini-value">14,455</div></div>
+        <div class="mini-card"><div class="mini-title">% descartadas</div><div class="mini-value">0.05%</div></div>
+        <div class="mini-card"><div class="mini-title">Días faltantes</div><div class="mini-value">12</div></div>
+        <div class="mini-card"><div class="mini-title">Semanas incompletas</div><div class="mini-value">3</div></div>
+    </div>
+    <div class="section-desc" style="margin-top:14px">Fechas inválidas detectadas: <strong>0</strong>. Coerciones numéricas totales: <strong>0</strong>. Meses parciales: 2026-01 (30/31 días), 2026-04 (8/30 días)</div>
+</div>
+
+<div class="section">
+  <div class="section-header"><span class="section-num">01</span><span class="section-title">Ventas en el Tiempo</span></div>
+  <div class="section-desc">Evolución diaria y semanal. Línea naranja = media móvil 7d.</div>
+    <div class="section-explainer"><strong>Interpretación:</strong> compara tendencia real vs ruido diario. Los picos recurrentes indican ventanas para promociones y staffing; caídas sostenidas exigen revisar disponibilidad y visibilidad en app.</div>
+  <div class="chart-row full"><div class="chart-box"><div id="chart-daily"></div></div></div>
+  <div class="chart-row">
+    <div class="chart-box"><div id="chart-weekly"></div></div>
+    <div class="chart-box"><div id="chart-dow"></div></div>
+  </div>
+  <div class="chart-row full"><div class="chart-box"><div class="chart-box-title">Órdenes por hora × día de semana</div><div id="chart-heatmap"></div></div></div>
+  <div class="chart-row full"><div class="chart-box"><div id="chart-cat-monthly"></div></div></div>
+</div>
+
+<div class="section">
+  <div class="section-header"><span class="section-num">02</span><span class="section-title">Análisis de Productos</span></div>
+  <div class="section-desc">Top productos por revenue, curva de Pareto y precio vs. volumen.</div>
+    <div class="section-explainer"><strong>Interpretación:</strong> identifica qué productos sostienen el negocio y cuáles tienen potencial de escala. Decisiones típicas: proteger top SKUs, reordenar catálogo y ajustar mix precio-volumen.</div>
+  <div class="chart-row full"><div class="chart-box"><div id="chart-top20"></div></div></div>
+  <div class="chart-row">
+    <div class="chart-box"><div id="chart-pareto"></div></div>
+    <div class="chart-box"><div id="chart-scatter"></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><span class="section-num">02B</span><span class="section-title">Análisis de Rentabilidad</span></div>
+  <div class="section-desc">Requiere datos de margen para análisis de profitabilidad.</div>
+  <div class="section-explainer"><strong>Estado:</strong> no hay datos de margen disponibles. Proporcione una columna <code>margin_pct</code> (% de margen por producto) en el CSV para activar análisis de productos Tractor/Champion, Pareto de profit y estrategias de pricing.</div>
+  <div class="info-box">
+    <p>Para habilitar análisis de rentabilidad:</p>
+    <ul>
+      <li>Agregue una columna <code>margin_pct</code> al CSV con el % de margen de cada producto</li>
+      <li>El analizador detectará automáticamente la columna y calculará profit por producto</li>
+      <li>Se mostrarán productos clasificados como: Champion (alto margen, alto volumen), Tractor (bajo margen, alto volumen), Gem (alto margen, bajo volumen), Niche (bajo margen, bajo volumen)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><span class="section-num">03</span><span class="section-title">Market Basket Analysis</span></div>
+  <div class="section-desc">Pares comprados juntos. Lift &gt; 1 = asociación positiva (ocurren juntos más de lo esperado).</div>
+    <div class="section-explainer"><strong>Interpretación:</strong> un lift alto sugiere afinidad real entre productos y es candidato para bundle. Pares frecuentes con lift bajo suelen ser hábitos ya maduros, con menor upside promocional.</div>
+  <div class="chart-row full"><div class="chart-box"><div id="chart-pairs"></div></div></div>
+  <div class="chart-row">
+    <div class="chart-box"><div class="chart-box-title">Detalle: Frecuencia y Lift</div>
+      <table class="data-table"><thead><tr><th>Producto A</th><th>Producto B</th><th>Juntos</th><th>Soporte</th><th>Lift</th></tr></thead><tbody><tr><td>Almojábana</td><td>Pandequeso</td><td class="mono">161</td><td class="mono">4.2%</td><td class="mono" style="color:#10b981">2.05</td></tr>
+<tr><td>Café con Leche</td><td>Tinto</td><td class="mono">118</td><td class="mono">3.1%</td><td class="mono" style="color:#f59e0b">1.06</td></tr>
+<tr><td>Café con Leche</td><td>Pandequeso</td><td class="mono">116</td><td class="mono">3.0%</td><td class="mono" style="color:#f59e0b">1.34</td></tr>
+<tr><td>Almojábana</td><td>Café con Leche</td><td class="mono">112</td><td class="mono">2.9%</td><td class="mono" style="color:#f59e0b">1.34</td></tr>
+<tr><td>Capuchino sin Licor</td><td>Pandequeso</td><td class="mono">106</td><td class="mono">2.8%</td><td class="mono" style="color:#f59e0b">1.14</td></tr>
+<tr><td>Porción Torta Zanahoria / Chocolate / Bizcocho / Maria Luisa</td><td>Tinto</td><td class="mono">103</td><td class="mono">2.7%</td><td class="mono" style="color:#f59e0b">1.24</td></tr>
+<tr><td>Capuchino sin Licor</td><td>Porción Torta Zanahoria / Chocolate / Bizcocho / Maria Luisa</td><td class="mono">102</td><td class="mono">2.7%</td><td class="mono" style="color:#f59e0b">1.38</td></tr>
+<tr><td>Americano</td><td>Capuchino sin Licor</td><td class="mono">91</td><td class="mono">2.4%</td><td class="mono" style="color:#f59e0b">1.15</td></tr>
+<tr><td>Pandequeso</td><td>Tinto</td><td class="mono">89</td><td class="mono">2.3%</td><td class="mono" style="color:#ef4444">0.85</td></tr>
+<tr><td>Almojábana</td><td>Capuchino sin Licor</td><td class="mono">81</td><td class="mono">2.1%</td><td class="mono" style="color:#ef4444">0.90</td></tr>
+<tr><td>Café con Leche</td><td>Capuchino sin Licor</td><td class="mono">76</td><td class="mono">2.0%</td><td class="mono" style="color:#ef4444">0.77</td></tr>
+<tr><td>Americano</td><td>Porción Torta Zanahoria / Chocolate / Bizcocho / Maria Luisa</td><td class="mono">75</td><td class="mono">2.0%</td><td class="mono" style="color:#f59e0b">1.36</td></tr>
+<tr><td>Capuchino sin Licor</td><td>Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne</td><td class="mono">68</td><td class="mono">1.8%</td><td class="mono" style="color:#f59e0b">1.03</td></tr>
+<tr><td>Café con Leche</td><td>Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne</td><td class="mono">68</td><td class="mono">1.8%</td><td class="mono" style="color:#f59e0b">1.11</td></tr>
+<tr><td>Capuchino sin Licor</td><td>Tinto</td><td class="mono">67</td><td class="mono">1.8%</td><td class="mono" style="color:#ef4444">0.56</td></tr>
+</tbody></table>
+    </div>
+    <div class="chart-box"><div id="chart-catpairs"></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><span class="section-num">04</span><span class="section-title">Composición del Carrito</span></div>
+  <div class="section-desc">Distribución de ítems por orden, ticket promedio y evolución.</div>
+    <div class="section-explainer"><strong>Interpretación:</strong> muestra profundidad de compra. Si crece el peso de carritos de 1 ítem, priorizar upsell/cross-sell; si suben tickets altos, validar que no dependan de pocos eventos atípicos.</div>
+  <div class="chart-row">
+    <div class="chart-box"><div id="chart-cartdist"></div></div>
+    <div class="chart-box"><div id="chart-ticketdist"></div></div>
+  </div>
+  <div class="chart-row full"><div class="chart-box"><div id="chart-cartevol"></div></div></div>
+</div>
+
+<div class="section">
+    <div class="section-header"><span class="section-num">06</span><span class="section-title">Ticket & Horas de Oportunidad</span></div>
+    <div class="section-desc">Ticket promedio por día/hora y ventanas con buen tráfico pero ticket bajo (espacio para upsell).</div>
+    <div class="section-explainer"><strong>Interpretación:</strong> las horas marcadas como oportunidad combinan volumen relevante con ticket por debajo del promedio; son ideales para pruebas de combo o add-ons.</div>
+    <div class="chart-row">
+        <div class="chart-box"><div id="chart-ticket-day"></div></div>
+        <div class="chart-box"><div id="chart-ticket-hour"></div></div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-header"><span class="section-num">07</span><span class="section-title">Reglas A→B (Market Basket)</span></div>
+    <div class="section-desc">Reglas dirigidas con confidence, lift y conviction para campañas de bundle más precisas.</div>
+    <div class="section-explainer"><strong>Cómo se calcula:</strong> <em>confidence</em> = probabilidad de comprar B dado A, <em>lift</em> = fuerza de asociación vs azar, <em>conviction</em> = estabilidad de la regla. <strong>Decisión:</strong> prioriza reglas con confidence alto, lift &gt; 1 y soporte suficiente para activar bundles o recomendadores.</div>
+    <div class="chart-row full"><div class="chart-box"><table class="data-table"><thead><tr><th>A (antecedente)</th><th>B (consecuente)</th><th>Veces</th><th>Confidence</th><th>Lift</th><th>Conviction</th></tr></thead><tbody><tr><td>Torta Fría 12 Porciones</td><td>Vela Volcan</td><td class='mono'>25</td><td class='mono'>46.3%</td><td class='mono'>30.33</td><td class='mono'>1.83</td></tr><tr><td>Croissant del Huerto</td><td>Desayuno Colmena</td><td class='mono'>26</td><td class='mono'>56.5%</td><td class='mono'>21.70</td><td class='mono'>2.24</td></tr><tr><td>Desayuno Capricho</td><td>Desayuno Colmena</td><td class='mono'>22</td><td class='mono'>57.9%</td><td class='mono'>22.22</td><td class='mono'>2.31</td></tr><tr><td>Vela Volcan</td><td>Torta Fría 6 Porciones</td><td class='mono'>18</td><td class='mono'>31.0%</td><td class='mono'>14.74</td><td class='mono'>1.42</td></tr><tr><td>Desayuno Capricho</td><td>Milo</td><td class='mono'>16</td><td class='mono'>42.1%</td><td class='mono'>4.97</td><td class='mono'>1.58</td></tr><tr><td>Tostadas Mediterraneas</td><td>Milo</td><td class='mono'>18</td><td class='mono'>40.0%</td><td class='mono'>4.72</td><td class='mono'>1.53</td></tr><tr><td>Desayuno Colmena</td><td>Milo</td><td class='mono'>29</td><td class='mono'>29.3%</td><td class='mono'>3.46</td><td class='mono'>1.29</td></tr><tr><td>Porción Postre Baileys</td><td>Porción Postre Pequeño</td><td class='mono'>33</td><td class='mono'>28.0%</td><td class='mono'>3.48</td><td class='mono'>1.28</td></tr><tr><td>Almojábana</td><td>Pandequeso</td><td class='mono'>161</td><td class='mono'>30.0%</td><td class='mono'>2.05</td><td class='mono'>1.22</td></tr><tr><td>Ranchero- Arequipequeso</td><td>Pastel Arequipe- Guayaba- Gloria- Hawaiano</td><td class='mono'>44</td><td class='mono'>24.3%</td><td class='mono'>2.40</td><td class='mono'>1.19</td></tr><tr><td>Croisant Jamon-Queso</td><td>Milo</td><td class='mono'>25</td><td class='mono'>21.6%</td><td class='mono'>2.54</td><td class='mono'>1.17</td></tr><tr><td>Arroz con Leche</td><td>Porción Postre Pequeño</td><td class='mono'>17</td><td class='mono'>22.1%</td><td class='mono'>2.75</td><td class='mono'>1.18</td></tr></tbody></table></div></div>
+</div>
+
+<div class="section">
+  <div class="section-header"><span class="section-num">05</span><span class="section-title">Hallazgos e Insights</span></div>
+  <div class="section-desc">10 insights generados automáticamente, ordenados por prioridad.</div>
+  <div class="insight-grid"><div class="insight yellow"><div class="insight-title">Concentración de revenue</div><div class="insight-body">Solo <strong>27 productos</strong> de 81 (33%) generan el 80% del revenue. Un problema de disponibilidad en cualquiera de los top 5 tiene impacto directo en GMV. Estos items deben estar siempre visibles y bien nombrados en el catálogo.</div><div class="insight-meta">Acción: Optimizar portafolio y pricing de top SKUs · Responsable: Comercial · Horizonte: 1-2 semanas</div></div>
+<div class="insight green"><div class="insight-title">Bebidas como ancla del carrito</div><div class="insight-body">La categoría <strong>Bebidas</strong> aparece en el 60% de los pares más frecuentes del market basket. Actúa como ancla que acompaña productos de mayor ticket. <em>Oportunidad:</em> optimizar combos con esta categoría como base.</div><div class="insight-meta">Acción: Lanzar test A/B de bundles en menú · Responsable: Growth · Horizonte: 2 semanas</div></div>
+<div class="insight green"><div class="insight-title">Oportunidad de combos (Market Basket)</div><div class="insight-body">Los pares con lift alto representan combinaciones que ocurren más de lo esperado por azar — candidatos naturales para combos en el menú: <strong>Almojábana</strong> + <strong>Pandequeso</strong> (lift 2.05). Los pares de alta frecuencia pero lift bajo ya son habituales; el upside está en promover los de alto lift.</div><div class="insight-meta">Acción: Lanzar test A/B de bundles en menú · Responsable: Growth · Horizonte: 2 semanas</div></div>
+<div class="insight green"><div class="insight-title">47.7% de órdenes son multi-item</div><div class="insight-body">El promedio es 1.8 items por orden. Hay espacio significativo para incrementar cross-sell, especialmente en carritos de 1 item. </div><div class="insight-meta">Acción: Lanzar test A/B de bundles en menú · Responsable: Growth · Horizonte: 2 semanas</div></div>
+<div class="insight "><div class="insight-title">Picos de demanda</div><div class="insight-body">La hora pico es las <strong>17:00</strong> y el día con más órdenes es <strong>Dom</strong>. La combinación más fuerte es <strong>Dom 9:00</strong>. Estos picos informan decisiones de staffing y timing de promociones.</div><div class="insight-meta">Acción: Ajustar staffing y slots promocionales · Responsable: Operaciones · Horizonte: 1 semana</div></div>
+<div class="insight green"><div class="insight-title">Productos en crecimiento</div><div class="insight-body">Comparando 2026-01 vs 2026-03, los productos con mayor crecimiento en revenue son: <strong>Avena</strong> (+110.0%), <strong>Muffins X 4 Unidades</strong> (+62.0%), <strong>Milhoja Individual</strong> (+52.6%). Estos representan demanda emergente que podría amplificarse con mejor posicionamiento en el catálogo. El ranking filtra productos con base suficiente (48 elegibles) para evitar porcentajes engañosos.</div><div class="insight-meta">Acción: Reubicar productos en catálogo según tendencia · Responsable: Catálogo · Horizonte: 1-2 semanas</div></div>
+<div class="insight red"><div class="insight-title">Productos en declive</div><div class="insight-body">Comparando 2026-01 vs 2026-03, los productos con mayor caída: <strong>Desayuno Capricho</strong> (-70.4%), <strong>Roscon Guayaba Y Roscon de Arequipe</strong> (-35.3%), <strong>Aromatica Frutos Secos</strong> (-30.3%). Investigar si se debe a disponibilidad, estacionalidad, o pérdida de demanda genuina. El análisis usa solo productos con base suficiente (48 elegibles).</div><div class="insight-meta">Acción: Reubicar productos en catálogo según tendencia · Responsable: Catálogo · Horizonte: 1-2 semanas</div></div>
+<div class="insight "><div class="insight-title">Ticket promedio $23,244 COP</div><div class="insight-body">El ticket mediano ($18,000) está por debajo del promedio (23% de diferencia), indicando una distribución con cola a la derecha. El 50% de los pedidos cae entre $10,000 y $30,000.</div><div class="insight-meta">Acción: Optimizar portafolio y pricing de top SKUs · Responsable: Comercial · Horizonte: 1-2 semanas</div></div>
+<div class="insight "><div class="insight-title">Balance de categorías</div><div class="insight-body">Las 3 categorías principales concentran el 95% del revenue: <strong>Panadería</strong> (39.3%), <strong>Repostería</strong> (32.5%), <strong>Bebidas</strong> (23.4%). La distribución está relativamente balanceada.</div><div class="insight-meta">Acción: Optimizar portafolio y pricing de top SKUs · Responsable: Comercial · Horizonte: 1-2 semanas</div></div>
+<div class="insight "><div class="insight-title">Días atípicos</div><div class="insight-body">El revenue diario promedio es $1,908,474 ± $765,935. Día de mayor pico: <strong>08 Mar</strong> ($4,496,000, 3.4σ sobre la media). Día más bajo: <strong>20 Apr</strong> ($252,500, 2.2σ bajo la media). Los picos pueden indicar eventos especiales o campañas efectivas; los valles pueden indicar problemas operativos o fechas festivas.</div><div class="insight-meta">Acción: Auditar campañas/eventos y operación del día · Responsable: BI + Operaciones · Horizonte: 72 horas</div></div>
+</div>
+</div>
+
+<div class="footer">Generado automáticamente · Store 900421032 · 02 Jan – 20 Apr 2026</div>
+</div><!-- /container -->
+
+<script>
+function initCharts() {
+const PC = {responsive:true, displayModeBar:false};
+const DL = {
+  paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+  font:{family:'DM Sans',color:'#8a92a3',size:12},
+  margin:{t:40,r:20,b:50,l:60},
+  xaxis:{gridcolor:'#1c2230',zerolinecolor:'#2a3040'},
+  yaxis:{gridcolor:'#1c2230',zerolinecolor:'#2a3040'},
+};
+const CC = {"Bebidas": "#3b82f6", "Panader\u00eda": "#f59e0b", "Reposter\u00eda": "#ef4444", "Brunch": "#10b981", "Pi\u00f1ater\u00eda": "#8b5cf6", "Otros": "#6b7280"};
+
+// ── DAILY ──
+const daily=[{"date_str":"2026-01-02","revenue":1695000,"orders":71,"rolling_rev":1695000.0,"rolling_orders":71.0},{"date_str":"2026-01-03","revenue":2345500,"orders":84,"rolling_rev":2020250.0,"rolling_orders":77.5},{"date_str":"2026-01-04","revenue":3090000,"orders":126,"rolling_rev":2376833.3333333335,"rolling_orders":93.6666666667},{"date_str":"2026-01-05","revenue":1232500,"orders":57,"rolling_rev":2090750.0,"rolling_orders":84.5},{"date_str":"2026-01-06","revenue":1527500,"orders":77,"rolling_rev":1978100.0,"rolling_orders":83.0},{"date_str":"2026-01-07","revenue":1843500,"orders":80,"rolling_rev":1955666.6666666667,"rolling_orders":82.5},{"date_str":"2026-01-08","revenue":1670500,"orders":69,"rolling_rev":1914928.5714285714,"rolling_orders":80.5714285714},{"date_str":"2026-01-09","revenue":1619500,"orders":73,"rolling_rev":1904142.857142857,"rolling_orders":80.8571428571},{"date_str":"2026-01-10","revenue":2264000,"orders":76,"rolling_rev":1892500.0,"rolling_orders":79.7142857143},{"date_str":"2026-01-11","revenue":2942500,"orders":107,"rolling_rev":1871428.5714285714,"rolling_orders":77.0},{"date_str":"2026-01-12","revenue":2925500,"orders":99,"rolling_rev":2113285.7142857141,"rolling_orders":83.0},{"date_str":"2026-01-13","revenue":1558500,"orders":76,"rolling_rev":2117714.2857142859,"rolling_orders":82.8571428571},{"date_str":"2026-01-14","revenue":1782500,"orders":71,"rolling_rev":2109000.0,"rolling_orders":81.5714285714},{"date_str":"2026-01-15","revenue":1289500,"orders":71,"rolling_rev":2054571.4285714286,"rolling_orders":81.8571428571},{"date_str":"2026-01-16","revenue":1998000,"orders":93,"rolling_rev":2108642.8571428573,"rolling_orders":84.7142857143},{"date_str":"2026-01-17","revenue":2587500,"orders":91,"rolling_rev":2154857.1428571427,"rolling_orders":86.8571428571},{"date_str":"2026-01-18","revenue":3005500,"orders":119,"rolling_rev":2163857.1428571427,"rolling_orders":88.5714285714},{"date_str":"2026-01-19","revenue":1594500,"orders":74,"rolling_rev":1973714.2857142857,"rolling_orders":85.0},{"date_str":"2026-01-20","revenue":1659000,"orders":81,"rolling_rev":1988071.4285714286,"rolling_orders":85.7142857143},{"date_str":"2026-01-21","revenue":1549500,"orders":76,"rolling_rev":1954785.7142857143,"rolling_orders":86.4285714286},{"date_str":"2026-01-22","revenue":1750000,"orders":76,"rolling_rev":2020571.4285714286,"rolling_orders":87.1428571429},{"date_str":"2026-01-23","revenue":1988000,"orders":80,"rolling_rev":2019142.857142857,"rolling_orders":85.2857142857},{"date_str":"2026-01-24","revenue":2364500,"orders":98,"rolling_rev":1987285.7142857143,"rolling_orders":86.2857142857},{"date_str":"2026-01-25","revenue":3550500,"orders":123,"rolling_rev":2065142.857142857,"rolling_orders":86.8571428571},{"date_str":"2026-01-26","revenue":1175500,"orders":62,"rolling_rev":2005285.7142857143,"rolling_orders":85.1428571429},{"date_str":"2026-01-27","revenue":1256000,"orders":67,"rolling_rev":1947714.2857142857,"rolling_orders":83.1428571429},{"date_str":"2026-01-28","revenue":1506500,"orders":82,"rolling_rev":1941571.4285714286,"rolling_orders":84.0},{"date_str":"2026-01-29","revenue":1232000,"orders":67,"rolling_rev":1867571.4285714286,"rolling_orders":82.7142857143},{"date_str":"2026-01-30","revenue":1927000,"orders":87,"rolling_rev":1858857.142857143,"rolling_orders":83.7142857143},{"date_str":"2026-01-31","revenue":2324000,"orders":102,"rolling_rev":1853071.4285714286,"rolling_orders":84.2857142857},{"date_str":"2026-02-01","revenue":3618500,"orders":130,"rolling_rev":1862785.7142857143,"rolling_orders":85.2857142857},{"date_str":"2026-02-02","revenue":1319500,"orders":67,"rolling_rev":1883357.142857143,"rolling_orders":86.0},{"date_str":"2026-02-03","revenue":1247500,"orders":62,"rolling_rev":1882142.857142857,"rolling_orders":85.2857142857},{"date_str":"2026-02-04","revenue":1376000,"orders":64,"rolling_rev":1863500.0,"rolling_orders":82.7142857143},{"date_str":"2026-02-05","revenue":1633500,"orders":68,"rolling_rev":1920857.142857143,"rolling_orders":82.8571428571},{"date_str":"2026-02-06","revenue":1658000,"orders":68,"rolling_rev":1882428.5714285714,"rolling_orders":80.1428571429},{"date_str":"2026-02-07","revenue":2332000,"orders":84,"rolling_rev":1883571.4285714286,"rolling_orders":77.5714285714},{"date_str":"2026-02-08","revenue":3649000,"orders":135,"rolling_rev":1887928.5714285714,"rolling_orders":78.2857142857},{"date_str":"2026-02-09","revenue":1207500,"orders":61,"rolling_rev":1871928.5714285714,"rolling_orders":77.4285714286},{"date_str":"2026-02-10","revenue":1499500,"orders":70,"rolling_rev":1907928.5714285714,"rolling_orders":78.5714285714},{"date_str":"2026-02-11","revenue":1458500,"orders":74,"rolling_rev":1919714.2857142857,"rolling_orders":80.0},{"date_str":"2026-02-12","revenue":1040000,"orders":55,"rolling_rev":1834928.5714285714,"rolling_orders":78.1428571429},{"date_str":"2026-02-13","revenue":1573500,"orders":77,"rolling_rev":1822857.142857143,"rolling_orders":79.4285714286},{"date_str":"2026-02-14","revenue":2879000,"orders":107,"rolling_rev":1901000.0,"rolling_orders":82.7142857143},{"date_str":"2026-02-15","revenue":3500000,"orders":134,"rolling_rev":1879714.2857142857,"rolling_orders":82.5714285714},{"date_str":"2026-02-16","revenue":1314000,"orders":64,"rolling_rev":1894928.5714285714,"rolling_orders":83.0},{"date_str":"2026-02-17","revenue":819500,"orders":43,"rolling_rev":1797785.7142857143,"rolling_orders":79.1428571429},{"date_str":"2026-02-18","revenue":1909500,"orders":85,"rolling_rev":1862214.2857142857,"rolling_orders":80.7142857143},{"date_str":"2026-02-19","revenue":1409500,"orders":63,"rolling_rev":1915000.0,"rolling_orders":81.8571428571},{"date_str":"2026-02-20","revenue":1590000,"orders":64,"rolling_rev":1917357.142857143,"rolling_orders":80.0},{"date_str":"2026-02-21","revenue":2693000,"orders":103,"rolling_rev":1890785.7142857143,"rolling_orders":79.4285714286},{"date_str":"2026-02-22","revenue":3291500,"orders":140,"rolling_rev":1861000.0,"rolling_orders":80.2857142857},{"date_str":"2026-02-23","revenue":1263500,"orders":66,"rolling_rev":1853785.7142857143,"rolling_orders":80.5714285714},{"date_str":"2026-02-24","revenue":1395500,"orders":67,"rolling_rev":1936071.4285714286,"rolling_orders":84.0},{"date_str":"2026-02-25","revenue":1398500,"orders":75,"rolling_rev":1863071.4285714286,"rolling_orders":82.5714285714},{"date_str":"2026-02-26","revenue":1643500,"orders":74,"rolling_rev":1896500.0,"rolling_orders":84.1428571429},{"date_str":"2026-02-27","revenue":1456000,"orders":72,"rolling_rev":1877357.142857143,"rolling_orders":85.2857142857},{"date_str":"2026-02-28","revenue":1967000,"orders":87,"rolling_rev":1773642.857142857,"rolling_orders":83.0},{"date_str":"2026-03-01","revenue":3828000,"orders":130,"rolling_rev":1850285.7142857143,"rolling_orders":81.5714285714},{"date_str":"2026-03-02","revenue":1633500,"orders":76,"rolling_rev":1903142.857142857,"rolling_orders":83.0},{"date_str":"2026-03-03","revenue":1502000,"orders":56,"rolling_rev":1918357.142857143,"rolling_orders":81.4285714286},{"date_str":"2026-03-04","revenue":1751500,"orders":73,"rolling_rev":1968785.7142857143,"rolling_orders":81.1428571429},{"date_str":"2026-03-05","revenue":1493000,"orders":74,"rolling_rev":1947285.7142857143,"rolling_orders":81.1428571429},{"date_str":"2026-03-06","revenue":2125500,"orders":84,"rolling_rev":2042928.5714285714,"rolling_orders":82.8571428571},{"date_str":"2026-03-07","revenue":2326500,"orders":95,"rolling_rev":2094285.7142857143,"rolling_orders":84.0},{"date_str":"2026-03-08","revenue":4496000,"orders":166,"rolling_rev":2189714.2857142859,"rolling_orders":89.1428571429},{"date_str":"2026-03-09","revenue":1260000,"orders":55,"rolling_rev":2136357.1428571427,"rolling_orders":86.1428571429},{"date_str":"2026-03-10","revenue":1329000,"orders":62,"rolling_rev":2111642.8571428573,"rolling_orders":87.0},{"date_str":"2026-03-11","revenue":1442000,"orders":80,"rolling_rev":2067428.5714285714,"rolling_orders":88.0},{"date_str":"2026-03-12","revenue":1352000,"orders":55,"rolling_rev":2047285.7142857143,"rolling_orders":85.2857142857},{"date_str":"2026-03-13","revenue":1301500,"orders":56,"rolling_rev":1929571.4285714286,"rolling_orders":81.2857142857},{"date_str":"2026-03-14","revenue":2660500,"orders":102,"rolling_rev":1977285.7142857143,"rolling_orders":82.2857142857},{"date_str":"2026-03-15","revenue":2933000,"orders":118,"rolling_rev":1754000.0,"rolling_orders":75.4285714286},{"date_str":"2026-03-16","revenue":1092500,"orders":55,"rolling_rev":1730071.4285714286,"rolling_orders":75.4285714286},{"date_str":"2026-03-17","revenue":1480000,"orders":80,"rolling_rev":1751642.857142857,"rolling_orders":78.0},{"date_str":"2026-03-18","revenue":1432500,"orders":69,"rolling_rev":1750285.7142857143,"rolling_orders":76.4285714286},{"date_str":"2026-03-19","revenue":1685000,"orders":84,"rolling_rev":1797857.142857143,"rolling_orders":80.5714285714},{"date_str":"2026-03-20","revenue":1693500,"orders":80,"rolling_rev":1853857.142857143,"rolling_orders":84.0},{"date_str":"2026-03-21","revenue":2090000,"orders":96,"rolling_rev":1772357.142857143,"rolling_orders":83.1428571429},{"date_str":"2026-03-22","revenue":2603500,"orders":105,"rolling_rev":1725285.7142857143,"rolling_orders":81.2857142857},{"date_str":"2026-03-23","revenue":2305500,"orders":93,"rolling_rev":1898571.4285714286,"rolling_orders":86.7142857143},{"date_str":"2026-03-24","revenue":1599500,"orders":78,"rolling_rev":1915642.857142857,"rolling_orders":86.4285714286},{"date_str":"2026-03-25","revenue":1071500,"orders":52,"rolling_rev":1864071.4285714286,"rolling_orders":84.0},{"date_str":"2026-03-26","revenue":1478000,"orders":73,"rolling_rev":1834500.0,"rolling_orders":82.4285714286},{"date_str":"2026-03-27","revenue":1837500,"orders":77,"rolling_rev":1855071.4285714286,"rolling_orders":82.0},{"date_str":"2026-03-28","revenue":2494000,"orders":95,"rolling_rev":1912785.7142857143,"rolling_orders":81.8571428571},{"date_str":"2026-03-29","revenue":3533000,"orders":138,"rolling_rev":2045571.4285714286,"rolling_orders":86.5714285714},{"date_str":"2026-03-30","revenue":1253500,"orders":65,"rolling_rev":1895285.7142857143,"rolling_orders":82.5714285714},{"date_str":"2026-03-31","revenue":1462500,"orders":71,"rolling_rev":1875714.2857142857,"rolling_orders":81.5714285714},{"date_str":"2026-04-13","revenue":1122500,"orders":60,"rolling_rev":1883000.0,"rolling_orders":82.7142857143},{"date_str":"2026-04-14","revenue":1224000,"orders":58,"rolling_rev":1846714.2857142857,"rolling_orders":80.5714285714},{"date_str":"2026-04-15","revenue":1329500,"orders":80,"rolling_rev":1774142.857142857,"rolling_orders":81.0},{"date_str":"2026-04-16","revenue":1706000,"orders":78,"rolling_rev":1661571.4285714286,"rolling_orders":78.5714285714},{"date_str":"2026-04-17","revenue":2156000,"orders":83,"rolling_rev":1464857.142857143,"rolling_orders":70.7142857143},{"date_str":"2026-04-18","revenue":2459500,"orders":91,"rolling_rev":1637142.857142857,"rolling_orders":74.4285714286},{"date_str":"2026-04-19","revenue":2928500,"orders":134,"rolling_rev":1846571.4285714286,"rolling_orders":83.4285714286},{"date_str":"2026-04-20","revenue":252500,"orders":13,"rolling_rev":1722285.7142857143,"rolling_orders":76.7142857143}];
+Plotly.newPlot('chart-daily',[
+  {x:daily.map(d=>d.date_str),y:daily.map(d=>d.revenue),type:'bar',name:'Revenue diario',marker:{color:'rgba(59,130,246,0.3)'}},
+  {x:daily.map(d=>d.date_str),y:daily.map(d=>d.rolling_rev),type:'scatter',mode:'lines',name:'Media 7d',line:{color:'#f59e0b',width:2.5}},
+  {x:daily.map(d=>d.date_str),y:daily.map(d=>d.orders),type:'bar',name:'Órdenes',marker:{color:'rgba(16,185,129,0.3)'},yaxis:'y2',visible:'legendonly'},
+  {x:daily.map(d=>d.date_str),y:daily.map(d=>d.rolling_orders),type:'scatter',mode:'lines',name:'Media 7d (órdenes)',line:{color:'#10b981',width:2,dash:'dot'},yaxis:'y2',visible:'legendonly'},
+],{...DL,title:'Revenue diario + Media Móvil',yaxis:{...DL.yaxis,type:'linear',title:'Revenue (COP)'},yaxis2:{overlaying:'y',side:'right',gridcolor:'transparent',type:'linear',title:'Órdenes'},legend:{x:0,y:1.12,orientation:'h',font:{size:11}}},PC);
+
+// ── WEEKLY ──
+const weekly=[{"year_week":"2026-W01","revenue":7130500,"orders":281},{"year_week":"2026-W02","revenue":13100000,"orders":539},{"year_week":"2026-W03","revenue":15147000,"orders":620},{"year_week":"2026-W04","revenue":14456000,"orders":608},{"year_week":"2026-W05","revenue":13039500,"orders":597},{"year_week":"2026-W06","revenue":13215500,"orders":548},{"year_week":"2026-W07","revenue":13158000,"orders":578},{"year_week":"2026-W08","revenue":13027000,"orders":562},{"year_week":"2026-W09","revenue":12952000,"orders":571},{"year_week":"2026-W10","revenue":15328000,"orders":624},{"year_week":"2026-W11","revenue":12278000,"orders":528},{"year_week":"2026-W12","revenue":12077000,"orders":569},{"year_week":"2026-W13","revenue":14319000,"orders":606},{"year_week":"2026-W14","revenue":2716000,"orders":136},{"year_week":"2026-W16","revenue":12926000,"orders":584},{"year_week":"2026-W17","revenue":252500,"orders":13}];
+Plotly.newPlot('chart-weekly',[
+  {x:weekly.map(d=>d.year_week),y:weekly.map(d=>d.revenue),type:'bar',name:'Revenue',marker:{color:'#3b82f6'}},
+  {x:weekly.map(d=>d.year_week),y:weekly.map(d=>d.orders),type:'scatter',mode:'lines+markers',name:'Órdenes',yaxis:'y2',line:{color:'#f59e0b',width:2},marker:{size:5}},
+],{...DL,title:'Revenue y órdenes por semana',xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'linear',title:'Revenue'},yaxis2:{overlaying:'y',side:'right',gridcolor:'transparent',type:'linear',title:'Órdenes'},legend:{x:0,y:1.12,orientation:'h',font:{size:11}}},PC);
+
+// ── DOW ──
+const dow=[{"day":"Lun","revenue":20952500,"orders":967},{"day":"Mar","revenue":19560000,"orders":948},{"day":"Mi\u00e9","revenue":19851500,"orders":961},{"day":"Jue","revenue":19382500,"orders":907},{"day":"Vie","revenue":24619000,"orders":1065},{"day":"S\u00e1b","revenue":33787000,"orders":1311},{"day":"Dom","revenue":46969500,"orders":1805}];
+Plotly.newPlot('chart-dow',[
+  {x:dow.map(d=>d.day),y:dow.map(d=>d.revenue),type:'bar',marker:{color:'#8b5cf6'}},
+],{...DL,title:'Revenue por día de semana',xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'linear',title:'Revenue (COP)'}},PC);
+
+// ── HEATMAP ──
+const hmD=["Lun", "Mar", "Mi\u00e9", "Jue", "Vie", "S\u00e1b", "Dom"];
+const hmH=[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+const hmZ=[[1.0, 3.0, 4.0, 2.0, 3.0, 5.0, 2.0], [47.0, 55.0, 57.0, 49.0, 58.0, 77.0, 78.0], [71.0, 71.0, 67.0, 69.0, 80.0, 115.0, 245.0], [78.0, 63.0, 69.0, 62.0, 71.0, 132.0, 126.0], [71.0, 58.0, 65.0, 64.0, 71.0, 104.0, 184.0], [42.0, 57.0, 46.0, 44.0, 49.0, 83.0, 129.0], [58.0, 64.0, 50.0, 46.0, 62.0, 83.0, 151.0], [67.0, 64.0, 61.0, 67.0, 66.0, 107.0, 169.0], [95.0, 62.0, 79.0, 88.0, 103.0, 132.0, 153.0], [108.0, 113.0, 115.0, 114.0, 121.0, 132.0, 146.0], [129.0, 120.0, 149.0, 115.0, 160.0, 155.0, 203.0], [125.0, 128.0, 124.0, 126.0, 138.0, 107.0, 127.0], [92.0, 100.0, 94.0, 79.0, 97.0, 100.0, 116.0], [0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0]];
+Plotly.newPlot('chart-heatmap',[{
+  z:hmZ,x:hmD,y:hmH.map(h=>h+':00'),type:'heatmap',
+  colorscale:[[0,'#0c0f14'],[0.5,'#3b82f6'],[1,'#f59e0b']],
+  hovertemplate:'%{x} %{y}<br>%{z} órdenes<extra></extra>'
+}],{...DL,margin:{...DL.margin,l:70},xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'category',title:'Hora',dtick:1}},PC);
+
+// ── CATEGORY MONTHLY ──
+const catM=[{"month":"2026-01","category":"Bebidas","revenue":13991500},{"month":"2026-01","category":"Brunch","revenue":2781000},{"month":"2026-01","category":"Otros","revenue":399000},{"month":"2026-01","category":"Panader\u00eda","revenue":23268500},{"month":"2026-01","category":"Pi\u00f1ater\u00eda","revenue":140000},{"month":"2026-01","category":"Reposter\u00eda","revenue":18674500},{"month":"2026-02","category":"Bebidas","revenue":11691000},{"month":"2026-02","category":"Brunch","revenue":2371000},{"month":"2026-02","category":"Otros","revenue":76000},{"month":"2026-02","category":"Panader\u00eda","revenue":20364500},{"month":"2026-02","category":"Pi\u00f1ater\u00eda","revenue":100000},{"month":"2026-02","category":"Reposter\u00eda","revenue":17540500},{"month":"2026-03","category":"Bebidas","revenue":14338000},{"month":"2026-03","category":"Brunch","revenue":2358000},{"month":"2026-03","category":"Panader\u00eda","revenue":23874500},{"month":"2026-03","category":"Pi\u00f1ater\u00eda","revenue":95000},{"month":"2026-03","category":"Reposter\u00eda","revenue":19880500},{"month":"2026-04","category":"Bebidas","revenue":3382000},{"month":"2026-04","category":"Brunch","revenue":381000},{"month":"2026-04","category":"Panader\u00eda","revenue":5302500},{"month":"2026-04","category":"Pi\u00f1ater\u00eda","revenue":35000},{"month":"2026-04","category":"Reposter\u00eda","revenue":4078000}];
+const cats=[...new Set(catM.map(d=>d.category))];
+Plotly.newPlot('chart-cat-monthly',cats.map(c=>({
+  x:catM.filter(d=>d.category===c).map(d=>d.month),
+  y:catM.filter(d=>d.category===c).map(d=>d.revenue),
+  type:'bar',name:c,marker:{color:CC[c]||'#6b7280'}
+})),{...DL,title:'Revenue por categoría — Mensual',barmode:'stack',xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'linear',title:'Revenue (COP)'},legend:{x:0,y:1.15,orientation:'h',font:{size:11}}},PC);
+
+// ── TOP 20 ──
+const top20=[{"Nombre Corregido":"Torta Fr\u00eda 6 Porciones","revenue":11290000,"units":251,"rev_share":6.1,"category":"Reposter\u00eda"},{"Nombre Corregido":"Pan de Masa Madre- 3 Quesos- Chocolate","revenue":10120000,"units":506,"rev_share":5.47,"category":"Panader\u00eda"},{"Nombre Corregido":"Capuchino sin Licor","revenue":9673500,"units":1019,"rev_share":5.23,"category":"Bebidas"},{"Nombre Corregido":"Torta Fr\u00eda 12 Porciones","revenue":9655000,"units":138,"rev_share":5.22,"category":"Reposter\u00eda"},{"Nombre Corregido":"Tinto","revenue":7841000,"units":1744,"rev_share":4.24,"category":"Bebidas"},{"Nombre Corregido":"Porci\u00f3n Torta Zanahoria \/ Chocolate \/ Bizcocho \/ Maria Luisa","revenue":7763000,"units":777,"rev_share":4.19,"category":"Reposter\u00eda"},{"Nombre Corregido":"Pandequeso","revenue":7441000,"units":1354,"rev_share":4.02,"category":"Panader\u00eda"},{"Nombre Corregido":"Pan Mantequilla Y Pan Maiz","revenue":6953000,"units":409,"rev_share":3.76,"category":"Panader\u00eda"},{"Nombre Corregido":"Porci\u00f3n Postre Peque\u00f1o","revenue":6760000,"units":676,"rev_share":3.65,"category":"Reposter\u00eda"},{"Nombre Corregido":"Almoj\u00e1bana","revenue":6652500,"units":1211,"rev_share":3.59,"category":"Panader\u00eda"},{"Nombre Corregido":"Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne","revenue":6426000,"units":714,"rev_share":3.47,"category":"Panader\u00eda"},{"Nombre Corregido":"Caf\u00e9 con Leche","revenue":5722000,"units":881,"rev_share":3.09,"category":"Bebidas"},{"Nombre Corregido":"Americano","revenue":5572500,"units":1014,"rev_share":3.01,"category":"Bebidas"},{"Nombre Corregido":"Pastel Arequipe- Guayaba- Gloria- Hawaiano","revenue":4641000,"units":663,"rev_share":2.51,"category":"Panader\u00eda"},{"Nombre Corregido":"Pan Mozarella","revenue":4179000,"units":199,"rev_share":2.26,"category":"Panader\u00eda"},{"Nombre Corregido":"Pan Leche- Concha","revenue":4068000,"units":339,"rev_share":2.2,"category":"Panader\u00eda"},{"Nombre Corregido":"Milo","revenue":4056500,"units":427,"rev_share":2.19,"category":"Bebidas"},{"Nombre Corregido":"Trenza","revenue":3819000,"units":201,"rev_share":2.06,"category":"Panader\u00eda"},{"Nombre Corregido":"Palito de Queso","revenue":3597500,"units":450,"rev_share":1.94,"category":"Panader\u00eda"},{"Nombre Corregido":"Porci\u00f3n Postre Baileys","revenue":3401000,"units":243,"rev_share":1.84,"category":"Reposter\u00eda"}];
+Plotly.newPlot('chart-top20',[{
+  y:top20.map(d=>d['Nombre Corregido']).reverse(),
+  x:top20.map(d=>d.revenue).reverse(),
+  type:'bar',orientation:'h',
+  marker:{color:top20.map(d=>CC[d.category]||'#6b7280').reverse()},
+  text:top20.map(d=>d.rev_share+'%').reverse(),textposition:'outside',
+  hovertemplate:'%{y}<br>${x:,.0f} COP<extra></extra>'
+}],{...DL,title:'Top 20 Productos por Revenue',margin:{...DL.margin,l:280},xaxis:{...DL.xaxis,type:'linear',title:'Revenue (COP)'}},PC);
+
+// ── PARETO ──
+const prods=[{"Nombre Corregido":"Torta Fr\u00eda 6 Porciones","revenue":11290000,"cum_rev_pct":6.1},{"Nombre Corregido":"Pan de Masa Madre- 3 Quesos- Chocolate","revenue":10120000,"cum_rev_pct":11.6},{"Nombre Corregido":"Capuchino sin Licor","revenue":9673500,"cum_rev_pct":16.8},{"Nombre Corregido":"Torta Fr\u00eda 12 Porciones","revenue":9655000,"cum_rev_pct":22.0},{"Nombre Corregido":"Tinto","revenue":7841000,"cum_rev_pct":26.2},{"Nombre Corregido":"Porci\u00f3n Torta Zanahoria \/ Chocolate \/ Bizcocho \/ Maria Luisa","revenue":7763000,"cum_rev_pct":30.4},{"Nombre Corregido":"Pandequeso","revenue":7441000,"cum_rev_pct":34.5},{"Nombre Corregido":"Pan Mantequilla Y Pan Maiz","revenue":6953000,"cum_rev_pct":38.2},{"Nombre Corregido":"Porci\u00f3n Postre Peque\u00f1o","revenue":6760000,"cum_rev_pct":41.9},{"Nombre Corregido":"Almoj\u00e1bana","revenue":6652500,"cum_rev_pct":45.5},{"Nombre Corregido":"Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne","revenue":6426000,"cum_rev_pct":48.9},{"Nombre Corregido":"Caf\u00e9 con Leche","revenue":5722000,"cum_rev_pct":52.0},{"Nombre Corregido":"Americano","revenue":5572500,"cum_rev_pct":55.0},{"Nombre Corregido":"Pastel Arequipe- Guayaba- Gloria- Hawaiano","revenue":4641000,"cum_rev_pct":57.5},{"Nombre Corregido":"Pan Mozarella","revenue":4179000,"cum_rev_pct":59.8},{"Nombre Corregido":"Pan Leche- Concha","revenue":4068000,"cum_rev_pct":62.0},{"Nombre Corregido":"Milo","revenue":4056500,"cum_rev_pct":64.2},{"Nombre Corregido":"Trenza","revenue":3819000,"cum_rev_pct":66.2},{"Nombre Corregido":"Palito de Queso","revenue":3597500,"cum_rev_pct":68.2},{"Nombre Corregido":"Porci\u00f3n Postre Baileys","revenue":3401000,"cum_rev_pct":70.0},{"Nombre Corregido":"Palitos Guayaba-Queso","revenue":3168500,"cum_rev_pct":71.7},{"Nombre Corregido":"Desayuno Colmena","revenue":3168000,"cum_rev_pct":73.4},{"Nombre Corregido":"Torta Zanahoria 4 Porciones","revenue":2596000,"cum_rev_pct":74.9},{"Nombre Corregido":"Arroz con Leche","revenue":2492000,"cum_rev_pct":76.2},{"Nombre Corregido":"Rollos Rojos","revenue":2070000,"cum_rev_pct":77.3},{"Nombre Corregido":"Torta Zanahoria 10 Porciones","revenue":2030000,"cum_rev_pct":78.4},{"Nombre Corregido":"Ranchero- Arequipequeso","revenue":1963500,"cum_rev_pct":79.5},{"Nombre Corregido":"Caf\u00e9 Fr\u00edo","revenue":1901500,"cum_rev_pct":80.5},{"Nombre Corregido":"Frozen Baileys","revenue":1703000,"cum_rev_pct":81.4},{"Nombre Corregido":"Croissant del Huerto","revenue":1656000,"cum_rev_pct":82.3},{"Nombre Corregido":"Rollo de Canela","revenue":1635000,"cum_rev_pct":83.2},{"Nombre Corregido":"Croisant Queso","revenue":1615000,"cum_rev_pct":84.1},{"Nombre Corregido":"Te Chai","revenue":1546000,"cum_rev_pct":84.9},{"Nombre Corregido":"Aromatica Frutos Secos","revenue":1427000,"cum_rev_pct":85.7},{"Nombre Corregido":"Crema","revenue":1386000,"cum_rev_pct":86.4},{"Nombre Corregido":"Torta Mar\u00eda Luisa 10 Porciones","revenue":1330000,"cum_rev_pct":87.1},{"Nombre Corregido":"Torta Chocolate 10 Porciones","revenue":1328000,"cum_rev_pct":87.9},{"Nombre Corregido":"Porcion Torta Caf\u00e9\/Envinada","revenue":1325000,"cum_rev_pct":88.6},{"Nombre Corregido":"Pan Seda","revenue":1280000,"cum_rev_pct":89.3},{"Nombre Corregido":"Croisant Jamon-Queso","revenue":1279000,"cum_rev_pct":90.0},{"Nombre Corregido":"Paquete de Galletas X 5","revenue":1224000,"cum_rev_pct":90.6},{"Nombre Corregido":"Milhoja Individual","revenue":1159500,"cum_rev_pct":91.2},{"Nombre Corregido":"Milhoja Caja X 3","revenue":1158000,"cum_rev_pct":91.9},{"Nombre Corregido":"Galleta Individual","revenue":1143500,"cum_rev_pct":92.5},{"Nombre Corregido":"Alfajores","revenue":1056000,"cum_rev_pct":93.1},{"Nombre Corregido":"Desayuno Capricho","revenue":1007000,"cum_rev_pct":93.6},{"Nombre Corregido":"Croisant Chocolate","revenue":984000,"cum_rev_pct":94.1},{"Nombre Corregido":"Tostadas Mediterraneas","revenue":972000,"cum_rev_pct":94.7},{"Nombre Corregido":"Avena","revenue":900000,"cum_rev_pct":95.1},{"Nombre Corregido":"Muffins X 4 Unidades","revenue":771500,"cum_rev_pct":95.6},{"Nombre Corregido":"Roscon Guayaba Y Roscon de Arequipe","revenue":686000,"cum_rev_pct":95.9},{"Nombre Corregido":"Torta Mar\u00eda Luisa 4 Porciones","revenue":670000,"cum_rev_pct":96.3},{"Nombre Corregido":"Torta","revenue":475000,"cum_rev_pct":96.6},{"Nombre Corregido":"Roscon Mixto","revenue":450000,"cum_rev_pct":96.8},{"Nombre Corregido":"Sandwich Pulled Pork","revenue":448000,"cum_rev_pct":97.0},{"Nombre Corregido":"Hatsu X 400","revenue":442000,"cum_rev_pct":97.3},{"Nombre Corregido":"Bizcocho Fino 10 Porciones","revenue":420000,"cum_rev_pct":97.5},{"Nombre Corregido":"Sandwich Roast Beef","revenue":416000,"cum_rev_pct":97.7},{"Nombre Corregido":"Agua","revenue":408000,"cum_rev_pct":97.9},{"Nombre Corregido":"Vela Volcan","revenue":370000,"cum_rev_pct":98.1},{"Nombre Corregido":"Pan de Canela","revenue":352000,"cum_rev_pct":98.3},{"Nombre Corregido":"Trufas X 6 Unidades","revenue":338000,"cum_rev_pct":98.5},{"Nombre Corregido":"Capuchino con Licor","revenue":329500,"cum_rev_pct":98.7},{"Nombre Corregido":"Malteada","revenue":297000,"cum_rev_pct":98.9},{"Nombre Corregido":"Arom\u00e1tica de Panelita","revenue":267000,"cum_rev_pct":99.0},{"Nombre Corregido":"Postobon","revenue":202500,"cum_rev_pct":99.1},{"Nombre Corregido":"Cocacola 400 Ml","revenue":198000,"cum_rev_pct":99.2},{"Nombre Corregido":"TRUFAS X 5 UNIDADES","revenue":169000,"cum_rev_pct":99.3},{"Nombre Corregido":"Sandwich Focaccia","revenue":168000,"cum_rev_pct":99.4},{"Nombre Corregido":"Espresso Doble","revenue":165000,"cum_rev_pct":99.5},{"Nombre Corregido":"Espresso","revenue":156000,"cum_rev_pct":99.6},{"Nombre Corregido":"Coca Cola 250 Ml","revenue":132000,"cum_rev_pct":99.6},{"Nombre Corregido":"Coca Cola Zero 400 Ml","revenue":130500,"cum_rev_pct":99.7},{"Nombre Corregido":"Agua Gas","revenue":126000,"cum_rev_pct":99.8},{"Nombre Corregido":"Soda","revenue":108000,"cum_rev_pct":99.8},{"Nombre Corregido":"Vaso Leche","revenue":98000,"cum_rev_pct":99.9},{"Nombre Corregido":"PAN TL","revenue":88000,"cum_rev_pct":99.9},{"Nombre Corregido":"Hamburguesa","revenue":56000,"cum_rev_pct":100.0},{"Nombre Corregido":"PAN","revenue":24000,"cum_rev_pct":100.0},{"Nombre Corregido":"Postre 12 Porciones","revenue":24000,"cum_rev_pct":100.0},{"Nombre Corregido":"Bu\u00f1uelo ","revenue":2000,"cum_rev_pct":100.0}];
+Plotly.newPlot('chart-pareto',[
+  {x:prods.map((_,i)=>i+1),y:prods.map(d=>d.revenue),type:'bar',name:'Revenue',marker:{color:'rgba(59,130,246,0.5)'}},
+  {x:prods.map((_,i)=>i+1),y:prods.map(d=>d.cum_rev_pct),type:'scatter',mode:'lines',name:'% Acumulado',yaxis:'y2',line:{color:'#f59e0b',width:2}},
+],{...DL,title:'Curva de Pareto — Revenue',xaxis:{...DL.xaxis,type:'linear',title:'# Producto (rank)'},yaxis:{...DL.yaxis,type:'linear',title:'Revenue'},yaxis2:{overlaying:'y',side:'right',gridcolor:'transparent',type:'linear',title:'% Acumulado',range:[0,105]},shapes:[{type:'line',x0:0,x1:81,y0:80.0,y1:80.0,yref:'y2',line:{color:'#ef4444',width:1,dash:'dash'}}],legend:{x:0.6,y:0.3}},PC);
+
+// ── SCATTER ──
+const sc=[{"Nombre Corregido":"Torta Fr\u00eda 6 Porciones","avg_price":44979.9196787149,"units":251,"revenue":11290000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Pan de Masa Madre- 3 Quesos- Chocolate","avg_price":20000.0,"units":506,"revenue":10120000,"category":"Panader\u00eda"},{"Nombre Corregido":"Capuchino sin Licor","avg_price":9493.5064935065,"units":1019,"revenue":9673500,"category":"Bebidas"},{"Nombre Corregido":"Torta Fr\u00eda 12 Porciones","avg_price":69963.2352941177,"units":138,"revenue":9655000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Tinto","avg_price":4495.0454170107,"units":1744,"revenue":7841000,"category":"Bebidas"},{"Nombre Corregido":"Porci\u00f3n Torta Zanahoria \/ Chocolate \/ Bizcocho \/ Maria Luisa","avg_price":9990.1664145234,"units":777,"revenue":7763000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Pandequeso","avg_price":5492.927864215,"units":1354,"revenue":7441000,"category":"Panader\u00eda"},{"Nombre Corregido":"Pan Mantequilla Y Pan Maiz","avg_price":17000.0,"units":409,"revenue":6953000,"category":"Panader\u00eda"},{"Nombre Corregido":"Porci\u00f3n Postre Peque\u00f1o","avg_price":10000.0,"units":676,"revenue":6760000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Almoj\u00e1bana","avg_price":5494.5226917058,"units":1211,"revenue":6652500,"category":"Panader\u00eda"},{"Nombre Corregido":"Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne","avg_price":9000.0,"units":714,"revenue":6426000,"category":"Panader\u00eda"},{"Nombre Corregido":"Caf\u00e9 con Leche","avg_price":6494.3181818182,"units":881,"revenue":5722000,"category":"Bebidas"},{"Nombre Corregido":"Americano","avg_price":5494.3609022556,"units":1014,"revenue":5572500,"category":"Bebidas"},{"Nombre Corregido":"Pastel Arequipe- Guayaba- Gloria- Hawaiano","avg_price":7000.0,"units":663,"revenue":4641000,"category":"Panader\u00eda"},{"Nombre Corregido":"Pan Mozarella","avg_price":21000.0,"units":199,"revenue":4179000,"category":"Panader\u00eda"},{"Nombre Corregido":"Pan Leche- Concha","avg_price":12000.0,"units":339,"revenue":4068000,"category":"Panader\u00eda"},{"Nombre Corregido":"Milo","avg_price":9500.0,"units":427,"revenue":4056500,"category":"Bebidas"},{"Nombre Corregido":"Trenza","avg_price":19000.0,"units":201,"revenue":3819000,"category":"Panader\u00eda"},{"Nombre Corregido":"Palito de Queso","avg_price":7994.301994302,"units":450,"revenue":3597500,"category":"Panader\u00eda"},{"Nombre Corregido":"Porci\u00f3n Postre Baileys","avg_price":13995.5555555556,"units":243,"revenue":3401000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Palitos Guayaba-Queso","avg_price":8495.0980392157,"units":373,"revenue":3168500,"category":"Panader\u00eda"},{"Nombre Corregido":"Desayuno Colmena","avg_price":24000.0,"units":132,"revenue":3168000,"category":"Brunch"},{"Nombre Corregido":"Torta Zanahoria 4 Porciones","avg_price":39938.4615384615,"units":65,"revenue":2596000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Arroz con Leche","avg_price":14000.0,"units":178,"revenue":2492000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Rollos Rojos","avg_price":18000.0,"units":115,"revenue":2070000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Torta Zanahoria 10 Porciones","avg_price":70000.0,"units":29,"revenue":2030000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Ranchero- Arequipequeso","avg_price":8500.0,"units":231,"revenue":1963500,"category":"Panader\u00eda"},{"Nombre Corregido":"Caf\u00e9 Fr\u00edo","avg_price":10988.9705882353,"units":173,"revenue":1901500,"category":"Bebidas"},{"Nombre Corregido":"Frozen Baileys","avg_price":13000.0,"units":131,"revenue":1703000,"category":"Bebidas"},{"Nombre Corregido":"Croissant del Huerto","avg_price":24000.0,"units":69,"revenue":1656000,"category":"Brunch"},{"Nombre Corregido":"Rollo de Canela","avg_price":6990.099009901,"units":234,"revenue":1635000,"category":"Panader\u00eda"},{"Nombre Corregido":"Croisant Queso","avg_price":7994.5054945055,"units":202,"revenue":1615000,"category":"Panader\u00eda"},{"Nombre Corregido":"Te Chai","avg_price":8496.7532467532,"units":182,"revenue":1546000,"category":"Bebidas"},{"Nombre Corregido":"Aromatica Frutos Secos","avg_price":5994.8717948718,"units":238,"revenue":1427000,"category":"Bebidas"},{"Nombre Corregido":"Crema","avg_price":18000.0,"units":77,"revenue":1386000,"category":"Panader\u00eda"},{"Nombre Corregido":"Torta Mar\u00eda Luisa 10 Porciones","avg_price":70000.0,"units":19,"revenue":1330000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Torta Chocolate 10 Porciones","avg_price":69894.7368421053,"units":19,"revenue":1328000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Porcion Torta Caf\u00e9\/Envinada","avg_price":5497.3404255319,"units":241,"revenue":1325000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Pan Seda","avg_price":8000.0,"units":160,"revenue":1280000,"category":"Panader\u00eda"},{"Nombre Corregido":"Croisant Jamon-Queso","avg_price":7996.5034965035,"units":160,"revenue":1279000,"category":"Panader\u00eda"},{"Nombre Corregido":"Paquete de Galletas X 5","avg_price":12000.0,"units":102,"revenue":1224000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Milhoja Individual","avg_price":8995.5357142857,"units":129,"revenue":1159500,"category":"Reposter\u00eda"},{"Nombre Corregido":"Milhoja Caja X 3","avg_price":26923.0769230769,"units":43,"revenue":1158000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Galleta Individual","avg_price":3498.1060606061,"units":327,"revenue":1143500,"category":"Reposter\u00eda"},{"Nombre Corregido":"Alfajores","avg_price":5500.0,"units":192,"revenue":1056000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Desayuno Capricho","avg_price":19000.0,"units":53,"revenue":1007000,"category":"Brunch"},{"Nombre Corregido":"Croisant Chocolate","avg_price":8000.0,"units":123,"revenue":984000,"category":"Panader\u00eda"},{"Nombre Corregido":"Tostadas Mediterraneas","avg_price":18000.0,"units":54,"revenue":972000,"category":"Brunch"},{"Nombre Corregido":"Avena","avg_price":10000.0,"units":90,"revenue":900000,"category":"Bebidas"},{"Nombre Corregido":"Muffins X 4 Unidades","avg_price":13620.3703703704,"units":57,"revenue":771500,"category":"Reposter\u00eda"},{"Nombre Corregido":"Roscon Guayaba Y Roscon de Arequipe","avg_price":14000.0,"units":49,"revenue":686000,"category":"Panader\u00eda"},{"Nombre Corregido":"Torta Mar\u00eda Luisa 4 Porciones","avg_price":39411.7647058823,"units":17,"revenue":670000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Torta","avg_price":19000.0,"units":25,"revenue":475000,"category":"Otros"},{"Nombre Corregido":"Roscon Mixto","avg_price":15000.0,"units":30,"revenue":450000,"category":"Panader\u00eda"},{"Nombre Corregido":"Sandwich Pulled Pork","avg_price":28000.0,"units":16,"revenue":448000,"category":"Brunch"},{"Nombre Corregido":"Hatsu X 400","avg_price":6500.0,"units":68,"revenue":442000,"category":"Bebidas"},{"Nombre Corregido":"Bizcocho Fino 10 Porciones","avg_price":70000.0,"units":6,"revenue":420000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Sandwich Roast Beef","avg_price":26000.0,"units":16,"revenue":416000,"category":"Brunch"},{"Nombre Corregido":"Agua","avg_price":3000.0,"units":136,"revenue":408000,"category":"Bebidas"},{"Nombre Corregido":"Vela Volcan","avg_price":5000.0,"units":74,"revenue":370000,"category":"Pi\u00f1ater\u00eda"},{"Nombre Corregido":"Pan de Canela","avg_price":22000.0,"units":16,"revenue":352000,"category":"Panader\u00eda"},{"Nombre Corregido":"Trufas X 6 Unidades","avg_price":13000.0,"units":26,"revenue":338000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Capuchino con Licor","avg_price":10973.6842105263,"units":30,"revenue":329500,"category":"Bebidas"},{"Nombre Corregido":"Malteada","avg_price":11000.0,"units":27,"revenue":297000,"category":"Bebidas"},{"Nombre Corregido":"Arom\u00e1tica de Panelita","avg_price":3983.3333333333,"units":67,"revenue":267000,"category":"Bebidas"},{"Nombre Corregido":"Postobon","avg_price":4500.0,"units":45,"revenue":202500,"category":"Bebidas"},{"Nombre Corregido":"Cocacola 400 Ml","avg_price":4500.0,"units":44,"revenue":198000,"category":"Bebidas"},{"Nombre Corregido":"TRUFAS X 5 UNIDADES","avg_price":13000.0,"units":13,"revenue":169000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Sandwich Focaccia","avg_price":28000.0,"units":6,"revenue":168000,"category":"Brunch"},{"Nombre Corregido":"Espresso Doble","avg_price":5500.0,"units":30,"revenue":165000,"category":"Bebidas"},{"Nombre Corregido":"Espresso","avg_price":4000.0,"units":39,"revenue":156000,"category":"Bebidas"},{"Nombre Corregido":"Coca Cola 250 Ml","avg_price":3000.0,"units":44,"revenue":132000,"category":"Bebidas"},{"Nombre Corregido":"Coca Cola Zero 400 Ml","avg_price":4500.0,"units":29,"revenue":130500,"category":"Bebidas"},{"Nombre Corregido":"Agua Gas","avg_price":4500.0,"units":28,"revenue":126000,"category":"Bebidas"},{"Nombre Corregido":"Soda","avg_price":4500.0,"units":24,"revenue":108000,"category":"Bebidas"},{"Nombre Corregido":"Vaso Leche","avg_price":4452.380952381,"units":22,"revenue":98000,"category":"Bebidas"},{"Nombre Corregido":"PAN TL","avg_price":7388.8888888889,"units":12,"revenue":88000,"category":"Panader\u00eda"},{"Nombre Corregido":"Hamburguesa","avg_price":28000.0,"units":2,"revenue":56000,"category":"Brunch"},{"Nombre Corregido":"PAN","avg_price":8000.0,"units":3,"revenue":24000,"category":"Panader\u00eda"},{"Nombre Corregido":"Postre 12 Porciones","avg_price":12000.0,"units":2,"revenue":24000,"category":"Reposter\u00eda"},{"Nombre Corregido":"Bu\u00f1uelo ","avg_price":2000.0,"units":1,"revenue":2000,"category":"Panader\u00eda"}];
+Plotly.newPlot('chart-scatter',[{
+  x:sc.map(d=>d.avg_price),y:sc.map(d=>d.units),mode:'markers',
+  marker:{size:sc.map(d=>Math.max(8,Math.sqrt(d.revenue/50000)*5)),color:sc.map(d=>CC[d.category]||'#6b7280'),opacity:0.8},
+  text:sc.map(d=>d['Nombre Corregido']),
+  hovertemplate:'%{text}<br>Precio: $%{x:,.0f}<br>Unidades: %{y}<extra></extra>'
+}],{...DL,title:'Precio vs Volumen',xaxis:{...DL.xaxis,type:'linear',title:'Precio unitario (COP)'},yaxis:{...DL.yaxis,type:'linear',title:'Unidades vendidas'}},PC);
+
+// ── MARKET BASKET PAIRS ──
+const pairs=[{"product_a":"Almoj\u00e1bana","product_b":"Pandequeso","count":161,"support":0.0424,"lift":2.05},{"product_a":"Caf\u00e9 con Leche","product_b":"Tinto","count":118,"support":0.0311,"lift":1.06},{"product_a":"Caf\u00e9 con Leche","product_b":"Pandequeso","count":116,"support":0.0305,"lift":1.34},{"product_a":"Almoj\u00e1bana","product_b":"Caf\u00e9 con Leche","count":112,"support":0.0295,"lift":1.34},{"product_a":"Capuchino sin Licor","product_b":"Pandequeso","count":106,"support":0.0279,"lift":1.14},{"product_a":"Porci\u00f3n Torta Zanahoria \/ Chocolate \/ Bizcocho \/ Maria Luisa","product_b":"Tinto","count":103,"support":0.0271,"lift":1.24},{"product_a":"Capuchino sin Licor","product_b":"Porci\u00f3n Torta Zanahoria \/ Chocolate \/ Bizcocho \/ Maria Luisa","count":102,"support":0.0268,"lift":1.38},{"product_a":"Americano","product_b":"Capuchino sin Licor","count":91,"support":0.0239,"lift":1.15},{"product_a":"Pandequeso","product_b":"Tinto","count":89,"support":0.0234,"lift":0.85},{"product_a":"Almoj\u00e1bana","product_b":"Capuchino sin Licor","count":81,"support":0.0213,"lift":0.9},{"product_a":"Caf\u00e9 con Leche","product_b":"Capuchino sin Licor","count":76,"support":0.02,"lift":0.77},{"product_a":"Americano","product_b":"Porci\u00f3n Torta Zanahoria \/ Chocolate \/ Bizcocho \/ Maria Luisa","count":75,"support":0.0197,"lift":1.36},{"product_a":"Capuchino sin Licor","product_b":"Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne","count":68,"support":0.0179,"lift":1.03},{"product_a":"Caf\u00e9 con Leche","product_b":"Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne","count":68,"support":0.0179,"lift":1.11},{"product_a":"Capuchino sin Licor","product_b":"Tinto","count":67,"support":0.0176,"lift":0.56}];
+Plotly.newPlot('chart-pairs',[
+  {y:pairs.map(d=>d.product_a+' + '+d.product_b).reverse(),
+    x:pairs.map(d=>d.count).reverse(),type:'bar',orientation:'h',
+    marker:{color:pairs.map(d=>d.lift>=1.5?'#10b981':(d.lift>=1?'#f59e0b':'#ef4444')).reverse()},
+    text:pairs.map(d=>'lift: '+d.lift.toFixed(2)).reverse(),textposition:'outside',
+    textfont:{size:11,family:'JetBrains Mono'},
+    hovertemplate:'%{y}<br>%{x} veces juntos<extra></extra>',showlegend:false},
+  {x:[null],y:[null],type:'bar',marker:{color:'#10b981'},name:'Lift ≥ 1.5 (fuerte)',showlegend:true},
+  {x:[null],y:[null],type:'bar',marker:{color:'#f59e0b'},name:'Lift 1.0–1.5 (moderada)',showlegend:true},
+  {x:[null],y:[null],type:'bar',marker:{color:'#ef4444'},name:'Lift < 1.0 (negativa)',showlegend:true},
+],{...DL,title:'Top 15 Pares (Market Basket)',margin:{...DL.margin,l:380,r:100},xaxis:{...DL.xaxis,type:'linear',title:'Veces comprados juntos'},legend:{x:0.5,y:1.15,orientation:'h',font:{size:11}}},PC);
+
+// ── CATEGORY PAIRS ──
+const catP=[{"cat_a":"Bebidas","cat_b":"Panader\u00eda","count":1524},{"cat_a":"Bebidas","cat_b":"Reposter\u00eda","count":840},{"cat_a":"Panader\u00eda","cat_b":"Reposter\u00eda","count":685},{"cat_a":"Bebidas","cat_b":"Brunch","count":111},{"cat_a":"Brunch","cat_b":"Panader\u00eda","count":61},{"cat_a":"Pi\u00f1ater\u00eda","cat_b":"Reposter\u00eda","count":58},{"cat_a":"Brunch","cat_b":"Reposter\u00eda","count":21},{"cat_a":"Otros","cat_b":"Panader\u00eda","count":6},{"cat_a":"Bebidas","cat_b":"Otros","count":4},{"cat_a":"Otros","cat_b":"Reposter\u00eda","count":4}];
+Plotly.newPlot('chart-catpairs',[{
+  y:catP.map(d=>d.cat_a+' + '+d.cat_b).reverse(),
+  x:catP.map(d=>d.count).reverse(),type:'bar',orientation:'h',
+  marker:{color:'#8b5cf6'}
+}],{...DL,margin:{...DL.margin,l:200},xaxis:{...DL.xaxis,type:'linear',title:'Veces juntas'}},PC);
+
+// ── CART DISTRIBUTION ──
+const cartD=[{"products_in_cart":1,"count":4234},{"products_in_cart":2,"count":2198},{"products_in_cart":3,"count":933},{"products_in_cart":4,"count":392},{"products_in_cart":5,"count":127},{"products_in_cart":6,"count":49},{"products_in_cart":7,"count":17},{"products_in_cart":8,"count":11},{"products_in_cart":9,"count":1},{"products_in_cart":10,"count":2}];
+Plotly.newPlot('chart-cartdist',[{
+  x:cartD.map(d=>d.products_in_cart),y:cartD.map(d=>d.count),type:'bar',marker:{color:'#3b82f6'}
+}],{...DL,title:'Productos únicos por orden',xaxis:{...DL.xaxis,type:'linear',title:'# productos',dtick:1},yaxis:{...DL.yaxis,type:'linear',title:'# órdenes'}},PC);
+
+// ── TICKET DISTRIBUTION ──
+const tickD=[{"bucket":"<5K","count":407},{"bucket":"5-10K","count":1734},{"bucket":"10-15K","count":1172},{"bucket":"15-20K","count":1528},{"bucket":"20-30K","count":1206},{"bucket":"30-50K","count":1233},{"bucket":"50K+","count":683}];
+Plotly.newPlot('chart-ticketdist',[{
+  x:tickD.map(d=>d.bucket),y:tickD.map(d=>d.count),type:'bar',marker:{color:'#f59e0b'}
+}],{...DL,title:'Distribución del Ticket (COP)',xaxis:{...DL.xaxis,type:'category',title:'Rango'},yaxis:{...DL.yaxis,type:'linear',title:'# órdenes'}},PC);
+
+// ── CART SIZE EVOLUTION ──
+const cartE=[{"week":"2026-W01","avg_items":1.9395017794},{"week":"2026-W02","avg_items":1.8552875696},{"week":"2026-W03","avg_items":1.8677419355},{"week":"2026-W04","avg_items":1.8174342105},{"week":"2026-W05","avg_items":1.7336683417},{"week":"2026-W06","avg_items":1.8905109489},{"week":"2026-W07","avg_items":1.7214532872},{"week":"2026-W08","avg_items":1.8291814947},{"week":"2026-W09","avg_items":1.7828371278},{"week":"2026-W10","avg_items":1.9118589744},{"week":"2026-W11","avg_items":1.7859848485},{"week":"2026-W12","avg_items":1.7574692443},{"week":"2026-W13","avg_items":1.8597359736},{"week":"2026-W14","avg_items":1.7352941176},{"week":"2026-W16","avg_items":1.727739726},{"week":"2026-W17","avg_items":2.0769230769}];
+Plotly.newPlot('chart-cartevol',[{
+  x:cartE.map(d=>d.week),y:cartE.map(d=>d.avg_items),type:'scatter',mode:'lines+markers',
+  line:{color:'#10b981',width:2.5},marker:{size:6}
+}],{...DL,title:'Tamaño promedio de carrito por semana',xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'linear',title:'Items / orden'}},PC);
+
+// ── TICKET BY DAY ──
+const ticketDay=[{"day":"Lun","orders":967,"avg_ticket":21293.1910569106},{"day":"Mar","orders":948,"avg_ticket":20417.5365344468},{"day":"Mi\u00e9","orders":961,"avg_ticket":20256.6326530612},{"day":"Jue","orders":907,"avg_ticket":20954.0540540541},{"day":"Vie","orders":1065,"avg_ticket":22816.4967562558},{"day":"S\u00e1b","orders":1311,"avg_ticket":25327.5862068966},{"day":"Dom","orders":1805,"avg_ticket":25680.4264625478}];
+Plotly.newPlot('chart-ticket-day',[{
+    x:ticketDay.map(d=>d.day),
+    y:ticketDay.map(d=>d.avg_ticket),
+    type:'bar',marker:{color:'#06b6d4'},
+    text:ticketDay.map(d=>d.orders+' órdenes'),textposition:'outside'
+}],{...DL,title:'Ticket Promedio por Día',xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'linear',title:'Ticket (COP)'}},PC);
+
+// ── TICKET BY HOUR ──
+const ticketHour=[{"hour":7,"orders":20,"avg_ticket":22325.0},{"hour":8,"orders":421,"avg_ticket":20711.4014251781},{"hour":9,"orders":718,"avg_ticket":21825.208913649},{"hour":10,"orders":601,"avg_ticket":22956.7387687188},{"hour":11,"orders":617,"avg_ticket":24106.1588330632},{"hour":12,"orders":450,"avg_ticket":22890.0},{"hour":13,"orders":514,"avg_ticket":23955.2529182879},{"hour":14,"orders":601,"avg_ticket":24059.9001663894},{"hour":15,"orders":712,"avg_ticket":23115.8707865169},{"hour":16,"orders":849,"avg_ticket":23712.6030624264},{"hour":17,"orders":1031,"avg_ticket":22848.2056256062},{"hour":18,"orders":875,"avg_ticket":22573.1428571429},{"hour":19,"orders":678,"avg_ticket":21537.610619469},{"hour":20,"orders":2,"avg_ticket":20250.0}];
+const oppHours=[{"hour":17,"orders":1031,"avg_ticket":22848.2056256062,"gap_pct":0.2},{"hour":18,"orders":875,"avg_ticket":22573.1428571429,"gap_pct":1.4},{"hour":9,"orders":718,"avg_ticket":21825.208913649,"gap_pct":4.6},{"hour":19,"orders":678,"avg_ticket":21537.610619469,"gap_pct":5.9}];
+const oppSet=new Set(oppHours.map(d=>String(d.hour)));
+Plotly.newPlot('chart-ticket-hour',[{
+    x:ticketHour.map(d=>String(d.hour)+':00'),
+    y:ticketHour.map(d=>d.avg_ticket),
+    type:'bar',
+    marker:{color:ticketHour.map(d=>oppSet.has(String(d.hour))?'#ef4444':'#3b82f6')},
+    text:ticketHour.map(d=>d.orders),textposition:'outside',
+    hovertemplate:'%{x}<br>Ticket: $%{y:,.0f}<br>Órdenes: %{text}<extra></extra>'
+}],{...DL,title:'Ticket por Hora (rojo = hora de oportunidad)',xaxis:{...DL.xaxis,type:'category'},yaxis:{...DL.yaxis,type:'linear',title:'Ticket (COP)'}},PC);
+
+} // end initCharts
+
+// Load Plotly dynamically → guaranteed execution order
+var s=document.createElement('script');
+s.src='https://cdn.plot.ly/plotly-2.27.0.min.js';
+s.onload=initCharts;
+s.onerror=function(){
+  var s2=document.createElement('script');
+  s2.src='https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js';
+  s2.onload=initCharts;
+  document.head.appendChild(s2);
+};
+document.head.appendChild(s);
+</script>
+</body>
+</html>
