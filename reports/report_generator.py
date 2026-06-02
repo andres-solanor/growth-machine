@@ -3149,12 +3149,17 @@ class ReportGenerator:
 # 7. CLI
 # ═══════════════════════════════════════════════════════════════════════
 
+_SAMPLE_CSV_NAMES: frozenset[str] = frozenset({"sales_carts_sample.csv"})
+
+
 def _discover_csv_in(base: Path) -> Optional[str]:
     """Busca el CSV más reciente en base/input_data/ o archivos de prueba en base/."""
     input_data_dir = base / "input_data"
     if input_data_dir.is_dir():
         input_data_csvs = sorted(
-            input_data_dir.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True
+            (p for p in input_data_dir.glob("*.csv") if p.name not in _SAMPLE_CSV_NAMES),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
         )
         if input_data_csvs:
             return str(input_data_csvs[0])
