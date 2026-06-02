@@ -1199,16 +1199,17 @@ class DeltaHtmlRenderer:
       const preOrder = orderMetrics(preOrders);
       const postOrder = orderMetrics(postOrders);
 
+      const scopedLinesByDate = buildLinesByDate(scopedLines);
+      const scopedOrdersByDate = buildOrdersByDate(scopedOrders);
       const timeline = [];
       for (let cursor = new Date(preStart); cursor <= postEnd; cursor = addDays(cursor, 1)) {{
         const dateKey = dateToKey(cursor);
-        const dayLines = scopedLines.filter((line) => line.date === dateKey);
-        const dayOrders = scopedOrders.filter((order) => order.date === dateKey);
+        const dayData = scopedLinesByDate.get(dateKey) || {{ revenue: 0, units: 0 }};
         timeline.push({{
           date: dateKey,
-          revenue: dayLines.reduce((accumulator, row) => accumulator + row.revenue, 0),
-          units: dayLines.reduce((accumulator, row) => accumulator + row.quantity, 0),
-          orders: dayOrders.length,
+          revenue: dayData.revenue,
+          units: dayData.units,
+          orders: scopedOrdersByDate.get(dateKey) || 0,
           isPost: dateKey >= state.eventDate,
         }});
       }}
@@ -1221,22 +1222,18 @@ class DeltaHtmlRenderer:
         point.movingAvg = movingAverageValues[index];
       }});
 
-      const productNames = Array.from(new Set(scopedLines.map((line) => line.product))).sort((left, right) => left.localeCompare(right));
-      const productRows = productNames.map((product) => {{
-        const preRows = preLineRows.filter((line) => line.product === product);
-        const postRows = postLineRows.filter((line) => line.product === product);
-        const preRevenue = preRows.reduce((accumulator, row) => accumulator + row.revenue, 0);
-        const postRevenue = postRows.reduce((accumulator, row) => accumulator + row.revenue, 0);
-        const preUnits = preRows.reduce((accumulator, row) => accumulator + row.quantity, 0);
-        const postUnits = postRows.reduce((accumulator, row) => accumulator + row.quantity, 0);
-        const preMarginRows = preRows.filter((row) => row.marginPct !== null);
-        const postMarginRows = postRows.filter((row) => row.marginPct !== null);
-        const preMargin = preMarginRows.length > 0
-          ? preMarginRows.reduce((accumulator, row) => accumulator + (row.marginPct * row.revenue), 0) / preMarginRows.reduce((accumulator, row) => accumulator + row.revenue, 0)
-          : null;
-        const postMargin = postMarginRows.length > 0
-          ? postMarginRows.reduce((accumulator, row) => accumulator + (row.marginPct * row.revenue), 0) / postMarginRows.reduce((accumulator, row) => accumulator + row.revenue, 0)
-          : null;
+      const preByProduct = buildByProduct(preLineRows);
+      const postByProduct = buildByProduct(postLineRows);
+      const allProductNames = Array.from(new Set([...preByProduct.keys(), ...postByProduct.keys()])).sort((left, right) => left.localeCompare(right));
+      const productRows = allProductNames.map((product) => {{
+        const pre = preByProduct.get(product) || {{ revenue: 0, units: 0, marginSum: 0, marginRevenue: 0 }};
+        const post = postByProduct.get(product) || {{ revenue: 0, units: 0, marginSum: 0, marginRevenue: 0 }};
+        const preRevenue = pre.revenue;
+        const postRevenue = post.revenue;
+        const preUnits = pre.units;
+        const postUnits = post.units;
+        const preMargin = pre.marginRevenue > 0 ? pre.marginSum / pre.marginRevenue : null;
+        const postMargin = post.marginRevenue > 0 ? post.marginSum / post.marginRevenue : null;
         let status = 'stable';
         if (preRevenue === 0 && postRevenue > 0) {{ status = 'new'; }}
         if (preRevenue > 0 && postRevenue === 0) {{ status = 'dropped'; }}
@@ -1256,12 +1253,14 @@ class DeltaHtmlRenderer:
       }}).filter((row) => row.preRevenue > 0 || row.postRevenue > 0)
         .sort((left, right) => Math.abs(right.deltaRevenue) - Math.abs(left.deltaRevenue));
 
-      const categoryNames = Array.from(new Set(scopedLines.map((line) => line.category))).sort((left, right) => left.localeCompare(right));
+      const preByCat = buildByCategory(preLineRows);
+      const postByCat = buildByCategory(postLineRows);
+      const categoryNames = Array.from(new Set([...preByCat.keys(), ...postByCat.keys()])).sort((left, right) => left.localeCompare(right));
       const totalPreRevenue = preLine.revenue || 1;
       const totalPostRevenue = postLine.revenue || 1;
       const categoryRows = categoryNames.map((category) => {{
-        const preRevenue = preLineRows.filter((line) => line.category === category).reduce((accumulator, row) => accumulator + row.revenue, 0);
-        const postRevenue = postLineRows.filter((line) => line.category === category).reduce((accumulator, row) => accumulator + row.revenue, 0);
+        const preRevenue = preByCat.get(category) || 0;
+        const postRevenue = postByCat.get(category) || 0;
         const mixPre = preRevenue / totalPreRevenue;
         const mixPost = postRevenue / totalPostRevenue;
         return {{
@@ -1369,6 +1368,50 @@ class DeltaHtmlRenderer:
         return last > 0 ? null : 0;
       }}
       return ((last - first) / first) * 100;
+    }}
+
+    function buildLinesByDate(rows) {{
+      const map = new Map();
+      for (const row of rows) {{
+        if (!map.has(row.date)) map.set(row.date, {{ revenue: 0, units: 0 }});
+        const bucket = map.get(row.date);
+        bucket.revenue += row.revenue;
+        bucket.units += row.quantity;
+      }}
+      return map;
+    }}
+
+    function buildOrdersByDate(rows) {{
+      const map = new Map();
+      for (const row of rows) {{
+        map.set(row.date, (map.get(row.date) || 0) + 1);
+      }}
+      return map;
+    }}
+
+    function buildByProduct(rows) {{
+      const map = new Map();
+      for (const line of rows) {{
+        if (!map.has(line.product)) {{
+          map.set(line.product, {{ revenue: 0, units: 0, marginSum: 0, marginRevenue: 0 }});
+        }}
+        const acc = map.get(line.product);
+        acc.revenue += line.revenue;
+        acc.units += line.quantity;
+        if (line.marginPct !== null) {{
+          acc.marginSum += line.revenue * line.marginPct;
+          acc.marginRevenue += line.revenue;
+        }}
+      }}
+      return map;
+    }}
+
+    function buildByCategory(rows) {{
+      const map = new Map();
+      for (const line of rows) {{
+        map.set(line.category, (map.get(line.category) || 0) + line.revenue);
+      }}
+      return map;
     }}
 
     function buildWarnings(preLine, postLine, missingPreDays, missingPostDays, activePreDays, activePostDays) {{
