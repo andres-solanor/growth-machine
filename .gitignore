@@ -12,24 +12,26 @@ venv/
 .venv/
 env/
 
-# Generated report outputs (run the scripts to regenerate)
-store-report-builder/store-report-builder/*.html
-store-report-builder/store-report-builder/*.csv
-!store-report-builder/store-report-builder/input_data/
-!store-report-builder/store-report-builder/test_data_with_margins.csv
-!store-report-builder/store-report-builder/test_data_with_margins_normalized.csv
-store-report-builder/store-report-builder/delta builder/impact_delta_report.html
-store-report-builder/store-report-builder/delta builder/impact_delta_report_data.json
-store-report-builder/store-report-builder/delta builder/impact_delta_report_discarded_rows.csv
-store-report-builder/store-report-builder/prev_test/
+# Local / IDE
+.claude/
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+*.swp
 
 # Logs
 *.log
 run_err.txt
 run_out.txt
 
-# IDE / OS
-.DS_Store
-Thumbs.db
-.vscode/settings.json
-*.swp
+# Generated report outputs (regenerate with run_reports.ps1 or README commands)
+reports/*.html
+reports/report_filas_descartadas.csv
+reports/delta_builder/impact_delta_report.html
+reports/delta_builder/impact_delta_report_data.json
+reports/delta_builder/impact_delta_report_discarded_rows.csv
+reports/prev_test/
+
+# User CSV exports (sample file is committed)
+reports/input_data/*.csv
+!reports/input_data/sales_carts_sample.csv

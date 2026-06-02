@@ -5,7 +5,7 @@
       "name": "Sales report",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/report_generator.py",
+      "program": "${workspaceFolder}/reports/report_generator.py",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     },
@@ -13,8 +13,8 @@
       "name": "Delta report",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/delta builder/delta_builder.py",
-      "cwd": "${workspaceFolder}/delta builder",
+      "program": "${workspaceFolder}/reports/delta_builder/delta_builder.py",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     }
   ]

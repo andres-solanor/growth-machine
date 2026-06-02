@@ -1,78 +1,44 @@
 # growth-machine
 
-Automation machine for making money!
+CSV-to-HTML analytics for store sales: an executive sales report and a pre/post event delta report.
 
-Two HTML report builders live under `store-report-builder/store-report-builder/`:
+## Quick start
 
-| Script | Purpose |
-|--------|---------|
-| `report_generator.py` | Full sales report (timeline, products, basket, profitability, bundles) |
-| `delta builder/delta_builder.py` | Pre/post event impact comparison (delta report) |
-
-## Prerequisites
-
-- **Python 3.10+** ([python.org](https://www.python.org/downloads/) or `winget install Python.Python.3.12`)
-- On Windows, use `python` / `python -m pip` (not the Microsoft Store stub unless Python is installed)
-
-## Setup
-
-From the **repository root**:
+**Requirements:** Python 3.10+
 
 ```powershell
-python -m pip install -r store-report-builder/store-report-builder/requirements.txt
+python -m pip install -r requirements.txt
+python reports/report_generator.py
+python reports/delta_builder/delta_builder.py
 ```
 
-Dependencies: `pandas>=2.0`, `numpy>=1.24`.
-
-## Run reports
-
-All commands below are run from the **repository root**. Scripts resolve paths relative to their project folder, so you do not need to `cd` into subdirectories.
-
-**Sales report** — auto-picks the newest CSV in `input_data/`:
-
-```powershell
-python store-report-builder/store-report-builder/report_generator.py
-```
-
-Output: `store-report-builder/store-report-builder/report.html` (and `report_filas_descartadas.csv` if rows were dropped).
-
-**Delta report** — reads `delta builder/delta_report_config.json`:
-
-```powershell
-python "store-report-builder/store-report-builder/delta builder/delta_builder.py"
-```
-
-Output: `store-report-builder/store-report-builder/delta builder/impact_delta_report.html`
-
-### Run both (Windows)
+On Windows, run both reports:
 
 ```powershell
 .\run_reports.ps1
 ```
 
-### Optional flags
+## Reports
 
-```powershell
-# Sales: explicit CSV and output
-python store-report-builder/store-report-builder/report_generator.py `
-  --input store-report-builder/store-report-builder/input_data/your-file.csv `
-  --output store-report-builder/store-report-builder/report.html
+| Report | Script | Output |
+|--------|--------|--------|
+| Sales | [`reports/report_generator.py`](reports/report_generator.py) | `reports/report.html` |
+| Delta (pre/post event) | [`reports/delta_builder/delta_builder.py`](reports/delta_builder/delta_builder.py) | `reports/delta_builder/impact_delta_report.html` |
 
-# Delta: alternate config file
-python "store-report-builder/store-report-builder/delta builder/delta_builder.py" --config path/to/config.json
-```
+## Data
 
-## Input data
+- Put your exports in [`reports/input_data/`](reports/input_data/) (see [README there](reports/input_data/README.md)).
+- Demo file committed: `reports/input_data/sales_carts_sample.csv`.
+- Additional test fixtures: [`reports/fixtures/`](reports/fixtures/).
 
-Place cart export CSVs in:
+Without `--input`, the sales report uses the newest `.csv` in `input_data/`.
 
-`store-report-builder/store-report-builder/input_data/`
+## Documentation
 
-The sales report uses the **most recently modified** `.csv` in that folder when `--input` is omitted.
+- [Sales report details](reports/docs/sales-report.md)
+- [Delta report details](reports/delta_builder/README.md)
+- [Architecture overview](reports/docs/architecture.md)
 
-## Generated outputs (gitignored)
+## License
 
-Regenerate with the commands above; these are not committed:
-
-- `report.html`, `report_filas_descartadas.csv`
-- `delta builder/impact_delta_report.html`, `impact_delta_report_data.json`, `impact_delta_report_discarded_rows.csv`
+Internal / project use—adjust as needed for your organization.

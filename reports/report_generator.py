@@ -3159,10 +3159,12 @@ def _discover_csv_in(base: Path) -> Optional[str]:
         if input_data_csvs:
             return str(input_data_csvs[0])
 
+    fixtures_dir = base / "fixtures"
     for filename in ("test_data_with_margins_normalized.csv", "test_data_with_margins.csv"):
-        candidate = base / filename
-        if candidate.is_file():
-            return str(candidate)
+        for parent in (fixtures_dir, base):
+            candidate = parent / filename
+            if candidate.is_file():
+                return str(candidate)
 
     csv_files = sorted(base.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
     if csv_files:
