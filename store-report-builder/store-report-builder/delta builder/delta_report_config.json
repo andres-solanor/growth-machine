@@ -1,7 +1,7 @@
 {
   "store_name": "La Panetteria · Suramerica",
   "report_title": "Impact Delta Analyzer",
-  "input_csv": "..\\input_data\\Análisis Ventas Panetteria - Carritos.csv",
+  "input_csv": "../input_data/Análisis Ventas Panetteria - Carritos.csv",
   "output_html": "impact_delta_report.html",
   "output_json": "impact_delta_report_data.json",
   "output_discarded_csv": "impact_delta_report_discarded_rows.csv",

@@ -33,22 +33,29 @@ Optional column (Phase 4 profitability):
 - margin_pct (product margin percentage, 0-100)
 
 ## 4. Run
-Basic execution:
+
+From the **repository root**, with auto-detected newest CSV in `input_data/`:
 
 ```bash
-python report_generator.py --input ventas.csv --output report.html
+python store-report-builder/store-report-builder/report_generator.py
+```
+
+Basic execution with explicit paths (from `store-report-builder/store-report-builder/`):
+
+```bash
+python report_generator.py --input input_data/ventas.csv --output report.html
 ```
 
 With custom store name:
 
 ```bash
-python report_generator.py --input ventas.csv --output report.html --store "Store 900421032"
+python report_generator.py --input input_data/ventas.csv --output report.html --store "Store 900421032"
 ```
 
 Verbose mode (recommended for troubleshooting):
 
 ```bash
-python report_generator.py --input ventas.csv --output report.html --verbose
+python report_generator.py --input input_data/ventas.csv --output report.html --verbose
 ```
 
 ## 5. Output

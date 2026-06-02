@@ -32,7 +32,13 @@ pip install pandas numpy
 
 ## Run
 
-From the `delta builder` folder:
+From the **repository root** (recommended):
+
+```bash
+python "store-report-builder/store-report-builder/delta builder/delta_builder.py"
+```
+
+Or from the `delta builder` folder:
 
 ```bash
 python delta_builder.py --config delta_report_config.json
