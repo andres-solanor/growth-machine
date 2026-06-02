@@ -1,3 +1,0 @@
-usage: report_generator.py [-h] [--input INPUT] [--output OUTPUT]
-                           [--store STORE] [--verbose]
-report_generator.py: error: unrecognized arguments: Ventas Panetteria - Carritos.csv
