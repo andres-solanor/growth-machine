@@ -905,6 +905,7 @@ class DeltaHtmlRenderer:
           <div id="quick-groups" class="quick-groups"></div>
           <div class="product-list" id="product-list"></div>
           <div class="selector-actions">
+            <button id="select-all-products" class="selector-link" type="button">Seleccionar todos</button>
             <button id="clear-selection" class="selector-link" type="button">Limpiar seleccion</button>
             <button id="select-top-products" class="selector-link" type="button">Top productos</button>
             <button id="close-selector" class="selector-link" type="button">Cerrar</button>
@@ -1043,7 +1044,7 @@ class DeltaHtmlRenderer:
     const state = {{
       eventDate: PAYLOAD.defaults.eventDate,
       windowDays: PAYLOAD.defaults.windowDays,
-      selectedProducts: new Set(PAYLOAD.defaults.selectedProducts || []),
+      selectedProducts: new Set(PAYLOAD.defaults.selectedProducts && PAYLOAD.defaults.selectedProducts.length > 0 ? PAYLOAD.defaults.selectedProducts : PAYLOAD.catalog),
       search: '',
       selectorOpen: false,
     }};
@@ -1061,6 +1062,7 @@ class DeltaHtmlRenderer:
       productList: document.getElementById('product-list'),
       quickGroups: document.getElementById('quick-groups'),
       clearSelection: document.getElementById('clear-selection'),
+      selectAllProducts: document.getElementById('select-all-products'),
       selectTopProducts: document.getElementById('select-top-products'),
       closeSelector: document.getElementById('close-selector'),
       kpiGrid: document.getElementById('kpi-grid'),
@@ -1157,8 +1159,9 @@ class DeltaHtmlRenderer:
       const selectedSet = state.selectedProducts;
       const trendWindowDays = getTrendWindowDays(state.windowDays);
 
-      const scopedLines = PAYLOAD.lines.filter((line) => selectedSet.size === 0 || selectedSet.has(line.product));
-      const scopedOrders = PAYLOAD.orders.filter((order) => intersects(order.products, selectedSet));
+      const isWholePortfolio = selectedSet.size === 0 || selectedSet.size === PAYLOAD.catalog.length;
+      const scopedLines = isWholePortfolio ? PAYLOAD.lines : PAYLOAD.lines.filter((line) => selectedSet.has(line.product));
+      const scopedOrders = isWholePortfolio ? PAYLOAD.orders : PAYLOAD.orders.filter((order) => intersects(order.products, selectedSet));
       const preDatasetRows = PAYLOAD.lines.filter((line) => line.date >= dateToKey(preStart) && line.date < state.eventDate);
       const postDatasetRows = PAYLOAD.lines.filter((line) => line.date >= state.eventDate && line.date <= dateToKey(postEnd));
 
@@ -1290,7 +1293,7 @@ class DeltaHtmlRenderer:
         }};
       }});
 
-      const selectionLabel = selectedSet.size === 0 ? 'todo el portafolio' : `${{selectedSet.size}} producto(s) seleccionado(s)`;
+      const selectionLabel = isWholePortfolio ? 'todo el portafolio' : `${{selectedSet.size}} producto(s) seleccionado(s)`;
       const missingPreDays = countMissingDays(preDatasetRows, preStart, addDays(eventDate, -1));
       const missingPostDays = countMissingDays(postDatasetRows, eventDate, postEnd);
       const activePreDays = countActiveDays(preLineRows);
@@ -1415,7 +1418,7 @@ class DeltaHtmlRenderer:
         }});
       }});
 
-      refs.selectorLabel.textContent = state.selectedProducts.size === 0
+      refs.selectorLabel.textContent = state.selectedProducts.size === 0 || state.selectedProducts.size === PAYLOAD.catalog.length
         ? 'Todo el portafolio'
         : `${{state.selectedProducts.size}} seleccionados`;
     }}
@@ -1446,9 +1449,8 @@ class DeltaHtmlRenderer:
     }}
 
     function renderKpis(scope) {{
-      const ticketLabel = state.selectedProducts.size > 0
-        ? 'Ticket prom carrito pos'
-        : 'Ticket promedio pos';
+      const isWholePortfolio = state.selectedProducts.size === 0 || state.selectedProducts.size === PAYLOAD.catalog.length;
+      const ticketLabel = isWholePortfolio ? 'Ticket promedio pos' : 'Ticket prom carrito pos';
       const kpis = [
         {{ label: 'Revenue pos', value: formatCurrency(scope.postLine.revenue), delta: scope.deltas.revenue, accent: 'positive' }},
         {{ label: 'Unidades pos', value: `${{formatNumber(scope.postLine.units)}} u`, delta: scope.deltas.units, accent: 'positive' }},
@@ -1682,7 +1684,8 @@ class DeltaHtmlRenderer:
         ? '#fda4af'
         : '#61e3b7';
 
-      const selectionText = state.selectedProducts.size === 0
+      const isWholePortfolio = state.selectedProducts.size === 0 || state.selectedProducts.size === PAYLOAD.catalog.length;
+      const selectionText = isWholePortfolio
         ? 'todo el portafolio'
         : `${{state.selectedProducts.size}} producto(s) seleccionado(s)`;
       const revenueDeltaText = scope.deltas.revenue === null
@@ -1734,6 +1737,11 @@ class DeltaHtmlRenderer:
     refs.productSearch.addEventListener('input', (event) => {{
       state.search = event.target.value;
       renderProductSelector();
+    }});
+    refs.selectAllProducts.addEventListener('click', () => {{
+      state.selectedProducts = new Set(PAYLOAD.catalog);
+      update();
+      toggleSelector(true);
     }});
     refs.clearSelection.addEventListener('click', () => {{
       state.selectedProducts = new Set();
