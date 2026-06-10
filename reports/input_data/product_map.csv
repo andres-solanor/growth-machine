@@ -28,7 +28,8 @@ COMBO PAN -RB-,,,Sandwich Roast Beef,Brunch,,
 CROISANT CHOCOLATE,,,Croisant Chocolate,Panadería,Hojaldres,60.26
 CROISANT JAMON-QUESO,,,Croisant Jamon-Queso,Panadería,Hojaldres,63.0
 CROISANT QUESO,,,Croisant Queso,Panadería,Hojaldres,65.05
-ESPRESSO,,,Espresso Doble,Bebidas,Con Café,
+ESPRESSO,4000,,Espresso,Bebidas,Con Café,
+ESPRESSO,5500,,Espresso Doble,Bebidas,Con Café,
 FROZEN BAILEYS,,,Frozen Baileys,Bebidas,Con Café,
 GALLETA INDIVIDUAL,,,Galleta Individual,Reposteria,Otros,
 HATSU X400,,,Hatsu X 400,Bebidas,Sin Café ,
@@ -39,8 +40,20 @@ MILO,,,Milo,Bebidas,Sin Café ,
 MUFFINS X 4 UNIDADES,,,Muffins X 4 Unidades,Reposteria,Otros,
 PALITO DE QUESO,,,Palito de Queso,Panadería,Hojaldres,57.89
 PALITOS GUAYABA-QUESO,,,Palitos Guayaba-Queso,Panadería,Hojaldres,62.2
-PAN,,,Pan de Masa Madre- 3 Quesos- Chocolate,Panaderia,Panes,70.0
-PAN TL,,,Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne,Panadería,Hojaldres,61.0
+PAN,8000,,Pan Seda,Panaderia,Hojaldres,52.34
+PAN,8500,,Ranchero- Arequipequeso,Panaderia,Hojaldres,60.0
+PAN,12000,,Pan Leche- Concha,Panaderia,Panes,70.0
+PAN,14000,,Roscon Guayaba Y Roscon de Arequipe,Panadería,Panes,73.0
+PAN,15000,,Roscon Mixto,Panadería,Panes,74.13
+PAN,17000,,Pan Mantequilla Y Pan Maiz,Panaderia,Panes,78.0
+PAN,18000,,Crema,Panaderia,Pan Crema,71.88
+PAN,19000,,Trenza,Panaderia,Panes,64.42
+PAN,20000,,Pan de Masa Madre- 3 Quesos- Chocolate,Panaderia,Panes,60.0
+PAN,21000,,Pan Mozarella,Panaderia,Panes,71.62
+PAN,22000,,Pan de Canela,Panaderia,Panes,
+PAN TL,7000,,Pastel Arequipe- Guayaba- Gloria- Hawaiano,Panadería,Hojaldres,68.0
+PAN TL,8000,,Pan Seda,Panadería,Hojaldres,52.34
+PAN TL,9000,,Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne,Panadería,Hojaldres,61.0
 PANDEQUESO,,,Pandequeso,Panadería,Otros,77.9
 PAQUETE DE GALLETAS X 5,,,Paquete de Galletas X 5,Reposteria,Otros,
 PORCION TORTA CAFÉ/ENVINADA,,,Porcion Torta Café/Envinada,Reposteria,Tortas,

@@ -227,7 +227,8 @@ def compute_split_ratios(sales: pd.DataFrame, split_map: pd.DataFrame) -> dict:
 
     for sistema, cutoff in cutoffs.items():
         variants = split_map[split_map["sistema"] == sistema]["precio_post"].dropna().unique()
-        post = sales[(sales["Producto"] == sistema) & (sales["Fecha"] >= cutoff)]
+        effective = cutoff if not pd.isna(cutoff) else pd.Timestamp.min
+        post = sales[(sales["Producto"] == sistema) & (sales["Fecha"] >= effective)]
         total_units = post["Cantidad"].sum()
 
         if total_units == 0:
@@ -304,11 +305,12 @@ def enrich(sales: pd.DataFrame, pm: pd.DataFrame) -> pd.DataFrame:
     # --- Price-split products ---
     for sistema, group in split_sales.groupby("Producto"):
         cutoff = cutoffs[sistema]
+        effective_cutoff = cutoff if not pd.isna(cutoff) else pd.Timestamp.min
         ratios = split_ratios.get(sistema, {})
         variants = split_map[split_map["sistema"] == sistema]
 
-        post = group[group["Fecha"] >= cutoff]
-        pre = group[group["Fecha"] < cutoff]
+        post = group[group["Fecha"] >= effective_cutoff]
+        pre = group[group["Fecha"] < effective_cutoff]
 
         # Post-cutoff: exact match on (sistema, Individual)
         for _, row in post.iterrows():
