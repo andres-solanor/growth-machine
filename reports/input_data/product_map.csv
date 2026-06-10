@@ -1,0 +1,69 @@
+sistema,precio_post,fecha_desde,nombre,categoria,subcategoria,margen_pct
+AGUA,,,Agua,Bebidas,Sin Café ,
+AGUA GAS,,,Agua Gas,Bebidas,Sin Café ,
+ALFAJORES,,,Alfajores,Reposteria,Otros,92.86
+ALMOJÁBANA,,,Almojábana,Panaderia,Otros,81.04
+AMERICANO,,,Americano,Bebidas,Con Café,
+AROMATICA,,,Aromatica Frutos Secos,Bebidas,Sin Café ,
+AROMÁTICA DE PANELITA,,,Aromática de Panelita,Bebidas,Sin Café ,
+ARROZ CON LECHE,,,Arroz con Leche,Reposteria,Otros,
+AVENA,,,Avena,Bebidas,Sin Café ,
+BIZCOCHO FINO,,,Bizcocho Fino 10 Porciones,Reposteria,Tortas,
+BUÑUELO,,,Buñuelo ,Panadería,Otros,73.2
+CAFÉ CON LECHE,,,Café con Leche,Bebidas,Con Café,
+CAFÉ FRÍO,,,Café Frío,Bebidas,Con Café,
+CAPUCHINO CON LICOR,,,Capuchino con Licor,Bebidas,Con Café,
+CAPUCHINO SIN LICOR,,,Capuchino sin Licor,Bebidas,Con Café,
+COCA COLA 250 ML,,,Coca Cola 250 Ml,Bebidas,Sin Café ,
+COCA COLA ZERO 400 ML,,,Coca Cola Zero 400 Ml,Bebidas,Sin Café ,
+COCACOLA 400 ML,,,Cocacola 400 Ml,Bebidas,Sin Café ,
+COMBO PAN -C-,,,Desayuno Colmena,Brunch,,
+COMBO PAN -CH-,,,Desayuno Capricho,Brunch,,
+COMBO PAN -FC-,,,Sandwich Focaccia,Brunch,,
+COMBO PAN -H-,,,Croissant del Huerto,Brunch,,
+COMBO PAN -K-,,,Hamburguesa,Brunch,,
+COMBO PAN -M-,,,Tostadas Mediterraneas,Brunch,,
+COMBO PAN -PK-,,,Sandwich Pulled Pork,Brunch,,
+COMBO PAN -RB-,,,Sandwich Roast Beef,Brunch,,
+CROISANT CHOCOLATE,,,Croisant Chocolate,Panadería,Hojaldres,60.26
+CROISANT JAMON-QUESO,,,Croisant Jamon-Queso,Panadería,Hojaldres,63.0
+CROISANT QUESO,,,Croisant Queso,Panadería,Hojaldres,65.05
+ESPRESSO,,,Espresso Doble,Bebidas,Con Café,
+FROZEN BAILEYS,,,Frozen Baileys,Bebidas,Con Café,
+GALLETA INDIVIDUAL,,,Galleta Individual,Reposteria,Otros,
+HATSU X400,,,Hatsu X 400,Bebidas,Sin Café ,
+MALTEADA,,,Malteada,Bebidas,Sin Café ,
+MILHOJA CAJA X 3,,,Milhoja Caja X 3,Reposteria,Otros,
+MILHOJA INDIVIDUAL,,,Milhoja Individual,Reposteria,Otros,
+MILO,,,Milo,Bebidas,Sin Café ,
+MUFFINS X 4 UNIDADES,,,Muffins X 4 Unidades,Reposteria,Otros,
+PALITO DE QUESO,,,Palito de Queso,Panadería,Hojaldres,57.89
+PALITOS GUAYABA-QUESO,,,Palitos Guayaba-Queso,Panadería,Hojaldres,62.2
+PAN,,,Pan de Masa Madre- 3 Quesos- Chocolate,Panaderia,Panes,70.0
+PAN TL,,,Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne,Panadería,Hojaldres,61.0
+PANDEQUESO,,,Pandequeso,Panadería,Otros,77.9
+PAQUETE DE GALLETAS X 5,,,Paquete de Galletas X 5,Reposteria,Otros,
+PORCION TORTA CAFÉ/ENVINADA,,,Porcion Torta Café/Envinada,Reposteria,Tortas,
+PORCIÓN POSTRE BAILEYS,,,Porción Postre Baileys,Reposteria,Postres,
+PORCIÓN POSTRE PEQUEÑO,,,Porción Postre Pequeño,Reposteria,Postres,
+PORCIÓN TORTA,,,Porción Torta Zanahoria / Chocolate / Bizcocho / Maria Luisa,Reposteria,Tortas,
+POSTOBON,,,Postobon,Bebidas,Sin Café ,
+POSTRE 12 PORCIONES,,,Postre 12 Porciones,Reposteria,Postres,
+ROLLO DE CANELA,,,Rollo de Canela,Panaderia,Hojaldres,91.37
+ROLLOS ROJOS,,,Rollos Rojos,Reposteria,Otros,82.6
+SODA,,,Soda,Bebidas,Sin Café ,
+TE CHAI,,,Te Chai,Bebidas,Sin Café ,
+TINTO,,,Tinto,Bebidas,Con Café,
+TORTA,,,Torta,-,-,
+TORTA 6 PORCIONES,,,Torta 6 Porciones,Reposteria,Tortas,
+TORTA CHOCOLATE 10 PORCIONES,,,Torta Chocolate 10 Porciones,Reposteria,Tortas,67.81
+TORTA FRÍA 12 PORCIONES,,,Torta Fría 12 Porciones,Reposteria,Tortas,30.0
+TORTA FRÍA 6 PORCIONES,,,Torta Fría 6 Porciones,Reposteria,Tortas,30.0
+TORTA MARÍA LUISA 10 PORCIONES,,,Torta María Luisa 10 Porciones,Reposteria,Tortas,79.54
+TORTA MARÍA LUISA 4 PORCIONES,,,Torta María Luisa 4 Porciones,Reposteria,Tortas,71.33
+TORTA ZANAHORIA 10 PORCIONES,,,Torta Zanahoria 10 Porciones,Reposteria,Tortas,80.0
+TORTA ZANAHORIA 4 PORCIONES,,,Torta Zanahoria 4 Porciones,Reposteria,Tortas,80.57
+TRUFAS X 5 UNIDADES,,,Trufas X 5 Unidades,Reposteria,Otros,
+TRUFAS X 6 UNIDADES,,,Trufas X 6 Unidades,Reposteria,Otros,
+VASO LECHE,,,Vaso Leche,Bebidas,Sin Café ,
+VELA VOLCAN,,,Vela Volcan,Piñateria,,

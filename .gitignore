@@ -32,6 +32,7 @@ reports/delta_builder/impact_delta_report_data.json
 reports/delta_builder/impact_delta_report_discarded_rows.csv
 reports/prev_test/
 
-# User CSV exports (sample file is committed)
+# User CSV exports (sample and product map are committed; data files are not)
 reports/input_data/*.csv
 !reports/input_data/sales_carts_sample.csv
+!reports/input_data/product_map.csv
