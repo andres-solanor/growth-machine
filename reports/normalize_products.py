@@ -271,21 +271,37 @@ def _apply(row_dict: dict, map_row: pd.Series) -> dict:
 
 
 def enrich(sales: pd.DataFrame, pm: pd.DataFrame) -> pd.DataFrame:
-    split_map = pm[pm["precio_post"].notna()].copy()
-    simple_map = pm[pm["precio_post"].isna()].copy()
-    split_sistemas = set(split_map["sistema"].unique())
+    # Classify sistemas:
+    #   disambiguation — precio_post is set AND multiple distinct nombres exist
+    #                    (same system name, different products → split by price)
+    #   tracking       — precio_post is set BUT all rows share the same nombre
+    #                    (same product, price changed over time → no split)
+    #   simple         — no precio_post at all
+    #
+    # For tracking/simple: try exact price match first, then fall back to
+    # the most recent temporally-valid row regardless of price.
+    # For disambiguation: post-cutoff rows get exact price match; pre-cutoff
+    # rows (price not in map) are split proportionally across all variants.
 
-    cutoffs = split_map.groupby("sistema")["fecha_desde"].min().to_dict()
-    split_ratios = compute_split_ratios(sales, split_map)
+    with_price = pm[pm["precio_post"].notna()]
+    distinct_nombres = with_price.groupby("sistema")["nombre"].nunique()
+    disambiguation_sistemas = set(distinct_nombres[distinct_nombres > 1].index)
 
-    is_split = sales["Producto"].isin(split_sistemas)
+    split_map = pm[pm["sistema"].isin(disambiguation_sistemas)].copy()
+    simple_map = pm[~pm["sistema"].isin(disambiguation_sistemas)].copy()
+
+    cutoffs = (split_map[split_map["precio_post"].notna()]
+               .groupby("sistema")["fecha_desde"].min().to_dict())
+    split_ratios = compute_split_ratios(sales, split_map[split_map["precio_post"].notna()])
+
+    is_split = sales["Producto"].isin(disambiguation_sistemas)
     simple_sales = sales[~is_split]
     split_sales = sales[is_split]
 
     output: list[dict] = []
     unmatched: list[str] = []
 
-    # --- Unambiguous products (vectorised per-product group) ---
+    # --- Simple + tracking products ---
     for sistema, group in simple_sales.groupby("Producto"):
         candidates_all = simple_map[simple_map["sistema"] == sistema]
 
@@ -298,21 +314,30 @@ def enrich(sales: pd.DataFrame, pm: pd.DataFrame) -> pd.DataFrame:
                 unmatched.append(str(sistema))
                 r.update({"Nombre Corregido": sistema, "Categoria Real": None,
                            "Sub Categoria Real": None, "margin_pct": None})
+                output.append(r)
+                continue
+
+            # Try exact price match first (covers price-tracking products)
+            price_match = valid[valid["precio_post"] == row["Individual"]]
+            if not price_match.empty:
+                r = _apply(r, _best_row(price_match))
             else:
-                r = _apply(r, _best_row(valid))
+                # Fall back: prefer price-agnostic rows, then any temporally valid row
+                agnostic = valid[valid["precio_post"].isna()]
+                r = _apply(r, _best_row(agnostic if not agnostic.empty else valid))
             output.append(r)
 
-    # --- Price-split products ---
+    # --- Price-disambiguation products ---
     for sistema, group in split_sales.groupby("Producto"):
-        cutoff = cutoffs[sistema]
+        cutoff = cutoffs.get(sistema, pd.NaT)
         effective_cutoff = cutoff if not pd.isna(cutoff) else pd.Timestamp.min
         ratios = split_ratios.get(sistema, {})
-        variants = split_map[split_map["sistema"] == sistema]
+        variants = split_map[(split_map["sistema"] == sistema) & split_map["precio_post"].notna()]
 
         post = group[group["Fecha"] >= effective_cutoff]
         pre = group[group["Fecha"] < effective_cutoff]
 
-        # Post-cutoff: exact match on (sistema, Individual)
+        # Known price → exact match
         for _, row in post.iterrows():
             valid = variants[
                 (variants["precio_post"] == row["Individual"]) &
@@ -327,7 +352,7 @@ def enrich(sales: pd.DataFrame, pm: pd.DataFrame) -> pd.DataFrame:
                 r = _apply(r, _best_row(valid))
             output.append(r)
 
-        # Pre-cutoff: expand each row proportionally across all variants
+        # Unknown price (pre-cutoff or unrecognised price) → proportional split
         for _, row in pre.iterrows():
             for _, variant in variants.iterrows():
                 ratio = ratios.get(variant["precio_post"], 1.0 / len(variants))
