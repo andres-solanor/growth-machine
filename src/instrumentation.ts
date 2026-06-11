@@ -9,10 +9,14 @@ export async function register() {
     return;
   }
   try {
-    const { migrate } = await import("drizzle-orm/mysql2/migrator");
-    const { getDb } = await import("./lib/db");
-    await migrate(getDb(), { migrationsFolder: "./drizzle" });
-    console.log("[db] Migraciones aplicadas.");
+    const { applyMigrations } = await import("./lib/db/migrator");
+    const { getPool } = await import("./lib/db");
+    const applied = await applyMigrations(getPool());
+    console.log(
+      applied.length
+        ? `[db] Migraciones aplicadas: ${applied.join(", ")}`
+        : "[db] Migraciones al día.",
+    );
   } catch (err) {
     console.error("[db] Error aplicando migraciones:", err);
   }

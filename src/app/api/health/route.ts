@@ -34,10 +34,9 @@ export async function GET() {
     // el error en la respuesta para diagnosticar sin acceso a logs.
     if ((checks.tables as number) < 10) {
       try {
-        const { migrate } = await import("drizzle-orm/mysql2/migrator");
-        const { getDb } = await import("@/lib/db");
-        await migrate(getDb(), { migrationsFolder: "./drizzle" });
-        checks.migrate = "applied";
+        const { applyMigrations } = await import("@/lib/db/migrator");
+        const applied = await applyMigrations(pool);
+        checks.migrate = applied.length ? `applied: ${applied.join(", ")}` : "up-to-date";
         checks.tables = await countTables();
       } catch (err) {
         checks.migrate = "error";
