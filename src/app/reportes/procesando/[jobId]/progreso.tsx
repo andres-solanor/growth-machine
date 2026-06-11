@@ -75,9 +75,11 @@ export function Progreso({ jobId }: { jobId: string }) {
 
       {status === "queued" && (
         <p className="max-w-sm rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-xs text-zinc-500">
-          Nota: el motor de análisis en la nube se conecta muy pronto. Tu
-          archivo ya quedó guardado y este análisis arrancará automáticamente
-          cuando activemos el procesamiento.
+          Tu archivo quedó guardado y el análisis está en cola. Si tarda más de
+          un minuto, lo reintentamos automáticamente.
+          {errorText && (
+            <span className="mt-2 block text-amber-400">{errorText}</span>
+          )}
         </p>
       )}
 
