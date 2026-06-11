@@ -28,6 +28,7 @@ export async function GET(
       attempt: schema.analysisJobs.attempt,
       errorText: schema.analysisJobs.errorText,
       createdAt: schema.analysisJobs.createdAt,
+      dispatchedAt: schema.analysisJobs.dispatchedAt,
       finishedAt: schema.analysisJobs.finishedAt,
     })
     .from(schema.analysisJobs)
@@ -47,10 +48,14 @@ export async function GET(
   // terminó en 12 min se marca timed_out al consultarlo.
   const job = rows[0];
   const ageMs = Date.now() - new Date(job.createdAt).getTime();
+  // El timeout cuenta desde el despacho real, no desde la creación: un job
+  // redespachado tras quedar atascado no debe expirar al instante.
+  const dispatchAgeMs =
+    Date.now() - new Date(job.dispatchedAt ?? job.createdAt).getTime();
   const TIMEOUT_MS = 12 * 60 * 1000;
   if (
     (job.status === "dispatched" || job.status === "running") &&
-    ageMs > TIMEOUT_MS
+    dispatchAgeMs > TIMEOUT_MS
   ) {
     await getDb()
       .update(schema.analysisJobs)
