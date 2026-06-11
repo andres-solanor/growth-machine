@@ -40,3 +40,14 @@ reports/input_data/*.csv
 # Raw POS exports (customer sales data — never commit)
 reports/input_data/*.xls
 reports/input_data/*.xlsx
+
+# ── Next.js web app (Analytikz) ──
+/node_modules
+/.next/
+/out/
+/coverage
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.env*
+.vercel

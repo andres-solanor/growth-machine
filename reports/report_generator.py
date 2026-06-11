@@ -171,7 +171,7 @@ class ReportConfig:
 
     # ── Metadata del reporte ──
     store_name: str = "La Panettería · Suramérica"
-    brand: str = "Analytiks Consulting"
+    brand: str = "Analytikz"
     currency: str = "COP"
     cat_colors: dict[str, str] = field(default_factory=lambda: {
         "Bebidas": "#3b82f6",
