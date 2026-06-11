@@ -94,21 +94,22 @@ contain zero locked keys.
 
 ## 4. Phases
 
-### Phase 0 — Python headless refactor (~1 week) — IN PROGRESS
+### Phase 0 — Python headless refactor — ✅ DONE (2026-06-10)
 
 0. ✅ `saas` branch; this doc + BRANCHING.md; `.gitignore` for `.xls` exports.
-1. `ReportGenerator.build_payload() -> dict` + `to_jsonable()` (DataFrames → records,
-   numpy scalars → native, NaN → None, dataclasses → dicts). `run()` reuses it; HTML unchanged.
-2. CLI: `--format json|html|both`, `--payload-out`, `--config tenant.json`;
-   `ReportConfig.from_dict()`; ISO date fields in `summary()`.
-3. `normalize_products`: pure `normalize(sales_frames, product_map_df)`; paths/prefix
-   parameterized; local `main()` behavior unchanged.
-4. `delta_builder --json-only`; store_name/currency in payload meta.
-5. `worker/run_job.py`: job spec JSON → normalize → engine → payload.json (+ quality summary).
-   No network code (the GH Action shell does HTTP). `openpyxl`/`xlrd` pinned.
-6. Golden-fixture pytest on `reports/fixtures/` data.
+1. ✅ `ReportGenerator.build_payload()` + `to_jsonable()`; HTML verified **byte-identical**
+   to pre-refactor on fixture data (md5 match).
+2. ✅ CLI `--format json|html|both`, `--payload-out`, `--config`; `ReportConfig.from_dict()`
+   (incl. `columns` aliases); `date_min_iso`/`date_max_iso` in `summary()`.
+3. ✅ Pure `normalize()`/`consolidate()`/`prepare_product_map()`; output byte-identical
+   on real POS exports (23,478 rows).
+4. ✅ `delta_builder --json-only`; meta gains schemaVersion/reportType/currency.
+5. ✅ `worker/run_job.py` (report + delta + no-product-map onboarding fallback tested
+   end-to-end on the real .xls). `openpyxl`/`xlrd` in requirements.
+6. ✅ `tests/test_payload.py` (9 tests) + golden snapshot + `tests/regen_golden.py`.
 
-**Verify:** one command emits JSON + identical HTML; delta JSON-only; `run_reports.ps1` untouched.
+Note: the zod schema (`packages/payload-schema`) moves to Phase 1 day 1 — it needs the
+npm workspace that the monorepo scaffold creates.
 
 ### Phase 1 — MVP funnel (~3–4 weeks)
 

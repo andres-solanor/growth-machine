@@ -1,0 +1,61 @@
+{
+  "analyses_keys": [
+    "anomalies",
+    "basket",
+    "basket_rules",
+    "bundles",
+    "cart",
+    "interactive_base",
+    "products",
+    "profitability",
+    "ticket",
+    "timeline",
+    "trends"
+  ],
+  "n_insights": 13,
+  "n_recommendations": 3,
+  "quality": {
+    "coverage_note": "Cobertura del 97/109 días entre 2026-01-02 y 2026-04-20.",
+    "dropped_pct": 0.05,
+    "incomplete_weeks": 3,
+    "initial_rows": 14462,
+    "invalid_dates": 0,
+    "invalid_numeric": {
+      "Cantidad": 0,
+      "Hour": 0,
+      "Individual": 0,
+      "Total": 0,
+      "margin_pct": 0
+    },
+    "missing_days": 12,
+    "partial_months": [
+      {
+        "month": "2026-01",
+        "month_days": 31,
+        "observed_days": 30
+      },
+      {
+        "month": "2026-04",
+        "month_days": 30,
+        "observed_days": 8
+      }
+    ],
+    "risk_level": "high",
+    "valid_rows": 14455
+  },
+  "summary": {
+    "avg_items_per_order": 1.8,
+    "avg_ticket": 23244,
+    "date_max": "20 Apr 2026",
+    "date_max_iso": "2026-04-20",
+    "date_min": "02 Jan",
+    "date_min_iso": "2026-01-02",
+    "date_range": "02 Jan – 20 Apr 2026",
+    "multi_item_orders": 3800,
+    "multi_item_pct": 47.7,
+    "total_orders": 7964,
+    "total_revenue": 185122000,
+    "total_units": 18361,
+    "unique_products": 81
+  }
+}
