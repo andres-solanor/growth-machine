@@ -29,14 +29,16 @@ import pandas as pd
 import numpy as np
 from itertools import combinations
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict, fields as dataclass_fields, is_dataclass
 from typing import Optional, Callable, Any
 import json
+import math
 import argparse
 import sys
 from pathlib import Path
 import logging
 from calendar import monthrange
+from datetime import datetime, timezone
 
 # Directorio del proyecto (donde viven input_data/, report.html, etc.)
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -46,6 +48,55 @@ def resolve_project_path(path: str | Path) -> Path:
     """Resuelve rutas relativas contra PROJECT_DIR (no contra cwd)."""
     p = Path(path)
     return p if p.is_absolute() else (PROJECT_DIR / p).resolve()
+
+
+# Versión del esquema del payload JSON (consumido por la app web).
+# Incrementar ante cambios incompatibles de estructura.
+PAYLOAD_SCHEMA_VERSION = 1
+
+
+def to_jsonable(obj: Any) -> Any:
+    """Convierte recursivamente estructuras de análisis a tipos JSON puros.
+
+    DataFrames → list[dict] (orient="records"), escalares numpy → nativos,
+    NaN/NaT/inf → None, Timestamps → ISO 8601, dataclasses → dict.
+    """
+    if obj is None or isinstance(obj, (str, bool, int)):
+        return obj
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        v = float(obj)
+        return v if math.isfinite(v) else None
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if obj is pd.NaT:
+        return None
+    if isinstance(obj, (pd.Timestamp, datetime)):
+        return obj.isoformat()
+    if isinstance(obj, (pd.Period, np.datetime64, np.timedelta64, pd.Timedelta)):
+        return str(obj)
+    if isinstance(obj, pd.DataFrame):
+        return to_jsonable(obj.to_dict(orient="records"))
+    if isinstance(obj, pd.Series):
+        return to_jsonable(obj.tolist())
+    if isinstance(obj, np.ndarray):
+        return to_jsonable(obj.tolist())
+    if is_dataclass(obj) and not isinstance(obj, type):
+        return to_jsonable(asdict(obj))
+    if isinstance(obj, dict):
+        return {
+            (k if isinstance(k, str) else str(k)): to_jsonable(v)
+            for k, v in obj.items()
+        }
+    if isinstance(obj, (list, tuple, set, frozenset)):
+        return [to_jsonable(v) for v in obj]
+    if isinstance(obj, Path):
+        return str(obj)
+    # Último recurso: representación textual (igual que el viejo default=str).
+    return str(obj)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -130,6 +181,48 @@ class ReportConfig:
         "Piñatería": "#8b5cf6",
         "Otros": "#6b7280",
     })
+
+    # Alias cortos aceptados en configs de tenant bajo la clave "columns".
+    _COLUMN_ALIASES = {
+        "date": "col_date",
+        "time": "col_time",
+        "order_id": "col_order_id",
+        "product_raw": "col_product_raw",
+        "quantity": "col_quantity",
+        "unit_price": "col_unit_price",
+        "total": "col_total",
+        "product": "col_product",
+        "category": "col_category",
+        "subcategory": "col_subcategory",
+        "margin_pct": "col_margin_pct",
+        "month": "col_month",
+        "weekday": "col_weekday",
+        "hour": "col_hour",
+    }
+
+    @classmethod
+    def from_dict(cls, data: Optional[dict]) -> "ReportConfig":
+        """Crea una configuración desde un dict (e.g. JSON de tenant).
+
+        Acepta cualquier campo del dataclass por nombre directo, más la clave
+        "columns" con alias cortos (date, order_id, total, ...). Claves
+        desconocidas generan warning y se ignoran — nunca rompen el reporte.
+        """
+        valid = {f.name for f in dataclass_fields(cls) if not f.name.startswith("_")}
+        kwargs: dict[str, Any] = {}
+        for key, value in (data or {}).items():
+            if key == "columns" and isinstance(value, dict):
+                for alias, col_name in value.items():
+                    target = cls._COLUMN_ALIASES.get(alias)
+                    if target is None:
+                        logger.warning("Config: alias de columna desconocido '%s' ignorado", alias)
+                    else:
+                        kwargs[target] = col_name
+            elif key in valid:
+                kwargs[key] = value
+            else:
+                logger.warning("Config: campo desconocido '%s' ignorado", key)
+        return cls(**kwargs)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -414,6 +507,8 @@ class DataProcessor:
                 "date_min": "N/A",
                 "date_max": "N/A",
                 "date_range": "N/A",
+                "date_min_iso": None,
+                "date_max_iso": None,
             }
 
         total_revenue = int(df[c.col_total].sum())
@@ -438,6 +533,8 @@ class DataProcessor:
             "date_min": df[c.col_date].min().strftime("%d %b"),
             "date_max": df[c.col_date].max().strftime("%d %b %Y"),
             "date_range": f"{df[c.col_date].min().strftime('%d %b')} – {df[c.col_date].max().strftime('%d %b %Y')}",
+            "date_min_iso": df[c.col_date].min().strftime("%Y-%m-%d"),
+            "date_max_iso": df[c.col_date].max().strftime("%Y-%m-%d"),
         }
 
 
@@ -3097,28 +3194,81 @@ class ReportGenerator:
         # Keep concise top recommendations.
         return recs[:3]
 
-    def run(self, output_path: str) -> str:
-        """Genera el reporte completo y lo guarda en output_path."""
-        # 1. Summary metrics
-        summary = self.processor.summary()
+    def _compute(self) -> dict[str, Any]:
+        """Ejecuta todo el análisis y retorna las piezas crudas (con DataFrames).
 
-        # 2. Run all analysis modules
+        Este es el seam entre el motor de análisis y cualquier renderer
+        (HTML local o payload JSON para la app web).
+        """
+        summary = self.processor.summary()
         analyses = AnalysisModules(self.processor.df, self.config).run_all()
         quality = self.processor.data_quality_metrics()
-
-        # 3. Generate insights
         insights = InsightEngine.generate(summary, analyses, self.config)
         recommendations = self.build_recommendations(summary, analyses, quality)
+        return {
+            "summary": summary,
+            "analyses": analyses,
+            "quality": quality,
+            "insights": insights,
+            "recommendations": recommendations,
+        }
 
-        # 4. Render HTML
-        html = ReportRenderer(summary, analyses, insights, quality, recommendations, self.config).render()
+    def build_payload(self, computed: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+        """Retorna el reporte completo como estructura JSON pura (sin HTML).
 
-        # 5. Write output
-        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(html)
+        Es el contrato con la app web (ver docs/SAAS-PLAN.md). Cambios
+        incompatibles requieren incrementar PAYLOAD_SCHEMA_VERSION.
+        """
+        pieces = computed if computed is not None else self._compute()
+        return {
+            "meta": {
+                "schema_version": PAYLOAD_SCHEMA_VERSION,
+                "report_type": "sales_report",
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "store_name": self.config.store_name,
+                "currency": self.config.currency,
+                "config": to_jsonable(asdict(self.config)),
+            },
+            "summary": to_jsonable(pieces["summary"]),
+            "quality": to_jsonable(pieces["quality"]),
+            "analyses": to_jsonable(pieces["analyses"]),
+            "insights": to_jsonable(pieces["insights"]),
+            "recommendations": to_jsonable(pieces["recommendations"]),
+        }
 
-        # 6. Export discarded rows log
+    def write_payload(self, payload_path: str, computed: Optional[dict[str, Any]] = None) -> str:
+        """Genera y escribe el payload JSON. Retorna la ruta escrita."""
+        payload = self.build_payload(computed)
+        out = Path(payload_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+        logger.info("Payload JSON generado: %s", payload_path)
+        return str(out)
+
+    def run(self, output_path: str, payload_path: Optional[str] = None, fmt: str = "html") -> str:
+        """Genera el reporte y lo guarda. fmt: "html" (default), "json" o "both"."""
+        if fmt not in ("html", "json", "both"):
+            raise ValueError(f"Formato no soportado: {fmt!r} (usa html, json o both)")
+
+        pieces = self._compute()
+        summary = pieces["summary"]
+        insights = pieces["insights"]
+
+        if fmt in ("json", "both"):
+            resolved_payload = payload_path or str(Path(output_path).with_suffix(".payload.json"))
+            self.write_payload(resolved_payload, pieces)
+
+        if fmt in ("html", "both"):
+            html = ReportRenderer(
+                summary, pieces["analyses"], insights, pieces["quality"],
+                pieces["recommendations"], self.config,
+            ).render()
+            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(html)
+
+        # 6. Export discarded rows log (junto al artefacto generado)
         discarded_log_path: Optional[str] = None
         discarded_df = self.processor.discarded_df
         if discarded_df is not None and not discarded_df.empty:
@@ -3127,7 +3277,10 @@ class ReportGenerator:
             discarded_df.to_csv(discarded_log_path, index=False, encoding="utf-8-sig")
 
         # Print summary
-        print(f"Reporte generado: {output_path}")
+        if fmt == "json":
+            print(f"Payload generado: {payload_path or Path(output_path).with_suffix('.payload.json')}")
+        else:
+            print(f"Reporte generado: {output_path}")
         print(f"  Revenue: ${summary['total_revenue']:,} {self.config.currency}")
         print(f"  Órdenes: {summary['total_orders']:,}")
         print(f"  Productos: {summary['unique_products']}")
@@ -3191,7 +3344,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Store Sales Report Generator")
     parser.add_argument("--input", "--csv", "-i", help="Path to cart CSV file")
     parser.add_argument("--output", "-o", default="report.html", help="Output HTML path")
-    parser.add_argument("--store", "-s", default="La Panettería · Suramérica", help="Store name for header")
+    parser.add_argument("--store", "-s", default=None, help="Store name for header (overrides --config)")
+    parser.add_argument(
+        "--format", "-f", default="html", choices=["html", "json", "both"],
+        help="Output: html (default), json (payload para la app web) o both",
+    )
+    parser.add_argument("--payload-out", default=None, help="Ruta del payload JSON (default: <output>.payload.json)")
+    parser.add_argument("--config", "-c", default=None, help="JSON de configuración de tenant (ReportConfig.from_dict)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logs")
     args = parser.parse_args()
 
@@ -3206,13 +3365,23 @@ if __name__ == "__main__":
 
     input_path = str(resolve_project_path(input_path))
     output_path = str(resolve_project_path(args.output))
+    payload_path = str(resolve_project_path(args.payload_out)) if args.payload_out else None
 
     if not args.input:
         logger.info("Sin --input explícito. CSV detectado automáticamente: %s", input_path)
 
-    config = ReportConfig(store_name=args.store)
+    if args.config:
+        config_path = resolve_project_path(args.config)
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = ReportConfig.from_dict(json.load(f))
+        logger.info("Configuración de tenant cargada: %s", config_path)
+    else:
+        config = ReportConfig()
+    if args.store:
+        config.store_name = args.store
+
     gen = ReportGenerator(input_path, config)
-    gen.run(output_path)
+    gen.run(output_path, payload_path=payload_path, fmt=args.format)
 
 
 # ═══════════════════════════════════════════════════════════════════════
