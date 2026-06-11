@@ -158,6 +158,17 @@ tier → sections unlock; gating leak test passes.
 
 ### Phase 2 — Paid content (~3 weeks)
 
+**Diseño acordado del editor de product map (2026-06-11):** nunca empieza en blanco —
+se genera desde las ventas del tenant (productos + frecuencia + revenue ya conocidos).
+Orden por impacto Pareto ("estos N productos son el 80% de tus ventas, clasifícalos
+primero"); categorías con auto-sugerencia (confirmar, no escribir); resto puede quedar
+"Otros". Márgenes en 3 niveles: (0) sin margen → teasers bloqueados, nada se rompe;
+(1) margen aproximado POR CATEGORÍA (sliders, ~2 min) aplicado como fallback a productos
+sin margen propio — reportes lo marcan "margen estimado"; (2) override por producto,
+opcional. Cambio de motor requerido: aplicar margen de categoría como fallback en la
+normalización del worker. El editor es a la vez el funnel de upgrade (categorías mejoran
+free/pro; márgenes desbloquean premium).
+
 Port remaining sections (trends, ticket, rules, profitability, bundles, recommendations);
 product map editor (auto-suggest categories, margin entry → unlocks profitability);
 delta report flow (event picker → BuilderConfig → job → ported delta sections);
