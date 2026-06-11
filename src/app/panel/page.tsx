@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/user";
 import { cerrarSesion } from "./actions";
@@ -48,12 +49,12 @@ export default async function PanelPage() {
             ~1 minuto tendrás tu reporte: ventas, productos estrella, horarios
             pico y oportunidades concretas.
           </p>
-          <button
-            disabled
-            className="mt-6 cursor-not-allowed rounded-lg bg-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-400"
+          <Link
+            href="/analisis/nuevo"
+            className="mt-6 inline-block rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
           >
-            Muy pronto — estamos construyendo esta parte
-          </button>
+            Subir mi archivo de ventas
+          </Link>
         </div>
       </section>
     </main>
