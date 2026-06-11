@@ -113,7 +113,13 @@ npm workspace that the monorepo scaffold creates.
 
 ### Phase 1 — MVP funnel (~3–4 weeks)
 
-Monorepo scaffold; hello-world deploy to Hostinger + MySQL **day 1** (verify
+✅ 2026-06-11: Next.js scaffold (repo root) **deployed live to Hostinger** from `saas` via
+GitHub auto-deploy (temporary domain; switch to analytikz.com.co pending — the domain must
+first be detached from the placeholder website in hPanel). Hostinger MySQL database created
+(`u727350056_growthdb`); password reset + `max_allowed_packet`/LONGBLOB verification still
+pending before first migration.
+
+Remaining: app scaffold extras + MySQL **day 1** checks (verify
 `max_allowed_packet`/LONGBLOB early); Drizzle schema (`users`, `tenants(tier)`, `memberships`,
 `tenant_configs`, `product_map_entries`, `datasets`, `analysis_jobs`, `report_payloads`,
 `consulting_leads`, `audit_log`); Auth.js register/login/verify; 4-step onboarding wizard
