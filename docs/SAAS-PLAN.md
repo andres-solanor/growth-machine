@@ -128,6 +128,15 @@ bigint unsigned autoincrement); the runtime does **not** ship repo files like `d
 so migration SQL is embedded in the bundle (`scripts/embed-migrations.ts`, runs inside
 `npm run db:generate`) and applied idempotently at boot + by `/api/health` self-heal.
 
+✅ 2026-06-11: **PIPELINE COMPLETO VERIFICADO EN PRODUCCIÓN** 🎉 — usuario real subió el
+.xls crudo de La Panettería por el wizard → dispatch → GitHub Actions corrió el motor
+Python (10k+ filas normalizadas, fallback sin product_map) → payload devuelto por API
+HMAC → validado contra el contrato zod → guardado gzip en report_payloads → "¡Listo!"
+en la página de progreso. Bugs cazados en el camino: timeout medía desde createdAt y no
+desde dispatchedAt; `classification_thresholds` ausente sin márgenes rompía el contrato;
+auto-redespacho check-on-read añadido para jobs huérfanos. Falta: página del reporte
+(siguiente bloque) — el job exitoso ya tiene su payload almacenado y listo para renderizar.
+
 ✅ 2026-06-11: **Auth + onboarding wizard live.** Registration (`/registro`: user + tenant
 free + membership + audit in one tx), login (`/ingresar`), stateless JWT sessions (30 d,
 `AUTH_SECRET` env), protected `/panel`. Upload wizard `/analisis/nuevo` (3 pasos: negocio →
