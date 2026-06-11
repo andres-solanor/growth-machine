@@ -15,7 +15,9 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.3",
     "mysql2": "^3.22.5",
     "next": "16.2.9",
     "react": "19.2.4",
