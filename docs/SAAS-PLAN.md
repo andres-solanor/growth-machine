@@ -149,6 +149,15 @@ Botón "Ver mi reporte →" al terminar el progreso; enlaces del panel van al re
 (`src/lib/format.ts`, `tzForCountry`), no UTC. Workflow bump: checkout@v5, setup-python@v6.
 Falta para tier toggle visible: render de Basket/Cart (Phase 2 port).
 
+✅ 2026-06-11: **Admin + landing con planes + prueba anti-fuga.** `/admin` (gate por env var
+`ADMIN_EMAILS`, lista de correos separados por coma — configurar en Hostinger): negocios con
+dropdown de plan (free/pro/premium, escribe `audit_log`), monitor de últimos 20 análisis
+(estado/intento/error), inbox de leads de consultoría (nuevo/contactado/cerrado). Landing
+nueva con hero + cómo funciona + 3 planes + banda de consultoría (sin precios publicados
+para Pro/Premium — pendiente decisión de pricing; CTA "Hablar con nosotros" → /consultoria).
+Gating extraído a `src/lib/gating.ts` (puro, sin DB) y `npm run check:gating` verifica que
+ningún dato bloqueado se serialice en ningún tier (pasa: free solo ve timeline+products).
+
 ✅ 2026-06-11: **Auth + onboarding wizard live.** Registration (`/registro`: user + tenant
 free + membership + audit in one tx), login (`/ingresar`), stateless JWT sessions (30 d,
 `AUTH_SECRET` env), protected `/panel`. Upload wizard `/analisis/nuevo` (3 pasos: negocio →
@@ -171,8 +180,9 @@ Remaining: app scaffold extras + MySQL **day 1** checks (verify
 deliberately post-first-report); job pipeline (`repository_dispatch`, HMAC-SHA256 worker API,
 check-on-read timeouts, ≤3 retries); progress page polling 3 s; ~~report page free sections +
 locked teasers + consulting CTA~~ (✅ hecho); `BasketSection`/`CartSection` (so tier toggle
-visibly unlocks — Phase 2 port); `/admin` (tenants, tier dropdown, job monitor, leads);
-landing ES with pricing; verificación de email (necesita dominio + SMTP).
+visibly unlocks — Phase 2 port); ~~`/admin` (tenants, tier dropdown, job monitor, leads)~~
+(✅ hecho); ~~landing ES with pricing~~ (✅ hecho, sin precios publicados); verificación de
+email (necesita dominio + SMTP); decidir precios de Pro/Premium.
 
 **Verify:** stranger registers → uploads real POS .xls → free report in <2 min; admin flips
 tier → sections unlock; gating leak test passes.
@@ -232,3 +242,5 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-10 | No npm-workspace monorepo: Next.js app lives at **repo root** (`src/app`, `package.json`); zod payload schemas in `src/lib/payload-schema/`; Python engine stays in `reports/` + `worker/` | Hostinger managed Node.js auto-detects/builds apps at repo root only (no documented subdirectory setting); worker is Python, so a shared TS package had no second consumer |
 | 2026-06-11 | Auth hecha a mano (bcryptjs + JWT firmado con jose en cookie httpOnly, server actions) en lugar de Auth.js | Solo necesitamos credenciales + verificación de email custom; Auth.js añade superficie/beta-churn sin beneficio hasta que haya OAuth (reconsiderar entonces). Sesión sin estado sobrevive redeploys de Hostinger. Requiere env var `AUTH_SECRET` |
 | 2026-06-11 | GitHub **default branch** switched from `main` to `saas` | Hostinger's repo import scans the *default* branch for framework detection (no branch picker shown); `main` has no Node.js app, so detection failed with "el marco no es compatible". Changes no code — `main` and the weekly La Panettería workflow are untouched. `saas` stays default going forward (it is the production branch) |
+| 2026-06-11 | Admin gateado por env var `ADMIN_EMAILS` (lista de correos), no por rol en DB | Cero migraciones y cero UI extra para un solo admin; el correo vive solo en el panel de Hostinger. Si algún día hay más admins, migrar a rol en `memberships` |
+| 2026-06-11 | Landing publica los 3 planes SIN precio para Pro/Premium ("precio de lanzamiento — escríbenos" → /consultoria) | Los precios aún no están decididos; el CTA a consultoría convierte la duda de precio en conversación de venta. Cuando se decidan, actualizar `PLANES` en `src/app/page.tsx` |

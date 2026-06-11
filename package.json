@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:payload": "tsx scripts/check-payload.ts",
+    "check:gating": "tsx scripts/check-gating.ts",
     "db:generate": "drizzle-kit generate && tsx scripts/embed-migrations.ts",
     "db:migrate": "drizzle-kit migrate"
   },
