@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { desc, eq } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/user";
 import { cerrarSesion } from "./actions";
 
@@ -12,9 +14,31 @@ const TIER_LABEL: Record<string, string> = {
   premium: "Plan Premium",
 };
 
+const JOB_STATUS: Record<string, { label: string; cls: string }> = {
+  queued: { label: "En cola", cls: "border-zinc-600 bg-zinc-800 text-zinc-300" },
+  dispatched: { label: "Preparando", cls: "border-sky-700 bg-sky-950 text-sky-300" },
+  running: { label: "Analizando", cls: "border-sky-700 bg-sky-950 text-sky-300" },
+  succeeded: { label: "Listo", cls: "border-emerald-700 bg-emerald-950 text-emerald-300" },
+  failed: { label: "Falló", cls: "border-red-800 bg-red-950 text-red-300" },
+  timed_out: { label: "Expiró", cls: "border-amber-700 bg-amber-950 text-amber-300" },
+};
+
 export default async function PanelPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/ingresar");
+
+  const jobs = await getDb()
+    .select({
+      id: schema.analysisJobs.id,
+      status: schema.analysisJobs.status,
+      createdAt: schema.analysisJobs.createdAt,
+      filename: schema.datasets.filename,
+    })
+    .from(schema.analysisJobs)
+    .innerJoin(schema.datasets, eq(schema.datasets.id, schema.analysisJobs.datasetId))
+    .where(eq(schema.analysisJobs.tenantId, user.tenant.id))
+    .orderBy(desc(schema.analysisJobs.id))
+    .limit(8);
 
   return (
     <main className="flex flex-1 flex-col bg-zinc-950 text-zinc-100">
@@ -56,6 +80,42 @@ export default async function PanelPage() {
             Subir mi archivo de ventas
           </Link>
         </div>
+
+        {jobs.length > 0 && (
+          <div className="mt-8">
+            <h2 className="mb-3 text-lg font-semibold">Tus análisis</h2>
+            <ul className="divide-y divide-zinc-800 rounded-2xl border border-zinc-800 bg-zinc-900">
+              {jobs.map((job) => {
+                const st = JOB_STATUS[job.status] ?? JOB_STATUS.queued;
+                return (
+                  <li key={job.id}>
+                    <Link
+                      href={`/reportes/procesando/${job.id}`}
+                      className="flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-zinc-800/50"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm text-zinc-200">
+                          {job.filename}
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          {new Date(job.createdAt).toLocaleString("es-CO", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium ${st.cls}`}
+                      >
+                        {st.label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </section>
     </main>
   );
