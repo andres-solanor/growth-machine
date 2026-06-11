@@ -52,6 +52,7 @@ class BuilderConfig:
     default_window_days: int
     default_products: tuple[str, ...] = field(default_factory=tuple)
     product_groups: tuple[ProductGroupConfig, ...] = field(default_factory=tuple)
+    currency: str = "COP"
 
     @staticmethod
     def from_dict(data: dict[str, Any], base_dir: Path) -> "BuilderConfig":
@@ -91,6 +92,7 @@ class BuilderConfig:
             default_window_days=default_window_days,
             default_products=default_products,
             product_groups=tuple(ProductGroupConfig.from_dict(group) for group in raw_groups),
+            currency=str(data.get("currency", "COP")).strip() or "COP",
         )
 
 
@@ -368,7 +370,10 @@ class DeltaPayloadBuilder:
 
         payload = {
             "meta": {
+                "schemaVersion": 1,
+                "reportType": "delta_report",
                 "storeName": self.config.store_name,
+                "currency": self.config.currency,
                 "reportTitle": self.config.report_title,
                 "dateMin": self.dataset.quality.date_min,
                 "dateMax": self.dataset.quality.date_max,
@@ -1825,20 +1830,23 @@ class DeltaReportBuilder:
     def __init__(self, config: BuilderConfig):
         self.config = config
 
-    def run(self) -> tuple[Path, Path, Path | None]:
-        """Build JSON and HTML artifacts and return their paths."""
+    def run(self, json_only: bool = False) -> tuple[Path | None, Path, Path | None]:
+        """Build JSON (and HTML salvo json_only) artifacts and return their paths."""
         dataset = DeltaDatasetLoader(self.config.input_csv).load()
         payload = DeltaPayloadBuilder(self.config, dataset).build()
-        html = DeltaHtmlRenderer(payload).render()
 
-        self.config.output_html.parent.mkdir(parents=True, exist_ok=True)
         self.config.output_json.parent.mkdir(parents=True, exist_ok=True)
-
         self.config.output_json.write_text(
             json.dumps(payload, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-        self.config.output_html.write_text(html, encoding="utf-8")
+
+        output_html: Path | None = None
+        if not json_only:
+            html = DeltaHtmlRenderer(payload).render()
+            self.config.output_html.parent.mkdir(parents=True, exist_ok=True)
+            self.config.output_html.write_text(html, encoding="utf-8")
+            output_html = self.config.output_html
 
         discarded_path: Path | None = None
         if not dataset.discarded_rows.empty:
@@ -1846,7 +1854,7 @@ class DeltaReportBuilder:
             dataset.discarded_rows.to_csv(self.config.output_discarded_csv, index=False)
             discarded_path = self.config.output_discarded_csv
 
-        return self.config.output_html, self.config.output_json, discarded_path
+        return output_html, self.config.output_json, discarded_path
 
 
 def load_config(config_path: Path) -> BuilderConfig:
@@ -1868,6 +1876,11 @@ def build_cli_parser() -> argparse.ArgumentParser:
         default="delta_report_config.json",
         help="JSON configuration file for the delta builder.",
     )
+    parser.add_argument(
+        "--json-only",
+        action="store_true",
+        help="Genera solo el payload JSON (sin HTML) — modo worker/SaaS.",
+    )
     return parser
 
 
@@ -1883,9 +1896,10 @@ def main() -> int:
         config_path = (Path(__file__).resolve().parent / raw_config_path).resolve()
 
     config = load_config(config_path)
-    output_html, output_json, discarded_path = DeltaReportBuilder(config).run()
+    output_html, output_json, discarded_path = DeltaReportBuilder(config).run(json_only=arguments.json_only)
 
-    print(f"HTML generado: {output_html}")
+    if output_html is not None:
+        print(f"HTML generado: {output_html}")
     print(f"Datos intermedios: {output_json}")
     if discarded_path is not None:
         print(f"Filas descartadas: {discarded_path}")
