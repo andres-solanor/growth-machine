@@ -12,7 +12,6 @@ import {
   json,
   mysqlEnum,
   mysqlTable,
-  serial,
   text,
   timestamp,
   uniqueIndex,
@@ -27,7 +26,12 @@ const longblob = customType<{ data: Buffer }>({
   },
 });
 
-const id = () => serial("id").primaryKey();
+// No usar serial(): emite `serial AUTO_INCREMENT` y MariaDB (Hostinger) lo
+// rechaza; bigint unsigned autoincrement es válido en MySQL y MariaDB.
+const id = () =>
+  bigint("id", { mode: "number", unsigned: true })
+    .autoincrement()
+    .primaryKey();
 const ref = (name: string) => bigint(name, { mode: "number", unsigned: true });
 const createdAt = () => timestamp("created_at").defaultNow().notNull();
 

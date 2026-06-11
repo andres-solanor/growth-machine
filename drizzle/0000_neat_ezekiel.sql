@@ -1,5 +1,5 @@
 CREATE TABLE `analysis_jobs` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`tenant_id` bigint unsigned NOT NULL,
 	`dataset_id` bigint unsigned NOT NULL,
 	`type` enum('report','delta') NOT NULL DEFAULT 'report',
@@ -16,7 +16,7 @@ CREATE TABLE `analysis_jobs` (
 );
 --> statement-breakpoint
 CREATE TABLE `audit_log` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`actor_user_id` bigint unsigned,
 	`tenant_id` bigint unsigned,
 	`action` varchar(120) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE `audit_log` (
 );
 --> statement-breakpoint
 CREATE TABLE `consulting_leads` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`tenant_id` bigint unsigned,
 	`name` varchar(120) NOT NULL,
 	`email` varchar(255) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE `consulting_leads` (
 );
 --> statement-breakpoint
 CREATE TABLE `datasets` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`tenant_id` bigint unsigned NOT NULL,
 	`filename` varchar(255) NOT NULL,
 	`content_gz` longblob NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE `datasets` (
 );
 --> statement-breakpoint
 CREATE TABLE `memberships` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`user_id` bigint unsigned NOT NULL,
 	`tenant_id` bigint unsigned NOT NULL,
 	`role` enum('owner','member') NOT NULL DEFAULT 'owner',
@@ -59,7 +59,7 @@ CREATE TABLE `memberships` (
 );
 --> statement-breakpoint
 CREATE TABLE `product_map_entries` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`tenant_id` bigint unsigned NOT NULL,
 	`sistema` varchar(200) NOT NULL,
 	`precio_post` int,
@@ -72,7 +72,7 @@ CREATE TABLE `product_map_entries` (
 );
 --> statement-breakpoint
 CREATE TABLE `report_payloads` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`job_id` bigint unsigned NOT NULL,
 	`tenant_id` bigint unsigned NOT NULL,
 	`schema_version` int NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE `tenant_configs` (
 );
 --> statement-breakpoint
 CREATE TABLE `tenants` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`name` varchar(160) NOT NULL,
 	`country` varchar(2) NOT NULL DEFAULT 'CO',
 	`currency` varchar(3) NOT NULL DEFAULT 'COP',
@@ -102,7 +102,7 @@ CREATE TABLE `tenants` (
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
-	`id` serial AUTO_INCREMENT NOT NULL,
+	`id` bigint unsigned AUTO_INCREMENT NOT NULL,
 	`email` varchar(255) NOT NULL,
 	`password_hash` varchar(255) NOT NULL,
 	`name` varchar(120) NOT NULL,
