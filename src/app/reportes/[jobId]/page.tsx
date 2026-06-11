@@ -14,6 +14,14 @@ import {
   QualitySection,
   TimelineSection,
 } from "./sections";
+import {
+  AnomaliesSection,
+  BasketRulesSection,
+  BasketSection,
+  CartSection,
+  TicketSection,
+  TrendsSection,
+} from "./sections-pro";
 
 export const metadata: Metadata = { title: "Tu reporte — Analytikz" };
 
@@ -72,6 +80,13 @@ export default async function ReportePage(props: {
         <InsightsSection r={r} />
         <TimelineSection r={r} />
         <ProductsSection r={r} />
+        {/* Secciones Pro: devuelven null si el gating quitó su módulo */}
+        <BasketSection r={r} />
+        <CartSection r={r} />
+        <TrendsSection r={r} />
+        <TicketSection r={r} />
+        <AnomaliesSection r={r} />
+        <BasketRulesSection r={r} />
         <LockedSections r={r} />
         <ConsultingCta />
       </div>

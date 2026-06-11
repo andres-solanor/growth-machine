@@ -158,6 +158,16 @@ para Pro/Premium — pendiente decisión de pricing; CTA "Hablar con nosotros" �
 Gating extraído a `src/lib/gating.ts` (puro, sin DB) y `npm run check:gating` verifica que
 ningún dato bloqueado se serialice en ningún tier (pasa: free solo ve timeline+products).
 
+✅ 2026-06-11: **Secciones Pro del reporte** (`sections-pro.tsx`, server components sin
+Plotly): canasta (parejas que se compran juntas + badge "fuerte" si lift ≥ 1.5),
+radiografía del carrito (distribución de productos por compra + ticket por segmento),
+tendencias (en alza/en caída entre meses), oportunidades de ticket (horas con ticket bajo
++ barras por hora), días atípicos (excepcionales/bajos vs promedio), reglas para combos
+("lleva A → ofrécele B" con % de aceptación y lift). Cada sección devuelve null si el
+gating quitó su módulo → subir el plan en /admin las desbloquea de inmediato. Con esto el
+contenido Pro está completo; Premium aún muestra teasers de rentabilidad/combos (Fase 2:
+editor de product map + márgenes).
+
 ✅ 2026-06-11: **Auth + onboarding wizard live.** Registration (`/registro`: user + tenant
 free + membership + audit in one tx), login (`/ingresar`), stateless JWT sessions (30 d,
 `AUTH_SECRET` env), protected `/panel`. Upload wizard `/analisis/nuevo` (3 pasos: negocio →
@@ -179,8 +189,8 @@ Remaining: app scaffold extras + MySQL **day 1** checks (verify
 (business info → upload → column mapping with auto-detect → first analysis; categories/margins
 deliberately post-first-report); job pipeline (`repository_dispatch`, HMAC-SHA256 worker API,
 check-on-read timeouts, ≤3 retries); progress page polling 3 s; ~~report page free sections +
-locked teasers + consulting CTA~~ (✅ hecho); `BasketSection`/`CartSection` (so tier toggle
-visibly unlocks — Phase 2 port); ~~`/admin` (tenants, tier dropdown, job monitor, leads)~~
+locked teasers + consulting CTA~~ (✅ hecho); ~~`BasketSection`/`CartSection` (so tier toggle
+visibly unlocks)~~ (✅ hecho, + trends/ticket/anomalies/rules); ~~`/admin` (tenants, tier dropdown, job monitor, leads)~~
 (✅ hecho); ~~landing ES with pricing~~ (✅ hecho, sin precios publicados); verificación de
 email (necesita dominio + SMTP); decidir precios de Pro/Premium.
 
