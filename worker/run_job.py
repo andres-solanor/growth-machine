@@ -14,6 +14,9 @@ Formato del spec (ver docs/SAAS-PLAN.md):
   "job_id": "uuid",
   "type": "report" | "delta",
   "input_files": ["ruta/export1.xls", "ruta/export2.csv"],   # exports POS crudos
+  "column_mapping": {"date": "FECHA", "product": "Descripción", ...} | ausente,
+      # clave canónica del wizard web -> encabezado real del archivo del tenant;
+      # si está presente se renombra a columnas POS antes de normalizar
   "tenant_config": { ... campos de ReportConfig / alias "columns" ... },
   "product_map": [ {sistema, precio_post, fecha_desde, nombre,
                     categoria, subcategoria, margen_pct}, ... ] | null,
@@ -51,6 +54,18 @@ import delta_builder as deltab  # noqa: E402
 
 FALLBACK_CATEGORY = "Otros"
 
+# Mapa clave canónica (wizard web) -> nombre de columna que espera el motor.
+# Espejo de src/lib/csv-detect.ts (CANONICAL_FIELDS).
+CANONICAL_TO_POS = {
+    "date": "Fecha",
+    "time": "Hora",
+    "order_id": "Código venta",
+    "product": "Producto",
+    "quantity": "Cantidad",
+    "unit_price": "Individual",
+    "total": "Total",
+}
+
 
 def _load_spec(spec_path: Path) -> dict:
     with open(spec_path, "r", encoding="utf-8") as f:
@@ -65,7 +80,38 @@ def _load_spec(spec_path: Path) -> dict:
     return spec
 
 
-def _read_input_frames(paths: list[str], base_dir: Path) -> list[pd.DataFrame]:
+def _apply_column_mapping(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
+    """Renombra las columnas del tenant a los nombres POS canónicos del motor
+    y sintetiza las opcionales ausentes (Hora, Individual)."""
+    rename = {
+        src: CANONICAL_TO_POS[key]
+        for key, src in mapping.items()
+        if key in CANONICAL_TO_POS and src in df.columns
+    }
+    df = df.rename(columns=rename)
+
+    # Hora e Individual son opcionales (se sintetizan); el resto es obligatorio.
+    synthesizable = {"Hora", "Individual"}
+    missing = [c for c in npd.POS_COLS if c not in df.columns and c not in synthesizable]
+    if missing:
+        raise ValueError(
+            f"faltan columnas tras aplicar el mapeo: {missing} "
+            f"(mapeo recibido: {sorted(mapping)})"
+        )
+
+    if "Hora" not in df.columns:
+        df["Hora"] = "00:00"
+    if "Individual" not in df.columns:
+        total = pd.to_numeric(df["Total"], errors="coerce")
+        qty = pd.to_numeric(df["Cantidad"], errors="coerce")
+        df["Individual"] = (total / qty.replace(0, pd.NA)).fillna(total)
+
+    return df[npd.POS_COLS]
+
+
+def _read_input_frames(
+    paths: list[str], base_dir: Path, column_mapping: dict | None = None
+) -> list[pd.DataFrame]:
     frames = []
     for raw in paths:
         p = Path(raw)
@@ -73,9 +119,15 @@ def _read_input_frames(paths: list[str], base_dir: Path) -> list[pd.DataFrame]:
             p = (base_dir / p).resolve()
         if not p.exists():
             raise FileNotFoundError(f"input no encontrado: {p}")
-        df = npd._read_file(p)
-        if df is None:
-            raise ValueError(f"input ilegible o sin columnas POS requeridas: {p.name}")
+        if column_mapping:
+            df = npd.read_raw_file(p)
+            if df is None:
+                raise ValueError(f"input ilegible: {p.name}")
+            df = _apply_column_mapping(df, column_mapping)
+        else:
+            df = npd._read_file(p)
+            if df is None:
+                raise ValueError(f"input ilegible o sin columnas POS requeridas: {p.name}")
         frames.append(df)
     return frames
 
@@ -136,7 +188,9 @@ def run_job(spec_path: Path, out_dir: Path | None = None) -> dict:
     out_dir = out_dir or spec_path.parent
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    frames = _read_input_frames(spec["input_files"], spec_path.parent)
+    frames = _read_input_frames(
+        spec["input_files"], spec_path.parent, spec.get("column_mapping")
+    )
     normalized = _normalize(frames, spec.get("product_map"))
 
     with tempfile.TemporaryDirectory() as tmp:

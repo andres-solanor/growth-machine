@@ -41,5 +41,21 @@ export async function GET(
   if (rows.length === 0) {
     return NextResponse.json({ error: "Job no encontrado" }, { status: 404 });
   }
-  return NextResponse.json(rows[0]);
+
+  // Timeout check-on-read (sin cron en Hostinger): un job despachado que no
+  // terminó en 12 min se marca timed_out al consultarlo.
+  const job = rows[0];
+  const TIMEOUT_MS = 12 * 60 * 1000;
+  if (
+    (job.status === "dispatched" || job.status === "running") &&
+    Date.now() - new Date(job.createdAt).getTime() > TIMEOUT_MS
+  ) {
+    await getDb()
+      .update(schema.analysisJobs)
+      .set({ status: "timed_out", finishedAt: new Date() })
+      .where(eq(schema.analysisJobs.id, job.id));
+    return NextResponse.json({ ...job, status: "timed_out" });
+  }
+
+  return NextResponse.json(job);
 }

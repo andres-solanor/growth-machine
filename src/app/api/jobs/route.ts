@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/user";
 import { CANONICAL_FIELDS } from "@/lib/csv-detect";
+import { dispatchAnalysisJob } from "@/lib/github-dispatch";
 
 export const dynamic = "force-dynamic";
 
@@ -136,6 +137,18 @@ export async function POST(req: Request) {
     });
     return job.id;
   });
+
+  // Despachar al worker (GitHub Actions). Si aún no hay credenciales
+  // configuradas, el job queda "queued" y la página de progreso lo explica.
+  const dispatched = await dispatchAnalysisJob(jobId);
+  if (dispatched.ok) {
+    await db
+      .update(schema.analysisJobs)
+      .set({ status: "dispatched", dispatchedAt: new Date() })
+      .where(eq(schema.analysisJobs.id, jobId));
+  } else {
+    console.warn(`[jobs] dispatch job ${jobId}: ${dispatched.error}`);
+  }
 
   return NextResponse.json({ jobId });
 }

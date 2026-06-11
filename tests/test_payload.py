@@ -118,3 +118,45 @@ def test_worker_fallback_without_product_map():
     assert len(out) > 0
     assert (out["Categoria Real"] == "Otros").all()
     assert (out["Nombre Corregido"] == out["Producto"]).all()
+
+
+def test_worker_column_mapping_variant_headers():
+    """Tenant con encabezados distintos a los del POS conocido: el mapeo del
+    wizard web renombra, sintetiza Hora/Individual y el motor corre igual."""
+    sys.path.insert(0, str(REPO / "worker"))
+    import run_job
+
+    raw = pd.read_csv(
+        REPO / "reports" / "input_data" / "sales_carts_sample.csv", dtype=str
+    )[["Fecha", "Código venta", "Producto", "Cantidad", "Total"]]
+    raw.columns = ["FECHA", "No. Factura", "Descripción", "Cant.", "Valor Total"]
+
+    mapped = run_job._apply_column_mapping(
+        raw,
+        {
+            "date": "FECHA",
+            "order_id": "No. Factura",
+            "product": "Descripción",
+            "quantity": "Cant.",
+            "total": "Valor Total",
+        },
+    )
+    assert list(mapped.columns) == [
+        "Fecha", "Hora", "Código venta", "Producto", "Cantidad", "Individual", "Total",
+    ]
+    assert (mapped["Hora"] == "00:00").all()  # sintetizada
+    # Individual sintetizado = Total / Cantidad
+    ind = pd.to_numeric(mapped["Individual"], errors="coerce")
+    assert ind.notna().mean() > 0.9
+
+    out = run_job._normalize([mapped], None)
+    assert len(out) > 0
+
+
+def test_worker_column_mapping_missing_required():
+    sys.path.insert(0, str(REPO / "worker"))
+    import run_job
+
+    raw = pd.DataFrame({"X": ["1"], "Y": ["2"]})
+    with pytest.raises(ValueError, match="faltan columnas"):
+        run_job._apply_column_mapping(raw, {"date": "X"})

@@ -110,26 +110,33 @@ def _read_spreadsheetml(path: Path) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=headers)
 
 
-def _read_file(path: Path) -> pd.DataFrame | None:
-    """Read a POS export file (SpreadsheetML .xls, .xlsx, or .csv)."""
+def read_raw_file(path: Path) -> pd.DataFrame | None:
+    """Lee un export POS (.csv, .xls SpreadsheetML/binario, .xlsx) SIN validar
+    columnas: el worker SaaS renombra columnas de tenants con otros encabezados
+    antes de validar. _read_file() conserva la validación de siempre."""
     suffix = path.suffix.lower()
     try:
         if suffix == ".csv":
-            df = pd.read_csv(path, dtype=str)
-        elif suffix in (".xls", ".xlsx"):
+            return pd.read_csv(path, dtype=str)
+        if suffix in (".xls", ".xlsx"):
             # Check if it's SpreadsheetML XML (common POS export trick)
             with open(path, "rb") as f:
                 magic = f.read(6)
             if magic.startswith(b"<?xml"):
-                df = _read_spreadsheetml(path)
-            else:
-                engine = "openpyxl" if suffix == ".xlsx" else "xlrd"
-                df = pd.read_excel(path, dtype=str, engine=engine)
-        else:
-            warnings.warn(f"Unsupported file type: {path.name} — skipped")
-            return None
+                return _read_spreadsheetml(path)
+            engine = "openpyxl" if suffix == ".xlsx" else "xlrd"
+            return pd.read_excel(path, dtype=str, engine=engine)
+        warnings.warn(f"Unsupported file type: {path.name} — skipped")
+        return None
     except Exception as exc:
         warnings.warn(f"Could not read {path.name}: {exc} — skipped")
+        return None
+
+
+def _read_file(path: Path) -> pd.DataFrame | None:
+    """Read a POS export file (SpreadsheetML .xls, .xlsx, or .csv)."""
+    df = read_raw_file(path)
+    if df is None:
         return None
 
     # Drop enrichment columns if present (legacy consolidated CSV)

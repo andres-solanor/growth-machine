@@ -1,0 +1,37 @@
+# Worker de análisis: la app (Hostinger) lanza un repository_dispatch por job;
+# este workflow corre el motor Python y devuelve el payload por la API HMAC.
+# Secrets requeridos (Settings → Secrets → Actions):
+#   APP_BASE_URL          p. ej. https://white-kangaroo-102434.hostingersite.com
+#   WORKER_SHARED_SECRET  mismo valor que la env var en Hostinger
+name: analysis-job
+
+on:
+  repository_dispatch:
+    types: [analysis-job]
+
+concurrency:
+  group: analysis-job-${{ github.event.client_payload.job_id }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Ejecutar análisis
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          WORKER_SHARED_SECRET: ${{ secrets.WORKER_SHARED_SECRET }}
+          JOB_ID: ${{ github.event.client_payload.job_id }}
+          OPENBLAS_NUM_THREADS: "1"
+        run: python worker/gha_runner.py
