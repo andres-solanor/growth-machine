@@ -20,12 +20,33 @@ export async function GET() {
     checks.maxAllowedPacketMB =
       Math.round((packet.maxAllowedPacket / 1024 / 1024) * 10) / 10;
 
-    const [tables] = (await pool.query(
-      "SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = DATABASE()",
-    )) as unknown as [[{ n: number }]];
-    checks.tables = tables[0].n;
+    const countTables = async () => {
+      const [rows] = (await pool.query(
+        "SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = DATABASE()",
+      )) as unknown as [[{ n: number }]];
+      return rows[0].n;
+    };
 
-    return NextResponse.json({ ok: true, ...checks });
+    checks.tables = await countTables();
+
+    // Autocuración: si el esquema no existe (el migrador de arranque pudo
+    // fallar sin dejar rastro visible), aplicar migraciones aquí y reportar
+    // el error en la respuesta para diagnosticar sin acceso a logs.
+    if ((checks.tables as number) < 10) {
+      try {
+        const { migrate } = await import("drizzle-orm/mysql2/migrator");
+        const { getDb } = await import("@/lib/db");
+        await migrate(getDb(), { migrationsFolder: "./drizzle" });
+        checks.migrate = "applied";
+        checks.tables = await countTables();
+      } catch (err) {
+        checks.migrate = "error";
+        checks.migrateError =
+          err instanceof Error ? err.message : String(err);
+      }
+    }
+
+    return NextResponse.json({ ok: checks.migrate !== "error", ...checks });
   } catch (err) {
     checks.db = "error";
     checks.dbError = err instanceof Error ? err.message : String(err);
