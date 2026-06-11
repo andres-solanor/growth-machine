@@ -74,7 +74,15 @@ Then run `.\run_reports.ps1` as always.
 2. If `git status` shows files you don't recognize as yours, ask before deleting anything.
 3. You can't really destroy committed work — git keeps history. The worst case is confusion, not loss. When in doubt, stop and ask.
 
-## 6. FAQ
+## 6. The "default branch" on GitHub (changed 2026-06-11)
+
+GitHub marks one branch as the **default**: it's simply the branch shown first when you open the repo page, and the one external tools look at when you don't tell them otherwise. It used to be `main`; we switched it to **`saas`**.
+
+**Why:** Hostinger's "import from GitHub" feature inspects the *default* branch to recognize the app — and `main` has no app on it, so Hostinger rejected the repo ("el marco no es compatible"). With `saas` as default, Hostinger finds the Next.js app.
+
+**What it does NOT change:** nothing about your files or workflow. `main` still exists, still holds the bakery setup, and `git checkout main` before your weekly report works exactly as before. "Default" is just GitHub's pointer for visitors and integrations.
+
+## 7. FAQ
 
 **"If I switch to `saas`, did I lose my `main` files?"**
 No. Switching swaps what you see; both versions are stored. Switch back anytime with `git checkout main`.
