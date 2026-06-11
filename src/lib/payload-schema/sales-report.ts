@@ -239,8 +239,9 @@ export const profitabilitySchema = z.looseObject({
   products_by_profitability: z.array(profitabilityRowSchema),
   profit_pareto: z.array(profitabilityRowSchema),
   n_profit_pareto: num,
-  product_classification: z.record(z.string(), z.unknown()),
-  classification_thresholds: z.record(z.string(), z.unknown()),
+  product_classification: z.record(z.string(), z.unknown()).optional(),
+  // Ausente cuando el tenant aún no tiene márgenes (sin product_map).
+  classification_thresholds: z.record(z.string(), z.unknown()).optional(),
   margin_by_category: z.array(numN),
   margin_weighted_pairs: z.array(
     z.looseObject({
