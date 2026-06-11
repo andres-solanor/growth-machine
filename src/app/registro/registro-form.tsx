@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useActionState } from "react";
 import Link from "next/link";
 import { registrar, type RegistroState } from "./actions";
-import { buttonClass, inputClass, labelClass } from "../_components/auth-card";
+import { buttonClass, inputClass, labelClass } from "@/components/auth-card";
 
 export function RegistroForm() {
   const [state, action, pending] = useActionState<RegistroState, FormData>(
@@ -16,23 +16,23 @@ export function RegistroForm() {
         <label htmlFor="name" className={labelClass}>
           Tu nombre
         </label>
-        <input id="name" name="name" required className={inputClass} placeholder="Andrés Solano" />
+        <input id="name" name="name" required className={inputClass} placeholder="AndrÃ©s Solano" />
       </div>
       <div>
         <label htmlFor="businessName" className={labelClass}>
           Nombre de tu negocio
         </label>
-        <input id="businessName" name="businessName" required className={inputClass} placeholder="Panadería La Espiga" />
+        <input id="businessName" name="businessName" required className={inputClass} placeholder="PanaderÃ­a La Espiga" />
       </div>
       <div>
         <label htmlFor="email" className={labelClass}>
-          Correo electrónico
+          Correo electrÃ³nico
         </label>
         <input id="email" name="email" type="email" required className={inputClass} placeholder="tu@correo.com" />
       </div>
       <div>
         <label htmlFor="password" className={labelClass}>
-          Contraseña
+          ContraseÃ±a
         </label>
         <input
           id="password"
@@ -41,7 +41,7 @@ export function RegistroForm() {
           required
           minLength={8}
           className={inputClass}
-          placeholder="Mínimo 8 caracteres"
+          placeholder="MÃ­nimo 8 caracteres"
         />
       </div>
       {state.error && (
@@ -50,10 +50,10 @@ export function RegistroForm() {
         </p>
       )}
       <button type="submit" disabled={pending} className={buttonClass}>
-        {pending ? "Creando cuenta…" : "Crear cuenta gratis"}
+        {pending ? "Creando cuentaâ€¦" : "Crear cuenta gratis"}
       </button>
       <p className="text-center text-sm text-zinc-400">
-        ¿Ya tienes cuenta?{" "}
+        Â¿Ya tienes cuenta?{" "}
         <Link href="/ingresar" className="text-emerald-400 hover:underline">
           Ingresar
         </Link>

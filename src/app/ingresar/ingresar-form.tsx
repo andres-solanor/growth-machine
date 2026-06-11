@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useActionState } from "react";
 import Link from "next/link";
 import { ingresar, type LoginState } from "./actions";
-import { buttonClass, inputClass, labelClass } from "../_components/auth-card";
+import { buttonClass, inputClass, labelClass } from "@/components/auth-card";
 
 export function IngresarForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(
@@ -14,13 +14,13 @@ export function IngresarForm() {
     <form action={action} className="mt-6 space-y-4">
       <div>
         <label htmlFor="email" className={labelClass}>
-          Correo electrónico
+          Correo electrÃ³nico
         </label>
         <input id="email" name="email" type="email" required className={inputClass} placeholder="tu@correo.com" />
       </div>
       <div>
         <label htmlFor="password" className={labelClass}>
-          Contraseña
+          ContraseÃ±a
         </label>
         <input id="password" name="password" type="password" required className={inputClass} />
       </div>
@@ -30,10 +30,10 @@ export function IngresarForm() {
         </p>
       )}
       <button type="submit" disabled={pending} className={buttonClass}>
-        {pending ? "Ingresando…" : "Ingresar"}
+        {pending ? "Ingresandoâ€¦" : "Ingresar"}
       </button>
       <p className="text-center text-sm text-zinc-400">
-        ¿No tienes cuenta?{" "}
+        Â¿No tienes cuenta?{" "}
         <Link href="/registro" className="text-emerald-400 hover:underline">
           Crear cuenta gratis
         </Link>
