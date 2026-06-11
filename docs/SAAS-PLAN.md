@@ -119,6 +119,12 @@ first be detached from the placeholder website in hPanel). Hostinger MySQL datab
 (`u727350056_growthdb`); password reset + `max_allowed_packet`/LONGBLOB verification still
 pending before first migration.
 
+✅ 2026-06-11: zod payload contract in `src/lib/payload-schema/` (validated against the real
+fixture payload, all 11 modules; check with `npm run check:payload`, regen sample with
+`tests/regen_payload_sample.py`). Drizzle schema for all 10 tables in `src/lib/db/schema.ts`
++ initial SQL migration in `drizzle/` (`npm run db:generate` / `db:migrate`; migrate needs
+`DATABASE_URL` env var — set in Hostinger panel only, never in the repo).
+
 Remaining: app scaffold extras + MySQL **day 1** checks (verify
 `max_allowed_packet`/LONGBLOB early); Drizzle schema (`users`, `tenants(tier)`, `memberships`,
 `tenant_configs`, `product_map_entries`, `datasets`, `analysis_jobs`, `report_payloads`,

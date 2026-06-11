@@ -1,0 +1,1800 @@
+{
+ "meta": {
+  "schema_version": 1,
+  "report_type": "sales_report",
+  "generated_at": "2026-06-11T07:11:22.104984+00:00",
+  "store_name": "La Panettería · Suramérica",
+  "currency": "COP",
+  "config": {
+   "col_date": "Fecha",
+   "col_time": "Hora",
+   "col_order_id": "Código venta",
+   "col_product_raw": "Producto",
+   "col_quantity": "Cantidad",
+   "col_unit_price": "Individual",
+   "col_total": "Total",
+   "col_product": "Nombre Corregido",
+   "col_category": "Categoria Real",
+   "col_subcategory": "Sub Categoria Real",
+   "col_margin_pct": "margin_pct",
+   "col_month": "Month",
+   "col_weekday": "Week Day",
+   "col_hour": "Hour",
+   "category_normalization": {
+    "Panadería": "Panadería",
+    "Panaderia": "Panadería",
+    "PAN": "Panadería",
+    "PAN TL": "Panadería",
+    "Reposteria": "Repostería",
+    "Bebidas": "Bebidas",
+    "Brunch": "Brunch",
+    "Piñateria": "Piñatería",
+    "TRUFAS X 5 UNIDADES": "Repostería",
+    "-": "Otros"
+   },
+   "day_order": [
+    "Lun",
+    "Mar",
+    "Mié",
+    "Jue",
+    "Vie"
+   ],
+   "month_order": [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May"
+   ],
+   "pareto_threshold": 80.0,
+   "margin_pareto_threshold": 80.0,
+   "min_basket_size": 2,
+   "top_n_products": 20,
+   "top_n_pairs": 15,
+   "top_n_single_ticket_products": 15,
+   "min_single_ticket_orders": 10,
+   "rolling_window": 7,
+   "trend_min_months": 2,
+   "trend_min_base_revenue": 200000,
+   "trend_min_base_orders": 10,
+   "anomaly_std_threshold": 2.0,
+   "ticket_bins": [
+    0,
+    5000,
+    10000,
+    15000,
+    20000
+   ],
+   "ticket_labels": [
+    "<5K",
+    "5-10K",
+    "10-15K",
+    "15-20K",
+    "20-30K"
+   ],
+   "store_name": "La Panettería · Suramérica",
+   "brand": "Analytikz",
+   "currency": "COP",
+   "cat_colors": {
+    "Bebidas": "#3b82f6",
+    "Panadería": "#f59e0b",
+    "Repostería": "#ef4444",
+    "Brunch": "#10b981",
+    "Piñatería": "#8b5cf6",
+    "Otros": "#6b7280"
+   }
+  }
+ },
+ "summary": {
+  "total_revenue": 185122000,
+  "total_orders": 7964,
+  "total_units": 18361,
+  "avg_ticket": 23244,
+  "avg_items_per_order": 1.8,
+  "unique_products": 81,
+  "multi_item_pct": 47.7,
+  "multi_item_orders": 3800,
+  "date_min": "02 Jan",
+  "date_max": "20 Apr 2026",
+  "date_range": "02 Jan – 20 Apr 2026",
+  "date_min_iso": "2026-01-02",
+  "date_max_iso": "2026-04-20"
+ },
+ "quality": {
+  "initial_rows": 14462,
+  "valid_rows": 14455,
+  "dropped_pct": 0.05,
+  "invalid_dates": 0,
+  "invalid_numeric": {
+   "Cantidad": 0,
+   "Individual": 0,
+   "Total": 0,
+   "Hour": 0,
+   "margin_pct": 0
+  },
+  "missing_days": 12,
+  "incomplete_weeks": 3,
+  "partial_months": [
+   {
+    "month": "2026-01",
+    "observed_days": 30,
+    "month_days": 31
+   },
+   {
+    "month": "2026-04",
+    "observed_days": 8,
+    "month_days": 30
+   }
+  ],
+  "coverage_note": "Cobertura del 97/109 días entre 2026-01-02 y 2026-04-20.",
+  "risk_level": "high"
+ },
+ "analyses": {
+  "interactive_base": {
+   "rows": [
+    {
+     "date_str": "2026-01-02",
+     "year_week": "2026-W01",
+     "year_month": "2026-01",
+     "day": "Vie",
+     "hour": 13,
+     "order_id": "0VZGOYWG",
+     "product": "Capuchino sin Licor",
+     "category": "Bebidas",
+     "quantity": 1,
+     "unit_price": 9000,
+     "total": 9000,
+     "margin_pct": 30.043194
+    },
+    {
+     "date_str": "2026-01-02",
+     "year_week": "2026-W01",
+     "year_month": "2026-01",
+     "day": "Vie",
+     "hour": 13,
+     "order_id": "RYA3CBEC",
+     "product": "Café con Leche",
+     "category": "Bebidas",
+     "quantity": 1,
+     "unit_price": 6000,
+     "total": 6000,
+     "margin_pct": 14.227219
+    },
+    {
+     "date_str": "2026-01-02",
+     "year_week": "2026-W01",
+     "year_month": "2026-01",
+     "day": "Vie",
+     "hour": 13,
+     "order_id": "RYA3CBEC",
+     "product": "Almojábana",
+     "category": "Panadería",
+     "quantity": 2,
+     "unit_price": 5000,
+     "total": 10000,
+     "margin_pct": 13.765549
+    },
+    {
+     "date_str": "2026-01-02",
+     "year_week": "2026-W01",
+     "year_month": "2026-01",
+     "day": "Vie",
+     "hour": 14,
+     "order_id": "QBMKSLPN",
+     "product": "Tinto",
+     "category": "Bebidas",
+     "quantity": 1,
+     "unit_price": 4000,
+     "total": 4000,
+     "margin_pct": 25.682928
+    },
+    {
+     "date_str": "2026-01-02",
+     "year_week": "2026-W01",
+     "year_month": "2026-01",
+     "day": "Vie",
+     "hour": 15,
+     "order_id": "7ZVP1LBD",
+     "product": "Pandequeso",
+     "category": "Panadería",
+     "quantity": 1,
+     "unit_price": 5000,
+     "total": 5000,
+     "margin_pct": 15.053027
+    }
+   ]
+  },
+  "timeline": {
+   "daily": [
+    {
+     "date_str": "2026-01-02",
+     "revenue": 1695000,
+     "orders": 71,
+     "rolling_rev": 1695000.0,
+     "rolling_orders": 71.0
+    },
+    {
+     "date_str": "2026-01-03",
+     "revenue": 2345500,
+     "orders": 84,
+     "rolling_rev": 2020250.0,
+     "rolling_orders": 77.5
+    },
+    {
+     "date_str": "2026-01-04",
+     "revenue": 3090000,
+     "orders": 126,
+     "rolling_rev": 2376833.3333333335,
+     "rolling_orders": 93.66666666666667
+    },
+    {
+     "date_str": "2026-01-05",
+     "revenue": 1232500,
+     "orders": 57,
+     "rolling_rev": 2090750.0,
+     "rolling_orders": 84.5
+    },
+    {
+     "date_str": "2026-01-06",
+     "revenue": 1527500,
+     "orders": 77,
+     "rolling_rev": 1978100.0,
+     "rolling_orders": 83.0
+    }
+   ],
+   "weekly": [
+    {
+     "year_week": "2026-W01",
+     "revenue": 7130500,
+     "orders": 281
+    },
+    {
+     "year_week": "2026-W02",
+     "revenue": 13100000,
+     "orders": 539
+    },
+    {
+     "year_week": "2026-W03",
+     "revenue": 15147000,
+     "orders": 620
+    },
+    {
+     "year_week": "2026-W04",
+     "revenue": 14456000,
+     "orders": 608
+    },
+    {
+     "year_week": "2026-W05",
+     "revenue": 13039500,
+     "orders": 597
+    }
+   ],
+   "dow": [
+    {
+     "day": "Lun",
+     "revenue": 20952500,
+     "orders": 967
+    },
+    {
+     "day": "Mar",
+     "revenue": 19560000,
+     "orders": 948
+    },
+    {
+     "day": "Mié",
+     "revenue": 19851500,
+     "orders": 961
+    },
+    {
+     "day": "Jue",
+     "revenue": 19382500,
+     "orders": 907
+    },
+    {
+     "day": "Vie",
+     "revenue": 24619000,
+     "orders": 1065
+    }
+   ],
+   "heatmap_days": [
+    "Lun",
+    "Mar",
+    "Mié",
+    "Jue",
+    "Vie"
+   ],
+   "heatmap_hours": [
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "heatmap_z": [
+    [
+     1.0,
+     3.0,
+     4.0,
+     2.0,
+     3.0
+    ],
+    [
+     47.0,
+     55.0,
+     57.0,
+     49.0,
+     58.0
+    ],
+    [
+     71.0,
+     71.0,
+     67.0,
+     69.0,
+     80.0
+    ],
+    [
+     78.0,
+     63.0,
+     69.0,
+     62.0,
+     71.0
+    ],
+    [
+     71.0,
+     58.0,
+     65.0,
+     64.0,
+     71.0
+    ]
+   ],
+   "hourly": [
+    {
+     "hour": 7,
+     "revenue": 446500,
+     "orders": 20
+    },
+    {
+     "hour": 8,
+     "revenue": 8719500,
+     "orders": 421
+    },
+    {
+     "hour": 9,
+     "revenue": 15670500,
+     "orders": 718
+    },
+    {
+     "hour": 10,
+     "revenue": 13797000,
+     "orders": 601
+    },
+    {
+     "hour": 11,
+     "revenue": 14873500,
+     "orders": 617
+    }
+   ],
+   "monthly_cat": [
+    {
+     "month": "2026-01",
+     "category": "Bebidas",
+     "revenue": 13991500
+    },
+    {
+     "month": "2026-01",
+     "category": "Brunch",
+     "revenue": 2781000
+    },
+    {
+     "month": "2026-01",
+     "category": "Otros",
+     "revenue": 399000
+    },
+    {
+     "month": "2026-01",
+     "category": "Panadería",
+     "revenue": 23268500
+    },
+    {
+     "month": "2026-01",
+     "category": "Piñatería",
+     "revenue": 140000
+    }
+   ],
+   "best_hour": 17,
+   "best_day": "Dom",
+   "best_combo": "Dom 9:00"
+  },
+  "products": {
+   "all_products": [
+    {
+     "Nombre Corregido": "Torta Fría 6 Porciones",
+     "units": 251,
+     "revenue": 11290000,
+     "orders": 249,
+     "avg_price": 44979.91967871486,
+     "category": "Repostería",
+     "cum_rev_pct": 6.1,
+     "rev_share": 6.1
+    },
+    {
+     "Nombre Corregido": "Pan de Masa Madre- 3 Quesos- Chocolate",
+     "units": 506,
+     "revenue": 10120000,
+     "orders": 476,
+     "avg_price": 20000.0,
+     "category": "Panadería",
+     "cum_rev_pct": 11.6,
+     "rev_share": 5.47
+    },
+    {
+     "Nombre Corregido": "Capuchino sin Licor",
+     "units": 1019,
+     "revenue": 9673500,
+     "orders": 763,
+     "avg_price": 9493.506493506493,
+     "category": "Bebidas",
+     "cum_rev_pct": 16.8,
+     "rev_share": 5.23
+    },
+    {
+     "Nombre Corregido": "Torta Fría 12 Porciones",
+     "units": 138,
+     "revenue": 9655000,
+     "orders": 136,
+     "avg_price": 69963.23529411765,
+     "category": "Repostería",
+     "cum_rev_pct": 22.0,
+     "rev_share": 5.22
+    },
+    {
+     "Nombre Corregido": "Tinto",
+     "units": 1744,
+     "revenue": 7841000,
+     "orders": 1172,
+     "avg_price": 4495.045417010735,
+     "category": "Bebidas",
+     "cum_rev_pct": 26.2,
+     "rev_share": 4.24
+    }
+   ],
+   "top_n": [
+    {
+     "Nombre Corregido": "Torta Fría 6 Porciones",
+     "units": 251,
+     "revenue": 11290000,
+     "orders": 249,
+     "avg_price": 44979.91967871486,
+     "category": "Repostería",
+     "cum_rev_pct": 6.1,
+     "rev_share": 6.1
+    },
+    {
+     "Nombre Corregido": "Pan de Masa Madre- 3 Quesos- Chocolate",
+     "units": 506,
+     "revenue": 10120000,
+     "orders": 476,
+     "avg_price": 20000.0,
+     "category": "Panadería",
+     "cum_rev_pct": 11.6,
+     "rev_share": 5.47
+    },
+    {
+     "Nombre Corregido": "Capuchino sin Licor",
+     "units": 1019,
+     "revenue": 9673500,
+     "orders": 763,
+     "avg_price": 9493.506493506493,
+     "category": "Bebidas",
+     "cum_rev_pct": 16.8,
+     "rev_share": 5.23
+    },
+    {
+     "Nombre Corregido": "Torta Fría 12 Porciones",
+     "units": 138,
+     "revenue": 9655000,
+     "orders": 136,
+     "avg_price": 69963.23529411765,
+     "category": "Repostería",
+     "cum_rev_pct": 22.0,
+     "rev_share": 5.22
+    },
+    {
+     "Nombre Corregido": "Tinto",
+     "units": 1744,
+     "revenue": 7841000,
+     "orders": 1172,
+     "avg_price": 4495.045417010735,
+     "category": "Bebidas",
+     "cum_rev_pct": 26.2,
+     "rev_share": 4.24
+    }
+   ],
+   "n_pareto": 27,
+   "total_products": 81,
+   "cat_totals": [
+    72810000,
+    60173500,
+    43402500,
+    7891000,
+    475000
+   ]
+  },
+  "basket": {
+   "pairs": [
+    {
+     "product_a": "Almojábana",
+     "product_b": "Pandequeso",
+     "count": 161,
+     "support": 0.0424,
+     "lift": 2.05
+    },
+    {
+     "product_a": "Café con Leche",
+     "product_b": "Tinto",
+     "count": 118,
+     "support": 0.0311,
+     "lift": 1.06
+    },
+    {
+     "product_a": "Café con Leche",
+     "product_b": "Pandequeso",
+     "count": 116,
+     "support": 0.0305,
+     "lift": 1.34
+    },
+    {
+     "product_a": "Almojábana",
+     "product_b": "Café con Leche",
+     "count": 112,
+     "support": 0.0295,
+     "lift": 1.34
+    },
+    {
+     "product_a": "Capuchino sin Licor",
+     "product_b": "Pandequeso",
+     "count": 106,
+     "support": 0.0279,
+     "lift": 1.14
+    }
+   ],
+   "cat_pairs": [
+    {
+     "cat_a": "Bebidas",
+     "cat_b": "Panadería",
+     "count": 1524
+    },
+    {
+     "cat_a": "Bebidas",
+     "cat_b": "Repostería",
+     "count": 840
+    },
+    {
+     "cat_a": "Panadería",
+     "cat_b": "Repostería",
+     "count": 685
+    },
+    {
+     "cat_a": "Bebidas",
+     "cat_b": "Brunch",
+     "count": 111
+    },
+    {
+     "cat_a": "Brunch",
+     "cat_b": "Panadería",
+     "count": 61
+    }
+   ],
+   "total_baskets": 3800,
+   "high_lift_pairs": [
+    {
+     "product_a": "Almojábana",
+     "product_b": "Pandequeso",
+     "count": 161,
+     "support": 0.0424,
+     "lift": 2.05
+    }
+   ]
+  },
+  "cart": {
+   "cart_dist": [
+    {
+     "products_in_cart": 1,
+     "count": 4234
+    },
+    {
+     "products_in_cart": 2,
+     "count": 2198
+    },
+    {
+     "products_in_cart": 3,
+     "count": 933
+    },
+    {
+     "products_in_cart": 4,
+     "count": 392
+    },
+    {
+     "products_in_cart": 5,
+     "count": 127
+    }
+   ],
+   "ticket_stats": {
+    "mean": 23244,
+    "median": 18000,
+    "p25": 10000,
+    "p75": 30000,
+    "max": 210000
+   },
+   "ticket_dist": [
+    {
+     "bucket": "<5K",
+     "count": 407
+    },
+    {
+     "bucket": "5-10K",
+     "count": 1734
+    },
+    {
+     "bucket": "10-15K",
+     "count": 1172
+    },
+    {
+     "bucket": "15-20K",
+     "count": 1528
+    },
+    {
+     "bucket": "20-30K",
+     "count": 1206
+    }
+   ],
+   "cart_weekly": [
+    {
+     "week": "2026-W01",
+     "avg_items": 1.9395017793594307
+    },
+    {
+     "week": "2026-W02",
+     "avg_items": 1.8552875695732838
+    },
+    {
+     "week": "2026-W03",
+     "avg_items": 1.867741935483871
+    },
+    {
+     "week": "2026-W04",
+     "avg_items": 1.8174342105263157
+    },
+    {
+     "week": "2026-W05",
+     "avg_items": 1.7336683417085428
+    }
+   ],
+   "segment_stats": [
+    {
+     "segment": "1 unidad",
+     "orders": 3379,
+     "share_pct": 42.4,
+     "avg_ticket": 15316.661734240899
+    },
+    {
+     "segment": "2+ unidades",
+     "orders": 4585,
+     "share_pct": 57.6,
+     "avg_ticket": 29087.677208287896
+    }
+   ],
+   "multi_bucket_stats": [
+    {
+     "bucket": "2 unidades",
+     "orders": 2119,
+     "avg_ticket": 20149.36290703162,
+     "share_multi_pct": 46.215921483097055
+    },
+    {
+     "bucket": "3 unidades",
+     "orders": 1024,
+     "avg_ticket": 27403.3203125,
+     "share_multi_pct": 22.33369683751363
+    },
+    {
+     "bucket": "4+ unidades",
+     "orders": 1442,
+     "avg_ticket": 43418.51595006935,
+     "share_multi_pct": 31.45038167938931
+    }
+   ],
+   "single_top_ticket": [
+    {
+     "product": "Tinto",
+     "orders": 287,
+     "avg_ticket": 4489.547038327526
+    },
+    {
+     "product": "Americano",
+     "orders": 234,
+     "avg_ticket": 5497.863247863248
+    },
+    {
+     "product": "Pan de Masa Madre- 3 Quesos- Chocolate",
+     "orders": 232,
+     "avg_ticket": 20000.0
+    },
+    {
+     "product": "Pan Mantequilla Y Pan Maiz",
+     "orders": 225,
+     "avg_ticket": 17000.0
+    },
+    {
+     "product": "Torta Fría 6 Porciones",
+     "orders": 168,
+     "avg_ticket": 44970.23809523809
+    }
+   ]
+  },
+  "trends": {
+   "growing": [
+    {
+     "product": "Avena",
+     "growth_pct": 110.0
+    },
+    {
+     "product": "Muffins X 4 Unidades",
+     "growth_pct": 62.0
+    },
+    {
+     "product": "Milhoja Individual",
+     "growth_pct": 52.6
+    },
+    {
+     "product": "Alfajores",
+     "growth_pct": 49.0
+    },
+    {
+     "product": "Ranchero- Arequipequeso",
+     "growth_pct": 46.8
+    }
+   ],
+   "declining": [
+    {
+     "product": "Desayuno Capricho",
+     "growth_pct": -70.4
+    },
+    {
+     "product": "Roscon Guayaba Y Roscon de Arequipe",
+     "growth_pct": -35.3
+    },
+    {
+     "product": "Aromatica Frutos Secos",
+     "growth_pct": -30.3
+    },
+    {
+     "product": "Desayuno Colmena",
+     "growth_pct": -26.0
+    },
+    {
+     "product": "Crema",
+     "growth_pct": -17.2
+    }
+   ],
+   "base_month": "2026-01",
+   "compare_month": "2026-03",
+   "eligible_count": 48
+  },
+  "anomalies": {
+   "high_days": [
+    {
+     "date": "08 Mar",
+     "revenue": 4496000,
+     "orders": 166,
+     "z_score": 3.4
+    },
+    {
+     "date": "01 Mar",
+     "revenue": 3828000,
+     "orders": 130,
+     "z_score": 2.5
+    },
+    {
+     "date": "08 Feb",
+     "revenue": 3649000,
+     "orders": 135,
+     "z_score": 2.3
+    },
+    {
+     "date": "01 Feb",
+     "revenue": 3618500,
+     "orders": 130,
+     "z_score": 2.2
+    },
+    {
+     "date": "25 Jan",
+     "revenue": 3550500,
+     "orders": 123,
+     "z_score": 2.1
+    }
+   ],
+   "low_days": [
+    {
+     "date": "20 Apr",
+     "revenue": 252500,
+     "orders": 13,
+     "z_score": -2.2
+    }
+   ],
+   "avg_daily_revenue": 1908474,
+   "std_daily_revenue": 765935
+  },
+  "ticket": {
+   "day_ticket": [
+    {
+     "day": "Lun",
+     "orders": 967,
+     "avg_ticket": 21293.191056910568
+    },
+    {
+     "day": "Mar",
+     "orders": 948,
+     "avg_ticket": 20417.536534446765
+    },
+    {
+     "day": "Mié",
+     "orders": 961,
+     "avg_ticket": 20256.632653061224
+    },
+    {
+     "day": "Jue",
+     "orders": 907,
+     "avg_ticket": 20954.054054054053
+    },
+    {
+     "day": "Vie",
+     "orders": 1065,
+     "avg_ticket": 22816.496756255794
+    }
+   ],
+   "hour_ticket": [
+    {
+     "hour": 7,
+     "orders": 20,
+     "avg_ticket": 22325.0
+    },
+    {
+     "hour": 8,
+     "orders": 421,
+     "avg_ticket": 20711.40142517815
+    },
+    {
+     "hour": 9,
+     "orders": 718,
+     "avg_ticket": 21825.208913649025
+    },
+    {
+     "hour": 10,
+     "orders": 601,
+     "avg_ticket": 22956.738768718802
+    },
+    {
+     "hour": 11,
+     "orders": 617,
+     "avg_ticket": 24106.158833063208
+    }
+   ],
+   "opportunity_hours": [
+    {
+     "hour": 17,
+     "orders": 1031,
+     "avg_ticket": 22848.205625606206,
+     "gap_pct": 0.2
+    },
+    {
+     "hour": 18,
+     "orders": 875,
+     "avg_ticket": 22573.14285714286,
+     "gap_pct": 1.4
+    },
+    {
+     "hour": 9,
+     "orders": 718,
+     "avg_ticket": 21825.208913649025,
+     "gap_pct": 4.6
+    },
+    {
+     "hour": 19,
+     "orders": 678,
+     "avg_ticket": 21537.610619469026,
+     "gap_pct": 5.9
+    }
+   ]
+  },
+  "basket_rules": {
+   "rules": [
+    {
+     "antecedent": "Torta Fría 12 Porciones",
+     "consequent": "Vela Volcan",
+     "count": 25,
+     "support": 0.0066,
+     "confidence": 0.463,
+     "lift": 30.33,
+     "conviction": 1.83,
+     "score": 45.752
+    },
+    {
+     "antecedent": "Croissant del Huerto",
+     "consequent": "Desayuno Colmena",
+     "count": 26,
+     "support": 0.0068,
+     "confidence": 0.565,
+     "lift": 21.7,
+     "conviction": 2.24,
+     "score": 40.415
+    },
+    {
+     "antecedent": "Desayuno Capricho",
+     "consequent": "Desayuno Colmena",
+     "count": 22,
+     "support": 0.0058,
+     "confidence": 0.579,
+     "lift": 22.22,
+     "conviction": 2.31,
+     "score": 40.34
+    },
+    {
+     "antecedent": "Vela Volcan",
+     "consequent": "Torta Fría 6 Porciones",
+     "count": 18,
+     "support": 0.0047,
+     "confidence": 0.31,
+     "lift": 14.74,
+     "conviction": 1.42,
+     "score": 13.471
+    },
+    {
+     "antecedent": "Desayuno Capricho",
+     "consequent": "Milo",
+     "count": 16,
+     "support": 0.0042,
+     "confidence": 0.421,
+     "lift": 4.97,
+     "conviction": 1.58,
+     "score": 5.928
+    }
+   ]
+  },
+  "profitability": {
+   "has_margin_data": true,
+   "margin_available": true,
+   "products_by_profitability": [
+    {
+     "Nombre Corregido": "Torta Fría 6 Porciones",
+     "units": 251,
+     "revenue": 11290000,
+     "orders": 249,
+     "avg_margin": 27.315906,
+     "category": "Repostería",
+     "profit": 3083965.7874000003,
+     "cum_profit_pct": 7.6,
+     "profit_share": 7.56
+    },
+    {
+     "Nombre Corregido": "Capuchino sin Licor",
+     "units": 1019,
+     "revenue": 9673500,
+     "orders": 763,
+     "avg_margin": 30.043194,
+     "category": "Bebidas",
+     "profit": 2906228.3715899996,
+     "cum_profit_pct": 14.7,
+     "profit_share": 7.12
+    },
+    {
+     "Nombre Corregido": "Pan de Masa Madre- 3 Quesos- Chocolate",
+     "units": 506,
+     "revenue": 10120000,
+     "orders": 476,
+     "avg_margin": 25.168105999999998,
+     "category": "Panadería",
+     "profit": 2547012.3271999997,
+     "cum_profit_pct": 20.9,
+     "profit_share": 6.24
+    },
+    {
+     "Nombre Corregido": "Pan Mantequilla Y Pan Maiz",
+     "units": 409,
+     "revenue": 6953000,
+     "orders": 389,
+     "avg_margin": 34.155534,
+     "category": "Panadería",
+     "profit": 2374834.2790200002,
+     "cum_profit_pct": 26.7,
+     "profit_share": 5.82
+    },
+    {
+     "Nombre Corregido": "Porción Postre Pequeño",
+     "units": 676,
+     "revenue": 6760000,
+     "orders": 510,
+     "avg_margin": 33.449287,
+     "category": "Repostería",
+     "profit": 2261171.8011999996,
+     "cum_profit_pct": 32.3,
+     "profit_share": 5.54
+    }
+   ],
+   "profit_pareto": [
+    {
+     "Nombre Corregido": "Torta Fría 6 Porciones",
+     "units": 251,
+     "revenue": 11290000,
+     "orders": 249,
+     "avg_margin": 27.315906,
+     "category": "Repostería",
+     "profit": 3083965.7874000003,
+     "cum_profit_pct": 7.6,
+     "profit_share": 7.56
+    },
+    {
+     "Nombre Corregido": "Capuchino sin Licor",
+     "units": 1019,
+     "revenue": 9673500,
+     "orders": 763,
+     "avg_margin": 30.043194,
+     "category": "Bebidas",
+     "profit": 2906228.3715899996,
+     "cum_profit_pct": 14.7,
+     "profit_share": 7.12
+    },
+    {
+     "Nombre Corregido": "Pan de Masa Madre- 3 Quesos- Chocolate",
+     "units": 506,
+     "revenue": 10120000,
+     "orders": 476,
+     "avg_margin": 25.168105999999998,
+     "category": "Panadería",
+     "profit": 2547012.3271999997,
+     "cum_profit_pct": 20.9,
+     "profit_share": 6.24
+    },
+    {
+     "Nombre Corregido": "Pan Mantequilla Y Pan Maiz",
+     "units": 409,
+     "revenue": 6953000,
+     "orders": 389,
+     "avg_margin": 34.155534,
+     "category": "Panadería",
+     "profit": 2374834.2790200002,
+     "cum_profit_pct": 26.7,
+     "profit_share": 5.82
+    },
+    {
+     "Nombre Corregido": "Porción Postre Pequeño",
+     "units": 676,
+     "revenue": 6760000,
+     "orders": 510,
+     "avg_margin": 33.449287,
+     "category": "Repostería",
+     "profit": 2261171.8011999996,
+     "cum_profit_pct": 32.3,
+     "profit_share": 5.54
+    }
+   ],
+   "n_profit_pareto": 27,
+   "product_classification": {
+    "Torta Fría 6 Porciones": "Champion",
+    "Capuchino sin Licor": "Champion",
+    "Pan de Masa Madre- 3 Quesos- Chocolate": "Champion",
+    "Pan Mantequilla Y Pan Maiz": "Champion",
+    "Porción Postre Pequeño": "Champion",
+    "Tinto": "Champion",
+    "Torta Fría 12 Porciones": "Tractor",
+    "Porción Torta Zanahoria / Chocolate / Bizcocho / Maria Luisa": "Tractor",
+    "Pandequeso": "Tractor",
+    "Desayuno Colmena": "Champion",
+    "Trenza": "Champion",
+    "Almojábana": "Tractor",
+    "Torta Zanahoria 4 Porciones": "Gem",
+    "Milo": "Champion",
+    "Arroz con Leche": "Champion",
+    "Café con Leche": "Tractor",
+    "Pastel Pollo Y Verduras-  Pollo Y Champinones- Carne": "Tractor",
+    "Pan Mozarella": "Tractor",
+    "Rollos Rojos": "Champion",
+    "Torta Zanahoria 10 Porciones": "Gem",
+    "Americano": "Tractor",
+    "Pastel Arequipe- Guayaba- Gloria- Hawaiano": "Tractor",
+    "Palitos Guayaba-Queso": "Tractor",
+    "Palito de Queso": "Tractor",
+    "Croisant Queso": "Champion",
+    "Frozen Baileys": "Champion",
+    "Croissant del Huerto": "Gem",
+    "Pan Leche- Concha": "Tractor",
+    "Ranchero- Arequipequeso": "Champion",
+    "Croisant Jamon-Queso": "Champion",
+    "Aromatica Frutos Secos": "Champion",
+    "Porcion Torta Café/Envinada": "Champion",
+    "Galleta Individual": "Champion",
+    "Torta Chocolate 10 Porciones": "Gem",
+    "Café Frío": "Tractor",
+    "Porción Postre Baileys": "Tractor",
+    "Crema": "Champion",
+    "Torta María Luisa 10 Porciones": "Gem",
+    "Alfajores": "Champion",
+    "Milhoja Individual": "Champion",
+    "Pan Seda": "Tractor",
+    "Te Chai": "Tractor",
+    "Torta María Luisa 4 Porciones": "Gem",
+    "Rollo de Canela": "Tractor",
+    "Roscon Guayaba Y Roscon de Arequipe": "Gem",
+    "Avena": "Niche",
+    "Paquete de Galletas X 5": "Tractor",
+    "Croisant Chocolate": "Tractor",
+    "Tostadas Mediterraneas": "Niche",
+    "Muffins X 4 Unidades": "Niche",
+    "Agua": "Champion",
+    "Milhoja Caja X 3": "Niche",
+    "Roscon Mixto": "Gem",
+    "Hatsu X 400": "Gem",
+    "Desayuno Capricho": "Niche",
+    "Vela Volcan": "Gem",
+    "Pan de Canela": "Gem",
+    "Sandwich Roast Beef": "Niche",
+    "Capuchino con Licor": "Gem",
+    "Trufas X 6 Unidades": "Gem",
+    "Bizcocho Fino 10 Porciones": "Niche",
+    "Aromática de Panelita": "Gem",
+    "TRUFAS X 5 UNIDADES": "Gem",
+    "Torta": "Niche",
+    "Espresso Doble": "Gem",
+    "Coca Cola 250 Ml": "Gem",
+    "Sandwich Pulled Pork": "Niche",
+    "Cocacola 400 Ml": "Niche",
+    "Malteada": "Niche",
+    "Espresso": "Niche",
+    "Vaso Leche": "Gem",
+    "Postobon": "Niche",
+    "Sandwich Focaccia": "Niche",
+    "PAN TL": "Niche",
+    "Coca Cola Zero 400 Ml": "Niche",
+    "Soda": "Niche",
+    "Agua Gas": "Niche",
+    "Hamburguesa": "Niche",
+    "PAN": "Niche",
+    "Postre 12 Porciones": "Niche",
+    "Buñuelo ": "Gem"
+   },
+   "classification_thresholds": {
+    "orders_median": 77.0,
+    "margin_median": 21.537211
+   },
+   "margin_by_category": [
+    28.793692,
+    25.304423449599998,
+    23.79226134653465,
+    21.61901165214797,
+    18.80558836422158
+   ],
+   "margin_weighted_pairs": [
+    {
+     "antecedent": "Almojábana",
+     "consequent": "Pandequeso",
+     "original_lift": 2.05,
+     "margin_weighted_score": 0.309
+    }
+   ],
+   "margin_row_coverage_pct": 100.0
+  },
+  "bundles": {
+   "has_data": true,
+   "has_margin_data": true,
+   "margin_row_coverage_pct": 100.0,
+   "launch_ready": [
+    {
+     "anchor": "Torta Fría 12 Porciones",
+     "target": "Vela Volcan",
+     "anchor_category": "Repostería",
+     "target_category": "Piñatería",
+     "anchor_class": "Tractor",
+     "target_class": "Gem",
+     "count": 25,
+     "support": 0.0066,
+     "confidence": 0.463,
+     "lift": 30.33,
+     "conviction": 1.83,
+     "target_margin": 28.79,
+     "combined_margin": 21.68,
+     "adoption_score": 45.753,
+     "margin_score": 58.927,
+     "launch_ready": true,
+     "adoption_score_norm": 1.0,
+     "margin_score_norm": 1.0,
+     "balanced_score": 1.0
+    },
+    {
+     "anchor": "Croissant del Huerto",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 26,
+     "support": 0.0068,
+     "confidence": 0.565,
+     "lift": 21.7,
+     "conviction": 2.24,
+     "target_margin": 33.17,
+     "combined_margin": 31.31,
+     "adoption_score": 40.409,
+     "margin_score": 53.813,
+     "launch_ready": true,
+     "adoption_score_norm": 0.879693831607384,
+     "margin_score_norm": 0.9109121315587765,
+     "balanced_score": 0.895
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 22,
+     "support": 0.0058,
+     "confidence": 0.579,
+     "lift": 22.22,
+     "conviction": 2.31,
+     "target_margin": 33.17,
+     "combined_margin": 21.98,
+     "adoption_score": 40.339,
+     "margin_score": 53.721,
+     "launch_ready": true,
+     "adoption_score_norm": 0.8781179648806844,
+     "margin_score_norm": 0.9093094557870531,
+     "balanced_score": 0.894
+    },
+    {
+     "anchor": "Porción Postre Baileys",
+     "target": "Porción Postre Pequeño",
+     "anchor_category": "Repostería",
+     "target_category": "Repostería",
+     "anchor_class": "Tractor",
+     "target_class": "Champion",
+     "count": 33,
+     "support": 0.0087,
+     "confidence": 0.28,
+     "lift": 3.48,
+     "conviction": 1.28,
+     "target_margin": 33.45,
+     "combined_margin": 22.35,
+     "adoption_score": 3.436,
+     "margin_score": 4.585,
+     "launch_ready": true,
+     "adoption_score_norm": 0.04734353894642052,
+     "margin_score_norm": 0.05334123057626647,
+     "balanced_score": 0.05
+    },
+    {
+     "anchor": "Desayuno Colmena",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Champion",
+     "target_class": "Champion",
+     "count": 29,
+     "support": 0.0076,
+     "confidence": 0.293,
+     "lift": 3.46,
+     "conviction": 1.29,
+     "target_margin": 21.54,
+     "combined_margin": 27.36,
+     "adoption_score": 3.448,
+     "margin_score": 4.191,
+     "launch_ready": true,
+     "adoption_score_norm": 0.04761368752814048,
+     "margin_score_norm": 0.04647759737997353,
+     "balanced_score": 0.047
+    }
+   ],
+   "test_candidates": [
+    {
+     "anchor": "Vela Volcan",
+     "target": "Torta Fría 6 Porciones",
+     "anchor_category": "Piñatería",
+     "target_category": "Repostería",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 18,
+     "support": 0.0047,
+     "confidence": 0.31,
+     "lift": 14.74,
+     "conviction": 1.42,
+     "target_margin": 27.32,
+     "combined_margin": 28.05,
+     "adoption_score": 13.454,
+     "margin_score": 17.129,
+     "launch_ready": false,
+     "adoption_score_norm": 0.2728725799189554,
+     "margin_score_norm": 0.2718625879729636,
+     "balanced_score": 0.272
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 16,
+     "support": 0.0042,
+     "confidence": 0.421,
+     "lift": 4.97,
+     "conviction": 1.58,
+     "target_margin": 21.54,
+     "combined_margin": 16.16,
+     "adoption_score": 5.928,
+     "margin_score": 7.205,
+     "launch_ready": false,
+     "adoption_score_norm": 0.1034443944169293,
+     "margin_score_norm": 0.09898264929273223,
+     "balanced_score": 0.101
+    },
+    {
+     "anchor": "Tostadas Mediterraneas",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 18,
+     "support": 0.0047,
+     "confidence": 0.4,
+     "lift": 4.72,
+     "conviction": 1.53,
+     "target_margin": 21.54,
+     "combined_margin": 18.01,
+     "adoption_score": 5.559,
+     "margin_score": 6.756,
+     "launch_ready": false,
+     "adoption_score_norm": 0.09513732552904097,
+     "margin_score_norm": 0.09116089471116996,
+     "balanced_score": 0.093
+    },
+    {
+     "anchor": "Arroz con Leche",
+     "target": "Porción Postre Pequeño",
+     "anchor_category": "Repostería",
+     "target_category": "Repostería",
+     "anchor_class": "Champion",
+     "target_class": "Champion",
+     "count": 17,
+     "support": 0.0045,
+     "confidence": 0.221,
+     "lift": 2.75,
+     "conviction": 1.18,
+     "target_margin": 33.45,
+     "combined_margin": 33.69,
+     "adoption_score": 1.757,
+     "margin_score": 2.344,
+     "launch_ready": false,
+     "adoption_score_norm": 0.009545249887438089,
+     "margin_score_norm": 0.014302139223747474,
+     "balanced_score": 0.012
+    },
+    {
+     "anchor": "Croisant Jamon-Queso",
+     "target": "Milo",
+     "anchor_category": "Panadería",
+     "target_category": "Bebidas",
+     "anchor_class": "Champion",
+     "target_class": "Champion",
+     "count": 25,
+     "support": 0.0066,
+     "confidence": 0.216,
+     "lift": 2.54,
+     "conviction": 1.17,
+     "target_margin": 21.54,
+     "combined_margin": 27.98,
+     "adoption_score": 1.788,
+     "margin_score": 2.173,
+     "launch_ready": false,
+     "adoption_score_norm": 0.010243133723547952,
+     "margin_score_norm": 0.011323252735001049,
+     "balanced_score": 0.011
+    }
+   ],
+   "balanced": [
+    {
+     "anchor": "Torta Fría 12 Porciones",
+     "target": "Vela Volcan",
+     "anchor_category": "Repostería",
+     "target_category": "Piñatería",
+     "anchor_class": "Tractor",
+     "target_class": "Gem",
+     "count": 25,
+     "support": 0.0066,
+     "confidence": 0.463,
+     "lift": 30.33,
+     "conviction": 1.83,
+     "target_margin": 28.79,
+     "combined_margin": 21.68,
+     "adoption_score": 45.753,
+     "margin_score": 58.927,
+     "launch_ready": true,
+     "adoption_score_norm": 1.0,
+     "margin_score_norm": 1.0,
+     "balanced_score": 1.0
+    },
+    {
+     "anchor": "Croissant del Huerto",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 26,
+     "support": 0.0068,
+     "confidence": 0.565,
+     "lift": 21.7,
+     "conviction": 2.24,
+     "target_margin": 33.17,
+     "combined_margin": 31.31,
+     "adoption_score": 40.409,
+     "margin_score": 53.813,
+     "launch_ready": true,
+     "adoption_score_norm": 0.879693831607384,
+     "margin_score_norm": 0.9109121315587765,
+     "balanced_score": 0.895
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 22,
+     "support": 0.0058,
+     "confidence": 0.579,
+     "lift": 22.22,
+     "conviction": 2.31,
+     "target_margin": 33.17,
+     "combined_margin": 21.98,
+     "adoption_score": 40.339,
+     "margin_score": 53.721,
+     "launch_ready": true,
+     "adoption_score_norm": 0.8781179648806844,
+     "margin_score_norm": 0.9093094557870531,
+     "balanced_score": 0.894
+    },
+    {
+     "anchor": "Vela Volcan",
+     "target": "Torta Fría 6 Porciones",
+     "anchor_category": "Piñatería",
+     "target_category": "Repostería",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 18,
+     "support": 0.0047,
+     "confidence": 0.31,
+     "lift": 14.74,
+     "conviction": 1.42,
+     "target_margin": 27.32,
+     "combined_margin": 28.05,
+     "adoption_score": 13.454,
+     "margin_score": 17.129,
+     "launch_ready": false,
+     "adoption_score_norm": 0.2728725799189554,
+     "margin_score_norm": 0.2718625879729636,
+     "balanced_score": 0.272
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 16,
+     "support": 0.0042,
+     "confidence": 0.421,
+     "lift": 4.97,
+     "conviction": 1.58,
+     "target_margin": 21.54,
+     "combined_margin": 16.16,
+     "adoption_score": 5.928,
+     "margin_score": 7.205,
+     "launch_ready": false,
+     "adoption_score_norm": 0.1034443944169293,
+     "margin_score_norm": 0.09898264929273223,
+     "balanced_score": 0.101
+    }
+   ],
+   "margin_focus": [
+    {
+     "anchor": "Torta Fría 12 Porciones",
+     "target": "Vela Volcan",
+     "anchor_category": "Repostería",
+     "target_category": "Piñatería",
+     "anchor_class": "Tractor",
+     "target_class": "Gem",
+     "count": 25,
+     "support": 0.0066,
+     "confidence": 0.463,
+     "lift": 30.33,
+     "conviction": 1.83,
+     "target_margin": 28.79,
+     "combined_margin": 21.68,
+     "adoption_score": 45.753,
+     "margin_score": 58.927,
+     "launch_ready": true,
+     "adoption_score_norm": 1.0,
+     "margin_score_norm": 1.0,
+     "balanced_score": 1.0
+    },
+    {
+     "anchor": "Croissant del Huerto",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 26,
+     "support": 0.0068,
+     "confidence": 0.565,
+     "lift": 21.7,
+     "conviction": 2.24,
+     "target_margin": 33.17,
+     "combined_margin": 31.31,
+     "adoption_score": 40.409,
+     "margin_score": 53.813,
+     "launch_ready": true,
+     "adoption_score_norm": 0.879693831607384,
+     "margin_score_norm": 0.9109121315587765,
+     "balanced_score": 0.895
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 22,
+     "support": 0.0058,
+     "confidence": 0.579,
+     "lift": 22.22,
+     "conviction": 2.31,
+     "target_margin": 33.17,
+     "combined_margin": 21.98,
+     "adoption_score": 40.339,
+     "margin_score": 53.721,
+     "launch_ready": true,
+     "adoption_score_norm": 0.8781179648806844,
+     "margin_score_norm": 0.9093094557870531,
+     "balanced_score": 0.894
+    },
+    {
+     "anchor": "Vela Volcan",
+     "target": "Torta Fría 6 Porciones",
+     "anchor_category": "Piñatería",
+     "target_category": "Repostería",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 18,
+     "support": 0.0047,
+     "confidence": 0.31,
+     "lift": 14.74,
+     "conviction": 1.42,
+     "target_margin": 27.32,
+     "combined_margin": 28.05,
+     "adoption_score": 13.454,
+     "margin_score": 17.129,
+     "launch_ready": false,
+     "adoption_score_norm": 0.2728725799189554,
+     "margin_score_norm": 0.2718625879729636,
+     "balanced_score": 0.272
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 16,
+     "support": 0.0042,
+     "confidence": 0.421,
+     "lift": 4.97,
+     "conviction": 1.58,
+     "target_margin": 21.54,
+     "combined_margin": 16.16,
+     "adoption_score": 5.928,
+     "margin_score": 7.205,
+     "launch_ready": false,
+     "adoption_score_norm": 0.1034443944169293,
+     "margin_score_norm": 0.09898264929273223,
+     "balanced_score": 0.101
+    }
+   ],
+   "conversion_focus": [
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 22,
+     "support": 0.0058,
+     "confidence": 0.579,
+     "lift": 22.22,
+     "conviction": 2.31,
+     "target_margin": 33.17,
+     "combined_margin": 21.98,
+     "adoption_score": 40.339,
+     "margin_score": 53.721,
+     "launch_ready": true,
+     "adoption_score_norm": 0.8781179648806844,
+     "margin_score_norm": 0.9093094557870531,
+     "balanced_score": 0.894
+    },
+    {
+     "anchor": "Croissant del Huerto",
+     "target": "Desayuno Colmena",
+     "anchor_category": "Brunch",
+     "target_category": "Brunch",
+     "anchor_class": "Gem",
+     "target_class": "Champion",
+     "count": 26,
+     "support": 0.0068,
+     "confidence": 0.565,
+     "lift": 21.7,
+     "conviction": 2.24,
+     "target_margin": 33.17,
+     "combined_margin": 31.31,
+     "adoption_score": 40.409,
+     "margin_score": 53.813,
+     "launch_ready": true,
+     "adoption_score_norm": 0.879693831607384,
+     "margin_score_norm": 0.9109121315587765,
+     "balanced_score": 0.895
+    },
+    {
+     "anchor": "Torta Fría 12 Porciones",
+     "target": "Vela Volcan",
+     "anchor_category": "Repostería",
+     "target_category": "Piñatería",
+     "anchor_class": "Tractor",
+     "target_class": "Gem",
+     "count": 25,
+     "support": 0.0066,
+     "confidence": 0.463,
+     "lift": 30.33,
+     "conviction": 1.83,
+     "target_margin": 28.79,
+     "combined_margin": 21.68,
+     "adoption_score": 45.753,
+     "margin_score": 58.927,
+     "launch_ready": true,
+     "adoption_score_norm": 1.0,
+     "margin_score_norm": 1.0,
+     "balanced_score": 1.0
+    },
+    {
+     "anchor": "Desayuno Capricho",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 16,
+     "support": 0.0042,
+     "confidence": 0.421,
+     "lift": 4.97,
+     "conviction": 1.58,
+     "target_margin": 21.54,
+     "combined_margin": 16.16,
+     "adoption_score": 5.928,
+     "margin_score": 7.205,
+     "launch_ready": false,
+     "adoption_score_norm": 0.1034443944169293,
+     "margin_score_norm": 0.09898264929273223,
+     "balanced_score": 0.101
+    },
+    {
+     "anchor": "Tostadas Mediterraneas",
+     "target": "Milo",
+     "anchor_category": "Brunch",
+     "target_category": "Bebidas",
+     "anchor_class": "Niche",
+     "target_class": "Champion",
+     "count": 18,
+     "support": 0.0047,
+     "confidence": 0.4,
+     "lift": 4.72,
+     "conviction": 1.53,
+     "target_margin": 21.54,
+     "combined_margin": 18.01,
+     "adoption_score": 5.559,
+     "margin_score": 6.756,
+     "launch_ready": false,
+     "adoption_score_norm": 0.09513732552904097,
+     "margin_score_norm": 0.09116089471116996,
+     "balanced_score": 0.093
+    }
+   ],
+   "notes": "Ranking balanceado por probabilidad de adopción y aporte de margen."
+  }
+ },
+ "insights": [
+  {
+   "title": "Concentración de revenue",
+   "body": "Solo <strong>27 productos</strong> de 81 (33%) generan el 80% del revenue. Un problema de disponibilidad en cualquiera de los top 5 tiene impacto directo en GMV. Estos items deben estar siempre visibles y bien nombrados en el catálogo.",
+   "category": "revenue",
+   "severity": "warning",
+   "priority": 1,
+   "action": "Optimizar portafolio y pricing de top SKUs",
+   "owner": "Comercial",
+   "horizon": "1-2 semanas"
+  },
+  {
+   "title": "Productos 'Champion': 22 ítems high-margin high-volume",
+   "body": "Estos 22 productos son los generadores de profit principales (margen promedio 27.5%). Representan 20.9% del profit total pero solo 16.8% del revenue. Estrategia: maximizar visibilidad, stock seguro, promoción selectiva (ej: en bundles de bajo margen).",
+   "category": "profitability",
+   "severity": "info",
+   "priority": 1,
+   "action": "Garantizar stock y visibilidad máxima",
+   "owner": "Catalog & Inventory",
+   "horizon": "Continuo"
+  },
+  {
+   "title": "Bebidas como ancla del carrito",
+   "body": "La categoría <strong>Bebidas</strong> aparece en el 60% de los pares más frecuentes del market basket. Actúa como ancla que acompaña productos de mayor ticket. <em>Oportunidad:</em> optimizar combos con esta categoría como base.",
+   "category": "basket",
+   "severity": "opportunity",
+   "priority": 2,
+   "action": "Lanzar test A/B de bundles en menú",
+   "owner": "Growth",
+   "horizon": "2 semanas"
+  },
+  {
+   "title": "Productos 'Tractor': alto volumen, margen 15.8%",
+   "body": "Encontrados 19 productos con alto volumen pero bajo margen (Tractores). Estos conducen tráfico pero generan poco profit. Considera: (1) aumentar precio en 5-10%, (2) vender como bundle con items de alto margen, (3) usar como lead magnet pero promover cross-sell agresivamente. Promedio: 492 órdenes/período, 15.8% margen.",
+   "category": "profitability",
+   "severity": "warning",
+   "priority": 2,
+   "action": "Revisar precios y estrategia de empaquetamiento",
+   "owner": "Pricing & Marketing",
+   "horizon": "Corto plazo (1-2 semanas)"
+  },
+  {
+   "title": "Oportunidad de combos (Market Basket)",
+   "body": "Los pares con lift alto representan combinaciones que ocurren más de lo esperado por azar — candidatos naturales para combos en el menú: <strong>Almojábana</strong> + <strong>Pandequeso</strong> (lift 2.05). Los pares de alta frecuencia pero lift bajo ya son habituales; el upside está en promover los de alto lift.",
+   "category": "basket",
+   "severity": "opportunity",
+   "priority": 2,
+   "action": "Lanzar test A/B de bundles en menú",
+   "owner": "Growth",
+   "horizon": "2 semanas"
+  }
+ ],
+ "recommendations": [
+  {
+   "impact": "ALTO",
+   "owner": "Catálogo",
+   "horizon": "1 semana",
+   "action": "Blindar disponibilidad y visibilidad de los 27 SKUs que concentran el 80% del revenue."
+  },
+  {
+   "impact": "MEDIO",
+   "owner": "Growth",
+   "horizon": "2 semanas",
+   "action": "Ejecutar test de upsell en la franja 17:00 (alto tráfico con ticket por debajo de la media)."
+  },
+  {
+   "impact": "ALTO",
+   "owner": "Growth + Comercial",
+   "horizon": "2 semanas",
+   "action": "Probar bundle guiado para Almojábana + Pandequeso (lift 2.05)."
+  }
+ ]
+}
