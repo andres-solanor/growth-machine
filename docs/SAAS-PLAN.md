@@ -128,6 +128,14 @@ bigint unsigned autoincrement); the runtime does **not** ship repo files like `d
 so migration SQL is embedded in the bundle (`scripts/embed-migrations.ts`, runs inside
 `npm run db:generate`) and applied idempotently at boot + by `/api/health` self-heal.
 
+✅ 2026-06-11: **Auth + onboarding wizard live.** Registration (`/registro`: user + tenant
+free + membership + audit in one tx), login (`/ingresar`), stateless JWT sessions (30 d,
+`AUTH_SECRET` env), protected `/panel`. Upload wizard `/analisis/nuevo` (3 pasos: negocio →
+archivo → columnas): datasets stored gzip+sha256 in LONGBLOB, column auto-detect
+(`src/lib/csv-detect.ts`, verified vs real POS headers), `POST /api/jobs` enforces free
+quota (1/mes) + 1 job activo, snapshot de config; progreso con polling 3 s. Job queda
+`queued` — falta despachar al worker (GitHub Actions + HMAC), siguiente bloque.
+
 ✅ 2026-06-11: zod payload contract in `src/lib/payload-schema/` (validated against the real
 fixture payload, all 11 modules; check with `npm run check:payload`, regen sample with
 `tests/regen_payload_sample.py`). Drizzle schema for all 10 tables in `src/lib/db/schema.ts`
