@@ -149,32 +149,8 @@ def _read_file(path: Path) -> pd.DataFrame | None:
 # Step 1: discover + consolidate raw exports
 # ---------------------------------------------------------------------------
 
-def load_raw_exports() -> pd.DataFrame:
-    raw_exports = sorted(
-        [p for p in INPUT_DIR.glob(f"{RAW_PREFIX}*") if p.suffix.lower() in (".xls", ".xlsx", ".csv")],
-        key=lambda p: p.stat().st_mtime,
-    )
-    legacy = INPUT_DIR / LEGACY_CSV_NAME
-    legacy_paths = [legacy] if legacy.exists() else []
-
-    all_paths = raw_exports + legacy_paths
-    if not all_paths:
-        sys.exit(
-            f"[error] No POS exports found in {INPUT_DIR}\n"
-            f"        Expected files starting with: '{RAW_PREFIX}'"
-        )
-
-    print(f"Loading {len(all_paths)} source file(s):")
-    frames = []
-    for p in all_paths:
-        df = _read_file(p)
-        if df is not None:
-            print(f"  {p.name}  ({len(df):,} rows)")
-            frames.append(df)
-
-    if not frames:
-        sys.exit("[error] No valid exports could be loaded.")
-
+def consolidate(frames: list[pd.DataFrame]) -> pd.DataFrame:
+    """Concatena exports crudos, deduplica y normaliza tipos. Función pura."""
     combined = pd.concat(frames, ignore_index=True)
     before = len(combined)
     combined = combined.drop_duplicates(subset=DEDUP_KEY)
@@ -193,27 +169,71 @@ def load_raw_exports() -> pd.DataFrame:
     return combined
 
 
+def load_raw_exports(
+    input_dir: Path = INPUT_DIR,
+    raw_prefix: str = RAW_PREFIX,
+    legacy_csv_name: str = LEGACY_CSV_NAME,
+) -> pd.DataFrame:
+    raw_exports = sorted(
+        [p for p in input_dir.glob(f"{raw_prefix}*") if p.suffix.lower() in (".xls", ".xlsx", ".csv")],
+        key=lambda p: p.stat().st_mtime,
+    )
+    legacy = input_dir / legacy_csv_name
+    legacy_paths = [legacy] if legacy.exists() else []
+
+    all_paths = raw_exports + legacy_paths
+    if not all_paths:
+        sys.exit(
+            f"[error] No POS exports found in {input_dir}\n"
+            f"        Expected files starting with: '{raw_prefix}'"
+        )
+
+    print(f"Loading {len(all_paths)} source file(s):")
+    frames = []
+    for p in all_paths:
+        df = _read_file(p)
+        if df is not None:
+            print(f"  {p.name}  ({len(df):,} rows)")
+            frames.append(df)
+
+    if not frames:
+        sys.exit("[error] No valid exports could be loaded.")
+
+    return consolidate(frames)
+
+
 # ---------------------------------------------------------------------------
 # Step 2: load and validate product map
 # ---------------------------------------------------------------------------
 
-def load_product_map() -> pd.DataFrame:
-    if not PRODUCT_MAP_FILE.exists():
-        sys.exit(
-            f"[error] {PRODUCT_MAP_FILE} not found.\n"
-            f"        Create it following the sample in reports/input_data/product_map.csv."
-        )
+def prepare_product_map(pm: pd.DataFrame) -> pd.DataFrame:
+    """Valida y normaliza tipos de un product map ya cargado (CSV, JSON o DB).
 
-    pm = pd.read_csv(PRODUCT_MAP_FILE, dtype=str)
+    Lanza ValueError si faltan columnas requeridas. Función pura e idempotente.
+    """
     required = {"sistema", "nombre", "categoria", "subcategoria", "margen_pct"}
     missing = required - set(pm.columns)
     if missing:
-        sys.exit(f"[error] product_map.csv is missing columns: {sorted(missing)}")
+        raise ValueError(f"product_map is missing columns: {sorted(missing)}")
 
+    pm = pm.copy()
     pm["precio_post"] = pd.to_numeric(pm.get("precio_post", pd.Series(dtype=str)), errors="coerce")
     pm["fecha_desde"] = pd.to_datetime(pm.get("fecha_desde", pd.Series(dtype=str)), errors="coerce")
     pm["margen_pct"] = pd.to_numeric(pm["margen_pct"], errors="coerce")
     return pm
+
+
+def load_product_map(product_map_file: Path = PRODUCT_MAP_FILE) -> pd.DataFrame:
+    if not product_map_file.exists():
+        sys.exit(
+            f"[error] {product_map_file} not found.\n"
+            f"        Create it following the sample in reports/input_data/product_map.csv."
+        )
+
+    try:
+        return prepare_product_map(pd.read_csv(product_map_file, dtype=str))
+    except ValueError as exc:
+        sys.exit(f"[error] {product_map_file.name}: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -388,6 +408,33 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
+# Pure pipeline API (used by worker/run_job.py and by main() below)
+# ---------------------------------------------------------------------------
+
+def reorder_columns(enriched: pd.DataFrame) -> pd.DataFrame:
+    """Columnas estándar primero, columnas extra del POS al final."""
+    extras = [c for c in enriched.columns if c not in OUTPUT_COL_ORDER]
+    final_cols = [c for c in OUTPUT_COL_ORDER if c in enriched.columns] + extras
+    return enriched[final_cols]
+
+
+def normalize(
+    sales: pd.DataFrame | list[pd.DataFrame],
+    product_map: pd.DataFrame,
+) -> pd.DataFrame:
+    """Pipeline completo sin I/O: consolida (si recibe frames), enriquece con el
+    product map y deriva features de tiempo. `Fecha` queda como datetime —
+    el caller decide el formato de salida.
+    """
+    if isinstance(sales, list):
+        sales = consolidate(sales)
+    pm = prepare_product_map(product_map)
+    enriched = enrich(sales, pm)
+    add_time_features(enriched)
+    return reorder_columns(enriched)
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -398,13 +445,7 @@ def main() -> None:
     pm = load_product_map()
 
     print(f"\nEnriching {len(sales):,} rows using {len(pm)} mapping rule(s)...")
-    enriched = enrich(sales, pm)
-    add_time_features(enriched)
-
-    # Reorder: standard columns first, any extra POS columns at the end
-    extras = [c for c in enriched.columns if c not in OUTPUT_COL_ORDER]
-    final_cols = [c for c in OUTPUT_COL_ORDER if c in enriched.columns] + extras
-    enriched = enriched[final_cols]
+    enriched = normalize(sales, pm)
 
     enriched["Fecha"] = enriched["Fecha"].dt.strftime("%Y-%m-%d")
     enriched.to_csv(OUTPUT_FILE, index=False)
