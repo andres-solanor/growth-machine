@@ -84,10 +84,12 @@ export function Progreso({ jobId }: { jobId: string }) {
       )}
 
       {status === "succeeded" && (
-        <p className="text-sm text-zinc-400">
-          Tu reporte está listo. (La página del reporte llega en la siguiente
-          actualización.)
-        </p>
+        <a
+          href={`/reportes/${jobId}`}
+          className="rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500"
+        >
+          Ver mi reporte →
+        </a>
       )}
 
       {(status === "failed" || status === "timed_out") && (

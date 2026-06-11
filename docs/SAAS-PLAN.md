@@ -134,8 +134,20 @@ Python (10k+ filas normalizadas, fallback sin product_map) → payload devuelto 
 HMAC → validado contra el contrato zod → guardado gzip en report_payloads → "¡Listo!"
 en la página de progreso. Bugs cazados en el camino: timeout medía desde createdAt y no
 desde dispatchedAt; `classification_thresholds` ausente sin márgenes rompía el contrato;
-auto-redespacho check-on-read añadido para jobs huérfanos. Falta: página del reporte
-(siguiente bloque) — el job exitoso ya tiene su payload almacenado y listo para renderizar.
+auto-redespacho check-on-read añadido para jobs huérfanos.
+
+✅ 2026-06-11: **Página del reporte free-tier completa** (`/reportes/[jobId]`). Server
+components puros (sin Plotly aún): KPIs (6), calidad de datos (chip de riesgo + cobertura),
+hallazgos con severidad (free ve 3 + contador de bloqueados), línea de tiempo (SVG diario +
+barras por día de semana + mejor combinación), top-10 productos con barras de revenue +
+línea Pareto. Gating 100 % server-side en `src/lib/report.ts` (`gateReport`): los módulos
+bloqueados se eliminan antes de serializar y se reemplazan por teasers con datos reales
+(`TIER_MODULES` free/pro/premium). Secciones bloqueadas → tarjetas con CTA. Página de
+consultoría `/consultoria` (lead form → `consulting_leads`, funciona logueado o anónimo).
+Botón "Ver mi reporte →" al terminar el progreso; enlaces del panel van al reporte si
+`succeeded`. Fix de zona horaria: fechas se muestran en hora local del país del tenant
+(`src/lib/format.ts`, `tzForCountry`), no UTC. Workflow bump: checkout@v5, setup-python@v6.
+Falta para tier toggle visible: render de Basket/Cart (Phase 2 port).
 
 ✅ 2026-06-11: **Auth + onboarding wizard live.** Registration (`/registro`: user + tenant
 free + membership + audit in one tx), login (`/ingresar`), stateless JWT sessions (30 d,
@@ -157,10 +169,10 @@ Remaining: app scaffold extras + MySQL **day 1** checks (verify
 `consulting_leads`, `audit_log`); Auth.js register/login/verify; 4-step onboarding wizard
 (business info → upload → column mapping with auto-detect → first analysis; categories/margins
 deliberately post-first-report); job pipeline (`repository_dispatch`, HMAC-SHA256 worker API,
-check-on-read timeouts, ≤3 retries); progress page polling 3 s; report page with free sections
-(KPIs, quality, timeline, products, insights) + `BasketSection`/`CartSection` (so tier toggle
-visibly unlocks) + `LockedSection` teasers + consulting CTA; `/admin` (tenants, tier dropdown,
-job monitor, leads); landing ES with pricing.
+check-on-read timeouts, ≤3 retries); progress page polling 3 s; ~~report page free sections +
+locked teasers + consulting CTA~~ (✅ hecho); `BasketSection`/`CartSection` (so tier toggle
+visibly unlocks — Phase 2 port); `/admin` (tenants, tier dropdown, job monitor, leads);
+landing ES with pricing; verificación de email (necesita dominio + SMTP).
 
 **Verify:** stranger registers → uploads real POS .xls → free report in <2 min; admin flips
 tier → sections unlock; gating leak test passes.

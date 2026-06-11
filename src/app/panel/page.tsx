@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/user";
+import { fmtDateTime } from "@/lib/format";
 import { cerrarSesion } from "./actions";
 
 export const metadata: Metadata = { title: "Panel — Analytikz" };
@@ -90,7 +91,11 @@ export default async function PanelPage() {
                 return (
                   <li key={job.id}>
                     <Link
-                      href={`/reportes/procesando/${job.id}`}
+                      href={
+                        job.status === "succeeded"
+                          ? `/reportes/${job.id}`
+                          : `/reportes/procesando/${job.id}`
+                      }
                       className="flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-zinc-800/50"
                     >
                       <div className="min-w-0">
@@ -98,10 +103,7 @@ export default async function PanelPage() {
                           {job.filename}
                         </p>
                         <p className="text-xs text-zinc-500">
-                          {new Date(job.createdAt).toLocaleString("es-CO", {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })}
+                          {fmtDateTime(job.createdAt, user.tenant.country)}
                         </p>
                       </div>
                       <span
