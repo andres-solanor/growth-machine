@@ -119,6 +119,15 @@ first be detached from the placeholder website in hPanel). Hostinger MySQL datab
 (`u727350056_growthdb`); password reset + `max_allowed_packet`/LONGBLOB verification still
 pending before first migration.
 
+✅ 2026-06-11: **MySQL wired end-to-end in production.** Fresh DB `u727350056_grwth_mchne_db`
+(old one retired), `DATABASE_URL` env var in Hostinger panel. All 10 tables + migration
+tracker live (verified via `/api/health`: ok, 11 tables, `max_allowed_packet` = 1024 MB —
+day-1 LONGBLOB check passed). Hard-won Hostinger facts: connect via `127.0.0.1` (not
+`localhost`, IPv6 ::1 is denied); the DB is **MariaDB** (drizzle `serial()` invalid →
+bigint unsigned autoincrement); the runtime does **not** ship repo files like `drizzle/`,
+so migration SQL is embedded in the bundle (`scripts/embed-migrations.ts`, runs inside
+`npm run db:generate`) and applied idempotently at boot + by `/api/health` self-heal.
+
 ✅ 2026-06-11: zod payload contract in `src/lib/payload-schema/` (validated against the real
 fixture payload, all 11 modules; check with `npm run check:payload`, regen sample with
 `tests/regen_payload_sample.py`). Drizzle schema for all 10 tables in `src/lib/db/schema.ts`
