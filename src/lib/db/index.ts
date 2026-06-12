@@ -17,7 +17,12 @@ export function getPool(): mysql.Pool {
   if (!globalForDb._mysqlPool) {
     globalForDb._mysqlPool = mysql.createPool({
       uri: process.env.DATABASE_URL,
-      connectionLimit: 5,
+      // Hostinger corre VARIOS procesos node y cada uno crea su propio pool:
+      // conexiones ociosas abiertas mantienen vivos los procesos y agotan el
+      // límite de procesos de la cuenta (→ 503). Pool chico que se vacía solo.
+      connectionLimit: 3,
+      maxIdle: 1,
+      idleTimeout: 30_000,
       // Los payloads gzip viajan como Buffer; sin esto mysql2 los castearía.
       supportBigNumbers: true,
     });

@@ -14,6 +14,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import hmac
+import http.client
 import json
 import os
 import subprocess
@@ -40,20 +41,45 @@ def _signed_headers(method: str, path: str, body: bytes | None) -> dict:
     return {"X-Worker-Ts": ts, "X-Worker-Sig": sig}
 
 
+# El hosting (LiteSpeed) corta conexiones SIN respuesta HTTP cuando llega al
+# límite de procesos → RemoteDisconnected/URLError aquí. Reintentar con
+# backoff exponencial; sin esto, una conexión cortada mata un job ya calculado.
+RETRYABLE_HTTP = {429, 500, 502, 503, 504}
+
+
 def _request(method: str, path: str, body: bytes | None = None,
-             content_type: str | None = None) -> bytes:
-    headers = _signed_headers(method, path, body)
-    if content_type:
-        headers["Content-Type"] = content_type
-    req = urllib.request.Request(BASE + path, data=body, method=method, headers=headers)
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        return resp.read()
+             content_type: str | None = None, attempts: int = 4) -> bytes:
+    for attempt in range(1, attempts + 1):
+        # Firma fresca por intento: el timestamp HMAC caduca entre esperas.
+        headers = _signed_headers(method, path, body)
+        if content_type:
+            headers["Content-Type"] = content_type
+        req = urllib.request.Request(BASE + path, data=body, method=method,
+                                     headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=180) as resp:
+                return resp.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code not in RETRYABLE_HTTP or attempt == attempts:
+                raise
+            reason = f"HTTP {exc.code}"
+        except (urllib.error.URLError, http.client.HTTPException,
+                ConnectionError, TimeoutError) as exc:
+            if attempt == attempts:
+                raise
+            reason = type(exc).__name__
+        wait = 2 ** attempt
+        print(f"[runner] {method} {path}: {reason}; "
+              f"reintento {attempt}/{attempts - 1} en {wait}s", file=sys.stderr)
+        time.sleep(wait)
+    raise AssertionError("unreachable")
 
 
 def _post_failure(error: str) -> None:
     body = json.dumps({"ok": False, "error": error[:2000]}).encode("utf-8")
     try:
-        _request("POST", f"/api/worker/jobs/{JOB_ID}/result", body, "application/json")
+        _request("POST", f"/api/worker/jobs/{JOB_ID}/result", body,
+                 "application/json", attempts=3)
     except Exception as exc:  # ya estamos reportando un fallo; solo log
         print(f"[runner] no se pudo reportar el fallo: {exc}", file=sys.stderr)
 
@@ -107,7 +133,9 @@ def main() -> int:
     payload_path = WORK_DIR / "payload.json"
     payload_gz = gzip.compress(payload_path.read_bytes())
     print(f"[runner] enviando payload ({len(payload_gz):,} bytes gzip)...")
-    _request("POST", f"/api/worker/jobs/{JOB_ID}/result", payload_gz, "application/gzip")
+    # El paso más crítico: el análisis ya está hecho, solo falta entregarlo.
+    _request("POST", f"/api/worker/jobs/{JOB_ID}/result", payload_gz,
+             "application/gzip", attempts=6)
     print("[runner] OK")
     return 0
 
