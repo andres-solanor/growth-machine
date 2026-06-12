@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { GatedReport } from "@/lib/report";
+import { TIER_MODULES } from "@/lib/gating";
 import { fmtMoney, fmtNum, fmtIsoDate } from "@/lib/format";
+import { LOCKED_DEMOS } from "./locked-demos";
 import {
   DailyRevenueChart,
   DowChart,
@@ -217,25 +219,63 @@ const LOCKED_TITLES: Record<string, string> = {
   bundles: "Combos sugeridos",
 };
 
+// Plan más barato que desbloquea cada módulo (para el botón de la tarjeta).
+const PRO_MODULES = new Set(TIER_MODULES.pro);
+const planFor = (key: string) => (PRO_MODULES.has(key) ? "Pro" : "Premium");
+
 export function LockedSections({ r }: { r: GatedReport }) {
   if (r.locked.length === 0) return null;
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">
+      <h2 className="mb-1 text-lg font-semibold">
         Lo que tu análisis ya sabe (y tu plan aún no muestra)
       </h2>
+      <p className="mb-4 text-sm text-zinc-500">
+        Las cifras de cada título son tuyas; la vista borrosa es un ejemplo de
+        cómo se ve la sección completa.
+      </p>
       <div className="grid gap-3 sm:grid-cols-2">
-        {r.locked.map(({ key, teaser }) => (
-          <div
-            key={key}
-            className="rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/60 p-5"
-          >
-            <p className="text-sm font-semibold text-zinc-200">
-              🔒 {LOCKED_TITLES[key] ?? key}
-            </p>
-            <p className="mt-1.5 text-sm text-zinc-400">{teaser}</p>
-          </div>
-        ))}
+        {r.locked.map(({ key, teaser }) => {
+          const plan = planFor(key);
+          return (
+            <div
+              key={key}
+              className="flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900"
+            >
+              <div className="p-5 pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-zinc-200">
+                    🔒 {LOCKED_TITLES[key] ?? key}
+                  </p>
+                  <span className="shrink-0 rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                    Plan {plan}
+                  </span>
+                </div>
+                {/* El gancho: una cifra REAL del análisis (lib/gating.ts) */}
+                <p className="mt-1.5 text-sm text-zinc-400">{teaser}</p>
+              </div>
+              <div className="relative mt-auto px-5 pb-4">
+                <p className="mb-1 text-right text-[10px] uppercase tracking-wide text-zinc-600">
+                  vista de ejemplo — no son tus datos
+                </p>
+                <div
+                  aria-hidden
+                  className="pointer-events-none select-none [mask-image:linear-gradient(to_bottom,black_25%,transparent_97%)]"
+                >
+                  {LOCKED_DEMOS[key]}
+                </div>
+                <div className="absolute inset-x-0 bottom-3 flex justify-center">
+                  <Link
+                    href="/#planes"
+                    className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-emerald-950/60 hover:bg-emerald-500"
+                  >
+                    Desbloquéalo con {plan}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

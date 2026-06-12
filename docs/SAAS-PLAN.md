@@ -262,9 +262,19 @@ las sugerencias sobreviven al guardado parcial ("Otros" guardado vuelve como sin
 clasificar — clasificar por tandas es el flujo esperado) y cada categoría tiene caja
 numérica además del slider para valores exactos.
 
+✅ 2026-06-11 (noche): **Teasers con blur en secciones bloqueadas.** Las tarjetas de
+candado del reporte ahora muestran: el dato REAL del análisis como gancho (igual que
+antes, viene de `lib/gating.ts`), una vista demo del contenido de la sección que se
+desvanece con blur + máscara de gradiente, la etiqueta "vista de ejemplo — no son tus
+datos", el badge del plan que la desbloquea y un botón "Desbloquéalo con Pro/Premium"
+que lleva a `/#planes` (ancla nueva en la landing). SEGURIDAD: la vista borrosa es
+100% sintética (`locked-demos.tsx`, datos inventados de cafetería, idénticos para
+todos los tenants) — el gating server-side no cambió y `check:gating` sigue verde;
+el archivo de demos no importa nada del payload por diseño.
+
 Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
-delta); teasers blur (nice-to-have de abajo); transactional email (dominio listo ✓,
-falta buzón no-reply + SMTP); colores por categoría del tenant en charts (hoy paleta fija).
+delta); transactional email (dominio listo ✓, falta buzón no-reply + SMTP); colores
+por categoría del tenant en charts (hoy paleta fija).
 
 **Nice-to-have (idea de Andrés, 2026-06-11) — enriquecimiento de categorías con IA:**
 la auto-sugerencia actual es por palabras clave (~15 categorías de comida LatAm), pero
@@ -291,14 +301,9 @@ reporte de ventas), diseñada alrededor de las habilidades, conocimiento y exper
 de Andrés. Pendiente: sesión de brainstorm con él para definir el catálogo de servicios
 antes de diseñar nada. Anotado como siguiente paso, sin fecha.
 
-**Nice-to-have (idea de Andrés, 2026-06-11) — teasers "semi-visibles" con blur:** en vez
-de la tarjeta de candado actual, las secciones bloqueadas mostrarían la parte superior
-del contenido real visible y el resto desvaneciéndose con blur, con un botón encima del
-área borrosa por sección ("Desbloquea con Pro" / "Desbloquea con Premium" según el módulo).
-OJO seguridad: el contenido borroso NO puede ser el dato real (el gating server-side jamás
-lo envía al navegador y eso no cambia) — debe ser una imagen estática de demo o datos
-sintéticos renderizados, con el teaser de dato real (1 cifra) como gancho. Hacerlo después
-del editor de product map.
+~~**Nice-to-have (idea de Andrés, 2026-06-11) — teasers "semi-visibles" con blur**~~
+(✅ hecho 2026-06-11 noche, ver milestone arriba: demos sintéticos renderizados con
+blur + dato real como gancho + botón de upgrade por sección).
 
 ### Phase 3 — Deferred
 
@@ -343,3 +348,4 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-11 | Márgenes por categoría guardados en `tenant_configs.configJson.category_margins` (no tabla nueva); tanto el editor como `/api/jobs` hacen merge del JSON, nunca lo reemplazan | Cero migraciones; el `config_snapshot` del job congela los márgenes usados en cada análisis (reproducibilidad y etiqueta "margen estimado" por reporte). El mapa de productos sí vive en su tabla (`product_map_entries`, ya existía) |
 | 2026-06-11 | El worker inyecta `category_normalization` identidad (categorías del propio tenant) cuando la config no trae uno | El default de `ReportConfig` es el mapeo de La Panettería: cualquier categoría ajena caía a "Otros" y el editor de categorías no habría servido de nada. Identidad = lo que el tenant escribió es lo que ve |
 | 2026-06-11 | JSON en DB con `customType` propio (JSON.parse en `fromDriver`) en vez del `json()` de drizzle; merges de `config_json` por lista blanca de claves, nunca spread | En MariaDB (Hostinger) JSON es LONGTEXT y mysql2 devuelve string — drizzle no parsea en lectura y todo `.campo` daba undefined en producción (sliders de margen "borrados", column_mapping del worker perdido en silencio). El spread de ese string además sembró claves basura "0","1","2"… que la lista blanca autolimpia en el siguiente guardado |
+| 2026-06-11 | Blur-teasers: las tarjetas bloqueadas muestran demos 100% SINTÉTICOS (`locked-demos.tsx`, datos inventados fijos) bajo blur, nunca una versión borrosa del dato real | El gating server-side es la garantía de seguridad del producto: lo bloqueado jamás se serializa al cliente, ni siquiera "borroso" (un blur CSS se quita con un click en DevTools). El gancho de venta sigue siendo la cifra real del teaser de `lib/gating.ts`, que sí es pública por diseño |

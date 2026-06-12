@@ -144,8 +144,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Planes */}
-      <section className="mx-auto w-full max-w-5xl px-6 py-12">
+      {/* Planes — ancla #planes: destino de los botones "Desbloquéalo" */}
+      <section id="planes" className="mx-auto w-full max-w-5xl scroll-mt-16 px-6 py-12">
         <h2 className="text-center text-2xl font-bold">Planes</h2>
         <p className="mx-auto mt-2 max-w-md text-center text-sm text-zinc-400">
           Empieza gratis. Sube de plan cuando quieras ver más profundo.
