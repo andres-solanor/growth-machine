@@ -41,8 +41,8 @@ const PLANES: {
   },
   {
     nombre: "Pro",
-    precio: "Precio de lanzamiento",
-    nota: "escríbenos y lo activamos",
+    precio: "$79.900/mes",
+    nota: "precio de lanzamiento · normal $119.900",
     destacado: true,
     bullets: [
       "Todo lo del plan Gratis",
@@ -57,15 +57,15 @@ const PLANES: {
   },
   {
     nombre: "Premium",
-    precio: "Precio de lanzamiento",
-    nota: "incluye sesión 1:1",
+    precio: "$199.900/mes",
+    nota: "precio de lanzamiento · normal $299.900",
     bullets: [
       "Todo lo del plan Pro",
       "Análisis ilimitados",
       "Rentabilidad real por producto",
       "Combos listos para lanzar",
       "Impacto de eventos y promociones",
-      "Sesión de consultoría 1:1 incluida",
+      "Sesión de estrategia 1:1 trimestral incluida (valor $260.000)",
     ],
     cta: { label: "Hablar con nosotros", href: "/consultoria" },
   },
@@ -149,6 +149,10 @@ export default function Home() {
         <h2 className="text-center text-2xl font-bold">Planes</h2>
         <p className="mx-auto mt-2 max-w-md text-center text-sm text-zinc-400">
           Empieza gratis. Sube de plan cuando quieras ver más profundo.
+        </p>
+        <p className="mx-auto mt-1 max-w-md text-center text-xs text-zinc-500">
+          Quienes entren con precio de lanzamiento lo conservan para siempre ·
+          Plan anual: 2 meses gratis
         </p>
         <div className="mt-8 grid gap-6 md:grid-cols-3">
           {PLANES.map((plan) => (

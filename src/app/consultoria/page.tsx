@@ -27,6 +27,13 @@ export default async function ConsultoriaPage() {
           oportunidades de mayor impacto y salimos con un plan de acción
           concreto para tu negocio. Te contactamos en menos de 24 horas.
         </p>
+        <p className="mt-3 text-sm text-zinc-300">
+          Tarifa: <span className="font-semibold">$260.000 COP por hora</span>.
+          <span className="text-zinc-400">
+            {" "}
+            El plan Premium incluye una sesión de estrategia cada trimestre.
+          </span>
+        </p>
         <LeadForm
           defaults={{ name: user?.name ?? "", email: user?.email ?? "" }}
         />
