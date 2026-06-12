@@ -24,6 +24,7 @@ export async function GET(
   const rows = await db
     .select({
       id: schema.analysisJobs.id,
+      tenantId: schema.analysisJobs.tenantId,
       type: schema.analysisJobs.type,
       status: schema.analysisJobs.status,
       configSnapshot: schema.analysisJobs.configSnapshot,
@@ -54,7 +55,31 @@ export async function GET(
     columns?: Record<string, string>;
     currency?: string;
     store_name?: string;
+    category_margins?: Record<string, number>;
   };
+
+  // Mapa de productos del tenant (editor /productos). margen_pct llega como
+  // string del driver (DECIMAL) — se convierte a número para el worker.
+  const pmRows = await db
+    .select({
+      sistema: schema.productMapEntries.sistema,
+      nombre: schema.productMapEntries.nombre,
+      categoria: schema.productMapEntries.categoria,
+      subcategoria: schema.productMapEntries.subcategoria,
+      margenPct: schema.productMapEntries.margenPct,
+    })
+    .from(schema.productMapEntries)
+    .where(eq(schema.productMapEntries.tenantId, job.tenantId));
+
+  const productMap = pmRows.map((r) => ({
+    sistema: r.sistema,
+    precio_post: null,
+    fecha_desde: null,
+    nombre: r.nombre,
+    categoria: r.categoria,
+    subcategoria: r.subcategoria,
+    margen_pct: r.margenPct == null ? null : Number(r.margenPct),
+  }));
 
   return NextResponse.json({
     job_id: job.id,
@@ -65,7 +90,9 @@ export async function GET(
       store_name: snap.store_name ?? null,
       currency: snap.currency ?? "COP",
     },
-    product_map: null, // editor de productos llega en Fase 2
+    product_map: productMap.length > 0 ? productMap : null,
+    // Fallback de margen por categoría (congelado en el snapshot del job).
+    category_margins: snap.category_margins ?? null,
     delta_config: null,
   });
 }

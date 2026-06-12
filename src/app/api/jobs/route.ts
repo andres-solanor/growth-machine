@@ -107,7 +107,15 @@ export async function POST(req: Request) {
     }
   }
 
+  // Merge sobre la config existente: el editor de productos guarda
+  // category_margins ahí y no debe perderse al crear un job.
+  const prevCfg = await db
+    .select({ configJson: schema.tenantConfigs.configJson })
+    .from(schema.tenantConfigs)
+    .where(eq(schema.tenantConfigs.tenantId, user.tenant.id))
+    .limit(1);
   const configJson = {
+    ...((prevCfg[0]?.configJson as Record<string, unknown>) ?? {}),
     columns: mapping,
     currency: user.tenant.currency,
     store_name: user.tenant.name,

@@ -82,6 +82,25 @@ export default async function PanelPage() {
           </Link>
         </div>
 
+        {jobs.some((j) => j.status === "succeeded") && (
+          <Link
+            href="/productos"
+            className="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 px-6 py-4 hover:border-zinc-700 hover:bg-zinc-800/60"
+          >
+            <div>
+              <h2 className="text-sm font-semibold">
+                Clasifica tus productos{" "}
+                <span className="font-normal text-zinc-500">· categorías y márgenes</span>
+              </h2>
+              <p className="mt-1 text-xs text-zinc-400">
+                Mejora tus reportes con tus propias categorías y activa el
+                análisis de rentabilidad agregando márgenes.
+              </p>
+            </div>
+            <span className="shrink-0 text-zinc-500">→</span>
+          </Link>
+        )}
+
         {jobs.length > 0 && (
           <div className="mt-8">
             <h2 className="mb-3 text-lg font-semibold">Tus análisis</h2>

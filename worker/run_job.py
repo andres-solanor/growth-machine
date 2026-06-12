@@ -20,6 +20,9 @@ Formato del spec (ver docs/SAAS-PLAN.md):
   "tenant_config": { ... campos de ReportConfig / alias "columns" ... },
   "product_map": [ {sistema, precio_post, fecha_desde, nombre,
                     categoria, subcategoria, margen_pct}, ... ] | null,
+  "category_margins": {"Panadería": 35, ...} | null,
+      # margen % estimado por categoría: fallback para productos sin
+      # margen propio en el product_map (editor /productos, nivel 1)
   "delta_config": { ... campos de BuilderConfig (solo type=delta) ... }
 }
 
@@ -132,20 +135,40 @@ def _read_input_frames(
     return frames
 
 
-def _normalize(frames: list[pd.DataFrame], product_map_rows: list[dict] | None) -> pd.DataFrame:
+def _normalize(
+    frames: list[pd.DataFrame],
+    product_map_rows: list[dict] | None,
+    category_margins: dict | None = None,
+) -> pd.DataFrame:
     """Normaliza ventas; sin product_map aplica el fallback de onboarding:
-    Nombre Corregido = Producto, Categoria Real = "Otros" (sin margen)."""
+    Nombre Corregido = Producto, Categoria Real = "Otros" (sin margen).
+    `category_margins` rellena margin_pct por categoría donde el producto
+    no tiene margen propio (nivel 1 del editor de productos)."""
     if product_map_rows:
-        pm = pd.DataFrame(product_map_rows, dtype=str)
-        return npd.normalize(frames, pm)
+        # Sin dtype=str: convertiría los None de JSON en el string "None";
+        # prepare_product_map ya coerciona los campos numéricos/fecha.
+        pm = pd.DataFrame(product_map_rows)
+        sales = npd.normalize(frames, pm)
+        # Productos nuevos que aún no están en el mapa quedan sin categoría:
+        # caen a "Otros" en vez de romper el reporte.
+        sales["Categoria Real"] = sales["Categoria Real"].fillna(FALLBACK_CATEGORY)
+    else:
+        sales = npd.consolidate(frames)
+        sales["Nombre Corregido"] = sales["Producto"]
+        sales["Categoria Real"] = FALLBACK_CATEGORY
+        sales["Sub Categoria Real"] = None
+        sales["margin_pct"] = None
+        npd.add_time_features(sales)
+        sales = npd.reorder_columns(sales)
 
-    sales = npd.consolidate(frames)
-    sales["Nombre Corregido"] = sales["Producto"]
-    sales["Categoria Real"] = FALLBACK_CATEGORY
-    sales["Sub Categoria Real"] = None
-    sales["margin_pct"] = None
-    npd.add_time_features(sales)
-    return npd.reorder_columns(sales)
+    if category_margins:
+        margins = pd.to_numeric(sales["margin_pct"], errors="coerce")
+        estimated = sales["Categoria Real"].map(
+            {k: float(v) for k, v in category_margins.items()}
+        )
+        sales["margin_pct"] = margins.fillna(estimated)
+
+    return sales
 
 
 def _write_normalized_csv(normalized: pd.DataFrame, out_dir: Path) -> Path:
@@ -191,7 +214,16 @@ def run_job(spec_path: Path, out_dir: Path | None = None) -> dict:
     frames = _read_input_frames(
         spec["input_files"], spec_path.parent, spec.get("column_mapping")
     )
-    normalized = _normalize(frames, spec.get("product_map"))
+    normalized = _normalize(frames, spec.get("product_map"), spec.get("category_margins"))
+
+    # ReportConfig trae por defecto el category_normalization de La Panettería;
+    # mapearía las categorías propias del tenant a NaN → "Otros". Si el tenant
+    # no define el suyo, se inyecta el mapeo identidad con SUS categorías.
+    tenant_config = dict(spec.get("tenant_config") or {})
+    if "category_normalization" not in tenant_config:
+        cats = normalized["Categoria Real"].dropna().unique()
+        tenant_config["category_normalization"] = {str(c): str(c) for c in cats}
+    spec["tenant_config"] = tenant_config
 
     with tempfile.TemporaryDirectory() as tmp:
         normalized_csv = _write_normalized_csv(normalized, Path(tmp))

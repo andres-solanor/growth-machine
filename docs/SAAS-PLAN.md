@@ -223,10 +223,31 @@ opcional. Cambio de motor requerido: aplicar margen de categoría como fallback 
 normalización del worker. El editor es a la vez el funnel de upgrade (categorías mejoran
 free/pro; márgenes desbloquean premium).
 
-Port remaining sections (trends, ticket, rules, profitability, bundles, recommendations);
-product map editor (auto-suggest categories, margin entry → unlocks profitability);
-delta report flow (event picker → BuilderConfig → job → ported delta sections);
-transactional email (Hostinger SMTP); consulting lead inbox polish.
+✅ 2026-06-11: **Editor de mapa de productos + márgenes, y secciones Premium completas.**
+`/productos` (link desde el panel tras el primer análisis): la lista nunca empieza en
+blanco — sale de `products.all_products` del último payload del tenant (revenue,
+frecuencia y corte Pareto ya calculados). Categorías con auto-sugerencia por palabras
+clave (`src/lib/category-suggest.ts`, ~15 categorías de retail de comida LatAm; el
+usuario confirma, con botón "aplicar todas"), datalist con categorías comunes + las
+propias. Márgenes en los 3 niveles del diseño: por producto (input en cada fila),
+por categoría (sliders, fallback marcado "margen estimado" en el reporte) o ninguno.
+Guardar reemplaza `product_map_entries` del tenant (todo producto queda mapeado;
+sin categoría → "Otros") y funde `category_margins` en `tenant_configs.configJson`
+(merge — `/api/jobs` ahora también hace merge para no pisarlo). El spec del worker
+entrega el mapa + márgenes; `worker/run_job.py` aplica el margen de categoría como
+fallback donde el producto no tiene margen propio e inyecta un
+`category_normalization` identidad con las categorías del tenant (sin esto, el
+default del motor —el mapa de La Panettería— colapsaba toda categoría ajena a
+"Otros"). Reporte: nuevas secciones Premium `sections-premium.tsx` — rentabilidad
+(Pareto de utilidad con gráfico, clasificación 👑 Champion / 🚜 Tractor / 💎 Gem /
+🎯 Niche, aviso de margen estimado/cobertura; si no hay márgenes, guía a /productos),
+combos sugeridos (launch-ready/balanced con confianza, lift y margen) y plan de
+acción (recommendations del motor — antes sin render). Con esto TODO el contenido
+Premium del payload está renderizado. `check:gating`, golden pytest y build verdes.
+
+Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
+delta); teasers blur (nice-to-have de abajo); transactional email (bloqueado por
+dominio+SMTP); colores por categoría del tenant en charts (hoy paleta fija).
 
 **Nice-to-have (idea de Andrés, 2026-06-11) — teasers "semi-visibles" con blur:** en vez
 de la tarjeta de candado actual, las secciones bloqueadas mostrarían la parte superior
@@ -277,3 +298,5 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-11 | Admin gateado por env var `ADMIN_EMAILS` (lista de correos), no por rol en DB | Cero migraciones y cero UI extra para un solo admin; el correo vive solo en el panel de Hostinger. Si algún día hay más admins, migrar a rol en `memberships` |
 | 2026-06-11 | Landing publica los 3 planes SIN precio para Pro/Premium ("precio de lanzamiento — escríbenos" → /consultoria) | Los precios aún no están decididos; el CTA a consultoría convierte la duda de precio en conversación de venta. Cuando se decidan, actualizar `PLANES` en `src/app/page.tsx` |
 | 2026-06-11 | Gráficos con `plotly.js-cartesian-dist-min` (bundle cartesiano, ~⅓ del Plotly completo) vía `react-plotly.js`, cargado solo en el cliente (`next/dynamic`, sin SSR) | El reporte solo usa barras/líneas/heatmap; Plotly completo pesa ~4.5 MB. Plotly toca `window` al importarse → no soporta SSR. Mismo motor de gráficos que los reportes HTML originales de La Panettería (tema y colorscales portados) |
+| 2026-06-11 | Márgenes por categoría guardados en `tenant_configs.configJson.category_margins` (no tabla nueva); tanto el editor como `/api/jobs` hacen merge del JSON, nunca lo reemplazan | Cero migraciones; el `config_snapshot` del job congela los márgenes usados en cada análisis (reproducibilidad y etiqueta "margen estimado" por reporte). El mapa de productos sí vive en su tabla (`product_map_entries`, ya existía) |
+| 2026-06-11 | El worker inyecta `category_normalization` identidad (categorías del propio tenant) cuando la config no trae uno | El default de `ReportConfig` es el mapeo de La Panettería: cualquier categoría ajena caía a "Otros" y el editor de categorías no habría servido de nada. Identidad = lo que el tenant escribió es lo que ve |

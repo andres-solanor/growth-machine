@@ -22,6 +22,11 @@ import {
   TicketSection,
   TrendsSection,
 } from "./sections-pro";
+import {
+  BundlesSection,
+  ProfitabilitySection,
+  RecommendationsSection,
+} from "./sections-premium";
 
 export const metadata: Metadata = { title: "Tu reporte — Analytikz" };
 
@@ -36,7 +41,10 @@ export default async function ReportePage(props: {
   if (!Number.isInteger(id) || id <= 0) notFound();
 
   const jobs = await getDb()
-    .select({ status: schema.analysisJobs.status })
+    .select({
+      status: schema.analysisJobs.status,
+      configSnapshot: schema.analysisJobs.configSnapshot,
+    })
     .from(schema.analysisJobs)
     .where(
       and(
@@ -53,6 +61,13 @@ export default async function ReportePage(props: {
 
   // Gating server-side: lo bloqueado jamás llega al navegador.
   const r = gateReport(payload, user.tenant.tier);
+
+  // Si el job corrió con márgenes estimados por categoría, la sección de
+  // rentabilidad lo declara (el snapshot congela la config de ese análisis).
+  const snap = (jobs[0].configSnapshot ?? {}) as {
+    category_margins?: Record<string, number>;
+  };
+  const marginEstimated = Object.keys(snap.category_margins ?? {}).length > 0;
 
   return (
     <main className="flex flex-1 flex-col bg-zinc-950 text-zinc-100">
@@ -87,6 +102,10 @@ export default async function ReportePage(props: {
         <TicketSection r={r} />
         <AnomaliesSection r={r} />
         <BasketRulesSection r={r} />
+        {/* Secciones Premium */}
+        <ProfitabilitySection r={r} marginEstimated={marginEstimated} />
+        <BundlesSection r={r} />
+        <RecommendationsSection r={r} />
         <LockedSections r={r} />
         <ConsultingCta />
       </div>

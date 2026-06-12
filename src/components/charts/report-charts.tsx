@@ -375,3 +375,41 @@ export function HourTicketChart({
     />
   );
 }
+
+// ── Top productos por utilidad (Premium) ─────────────────────────────────
+
+export function ProfitChart({
+  items,
+}: {
+  items: { name: string; profit: number | null; avgMargin: number | null }[];
+}) {
+  // Ranking visible + etiquetas únicas (si dos truncan igual, Plotly
+  // fusionaría sus barras en una sola fila).
+  const labeled = items.map((p, i) => ({ ...p, label: `${i + 1}. ${trunc(p.name, 28)}` }));
+  const ordered = [...labeled].reverse(); // Plotly pinta de abajo hacia arriba
+  return (
+    <Chart
+      height={items.length * 32 + 50}
+      data={[
+        {
+          y: ordered.map((p) => p.label),
+          x: ordered.map((p) => p.profit),
+          type: "bar",
+          orientation: "h",
+          marker: { color: "#f59e0b" },
+          text: ordered.map((p) =>
+            p.avgMargin != null ? `${p.avgMargin.toFixed(0)}% margen` : "",
+          ),
+          textposition: "outside",
+          textfont: { size: 11, color: "#a1a1aa" },
+          cliponaxis: false,
+          hovertemplate: "%{y}<br>utilidad $%{x:,.0f}<extra></extra>",
+        } as Partial<PlotData>,
+      ]}
+      layout={{
+        margin: { ...BASE_LAYOUT.margin, l: 8, r: 86, b: 28 },
+        yaxis: { ...BASE_LAYOUT.yaxis, automargin: true, gridcolor: "rgba(0,0,0,0)" },
+      }}
+    />
+  );
+}
