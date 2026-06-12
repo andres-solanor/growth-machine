@@ -237,6 +237,9 @@ export function LockedSections({ r }: { r: GatedReport }) {
       <div className="grid gap-3 sm:grid-cols-2">
         {r.locked.map(({ key, teaser }) => {
           const plan = planFor(key);
+          // Premium en dorado (más llamativo, mismo lenguaje de color que
+          // rentabilidad en los charts); Pro en el esmeralda de marca.
+          const premium = plan === "Premium";
           return (
             <div
               key={key}
@@ -247,7 +250,13 @@ export function LockedSections({ r }: { r: GatedReport }) {
                   <p className="text-sm font-semibold text-zinc-200">
                     🔒 {LOCKED_TITLES[key] ?? key}
                   </p>
-                  <span className="shrink-0 rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-400">
+                  <span
+                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                      premium
+                        ? "border-amber-600 text-amber-300"
+                        : "border-emerald-700 text-emerald-300"
+                    }`}
+                  >
                     Plan {plan}
                   </span>
                 </div>
@@ -267,7 +276,11 @@ export function LockedSections({ r }: { r: GatedReport }) {
                 <div className="absolute inset-x-0 bottom-3 flex justify-center">
                   <Link
                     href="/#planes"
-                    className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-emerald-950/60 hover:bg-emerald-500"
+                    className={`rounded-lg px-4 py-2 text-xs font-semibold shadow-lg ${
+                      premium
+                        ? "bg-gradient-to-r from-amber-400 to-orange-500 text-zinc-950 shadow-amber-950/60 hover:from-amber-300 hover:to-orange-400"
+                        : "bg-emerald-600 text-white shadow-emerald-950/60 hover:bg-emerald-500"
+                    }`}
                   >
                     Desbloquéalo con {plan}
                   </Link>

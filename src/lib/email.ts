@@ -88,6 +88,35 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
   }
 }
 
+// Diagnóstico para /api/health?smtp=1: prueba la conexión y el login SMTP
+// SIN exponer secretos (solo flags y el mensaje de error del servidor).
+// passHasEdgeWhitespace delata el clásico espacio colado al copiar/pegar.
+export async function smtpDiag(): Promise<Record<string, unknown>> {
+  const pass = process.env.SMTP_PASS;
+  const port = Number(process.env.SMTP_PORT ?? 465);
+  const diag: Record<string, unknown> = {
+    user: process.env.SMTP_USER ?? null,
+    passSet: Boolean(pass),
+    passHasEdgeWhitespace: pass ? /^\s|\s$/.test(pass) : null,
+    baseUrl: baseUrl(),
+    host: process.env.SMTP_HOST ?? "smtp.hostinger.com",
+    port,
+  };
+  const transport = getTransport();
+  if (!transport) {
+    diag.verify = "disabled — falta SMTP_USER, SMTP_PASS o APP_BASE_URL";
+    return diag;
+  }
+  try {
+    await transport.verify();
+    diag.verify = "ok";
+  } catch (err) {
+    diag.verify = "error";
+    diag.verifyError = err instanceof Error ? err.message : String(err);
+  }
+  return diag;
+}
+
 export async function sendVerificationEmail(
   to: string,
   name: string,

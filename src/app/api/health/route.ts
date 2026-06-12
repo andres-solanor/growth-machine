@@ -6,11 +6,16 @@ import { getPool } from "@/lib/db";
 // (los payloads gzip de ~0.4-1 MB deben caber con holgura en un INSERT).
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   const checks: Record<string, unknown> = {
     app: "ok",
     time: new Date().toISOString(),
   };
+  // ?smtp=1: prueba conexión+login SMTP (sin secretos en la respuesta).
+  if (new URL(req.url).searchParams.has("smtp")) {
+    const { smtpDiag } = await import("@/lib/email");
+    checks.smtp = await smtpDiag();
+  }
   try {
     const pool = getPool();
     const [[packet]] = (await pool.query(
