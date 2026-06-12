@@ -1,0 +1,32 @@
+# Diagnóstico de conexión worker → app (correr a mano desde la pestaña Actions).
+# Distingue entre: (a) el secreto APP_BASE_URL apunta a un dominio viejo/errado,
+# (b) Hostinger bloquea las IPs de los runners de GitHub.
+# No imprime secretos: GitHub enmascara el valor y aquí solo comparamos.
+name: Diag conexion worker
+
+on: workflow_dispatch
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    env:
+      APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+    steps:
+      - name: Salud con el dominio real (fijo)
+        run: |
+          echo "GET https://analytikz.com.co/api/health"
+          curl -sS -m 20 https://analytikz.com.co/api/health && echo || echo "FALLO con el dominio fijo"
+
+      - name: Salud con APP_BASE_URL (el secreto que usa el worker)
+        run: |
+          base="${APP_BASE_URL%/}"
+          echo "GET (APP_BASE_URL)/api/health"
+          curl -sS -m 20 "$base/api/health" && echo || echo "FALLO con APP_BASE_URL"
+
+      - name: Comparar APP_BASE_URL con el dominio esperado
+        run: |
+          if [ "${APP_BASE_URL%/}" = "https://analytikz.com.co" ]; then
+            echo "APP_BASE_URL es exactamente https://analytikz.com.co"
+          else
+            echo "OJO: APP_BASE_URL NO es https://analytikz.com.co (largo: ${#APP_BASE_URL})"
+          fi
