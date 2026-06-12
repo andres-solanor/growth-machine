@@ -16,6 +16,12 @@ export async function GET(req: Request) {
     const { smtpDiag } = await import("@/lib/email");
     checks.smtp = await smtpDiag();
   }
+  // ?proc=1: censo de procesos/hilos de la cuenta (qué consume el límite
+  // "Max processes" de Hostinger). Solo nombres de proceso, nunca cmdline.
+  if (new URL(req.url).searchParams.has("proc")) {
+    const { procCensus } = await import("@/lib/proc-census");
+    checks.proc = await procCensus();
+  }
   try {
     const pool = getPool();
     const [[packet]] = (await pool.query(
