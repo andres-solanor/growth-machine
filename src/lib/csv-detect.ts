@@ -11,6 +11,9 @@ export const CANONICAL_FIELDS = [
   { key: "quantity", label: "Cantidad", required: true },
   { key: "unit_price", label: "Precio unitario", required: false },
   { key: "total", label: "Total de la línea", required: true },
+  { key: "categoria", label: "Categoría del producto", required: false },
+  { key: "subcategoria", label: "Subcategoría", required: false },
+  { key: "margen_pct", label: "Margen (%)", required: false },
 ] as const;
 
 export type FieldKey = (typeof CANONICAL_FIELDS)[number]["key"];
@@ -37,6 +40,18 @@ const SYNONYMS: Record<FieldKey, string[]> = {
   total: [
     "total", "valor total", "importe", "total linea", "vlr total",
     "subtotal", "monto",
+  ],
+  categoria: [
+    "categoria", "categoria real", "category", "familia", "linea",
+    "tipo producto", "grupo",
+  ],
+  subcategoria: [
+    "subcategoria", "sub categoria", "subcategory", "sub category",
+    "subfamilia", "sub linea", "sublinea",
+  ],
+  margen_pct: [
+    "margen", "margen pct", "margen %", "margin", "margin pct",
+    "margin %", "rentabilidad", "margen porcentaje",
   ],
 };
 

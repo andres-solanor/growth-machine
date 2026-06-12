@@ -67,7 +67,13 @@ CANONICAL_TO_POS = {
     "quantity": "Cantidad",
     "unit_price": "Individual",
     "total": "Total",
+    "categoria": "Categoria Real",
+    "subcategoria": "Sub Categoria Real",
+    "margen_pct": "margin_pct",
 }
+
+# Enrichment columns that the file may supply directly (via column mapping)
+_ENRICHMENT_COLS = {"Categoria Real", "Sub Categoria Real", "margin_pct"}
 
 
 def _load_spec(spec_path: Path) -> dict:
@@ -91,6 +97,13 @@ def _apply_column_mapping(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
         for key, src in mapping.items()
         if key in CANONICAL_TO_POS and src in df.columns
     }
+    # If the file already has a column with a target name (e.g. "Producto") but
+    # a *different* column is being renamed to that same target, the original
+    # column would create a duplicate label → drop it first.
+    targets = set(rename.values())
+    cols_to_drop = [c for c in df.columns if c in targets and c not in rename]
+    if cols_to_drop:
+        df = df.drop(columns=cols_to_drop)
     df = df.rename(columns=rename)
 
     # Hora e Individual son opcionales (se sintetizan); el resto es obligatorio.
@@ -109,7 +122,8 @@ def _apply_column_mapping(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
         qty = pd.to_numeric(df["Cantidad"], errors="coerce")
         df["Individual"] = (total / qty.replace(0, pd.NA)).fillna(total)
 
-    return df[npd.POS_COLS]
+    enrichment_present = [c for c in _ENRICHMENT_COLS if c in df.columns]
+    return df[npd.POS_COLS + enrichment_present]
 
 
 def _read_input_frames(
@@ -140,20 +154,40 @@ def _normalize(
     product_map_rows: list[dict] | None,
     category_margins: dict | None = None,
 ) -> pd.DataFrame:
-    """Normaliza ventas; sin product_map aplica el fallback de onboarding:
-    Nombre Corregido = Producto, Categoria Real = "Otros" (sin margen).
+    """Normaliza ventas.
+
+    Prioridad de enriquecimiento:
+    1. El archivo ya trae Categoria Real (mapeada en el wizard) → se usa tal
+       cual; el product_map se ignora para no pisar datos más granulares.
+    2. product_map presente → enriquecimiento por nombre de producto.
+    3. Fallback de onboarding: Nombre Corregido = Producto, Categoria = "Otros".
+
     `category_margins` rellena margin_pct por categoría donde el producto
     no tiene margen propio (nivel 1 del editor de productos)."""
-    if product_map_rows:
+    consolidated = npd.consolidate(frames)
+
+    if "Categoria Real" in consolidated.columns:
+        # Archivo con enriquecimiento propio: completar huecos y normalizar.
+        sales = consolidated
+        if "Nombre Corregido" not in sales.columns:
+            sales["Nombre Corregido"] = sales["Producto"]
+        if "Sub Categoria Real" not in sales.columns:
+            sales["Sub Categoria Real"] = None
+        if "margin_pct" not in sales.columns:
+            sales["margin_pct"] = None
+        sales["Categoria Real"] = sales["Categoria Real"].fillna(FALLBACK_CATEGORY)
+        npd.add_time_features(sales)
+        sales = npd.reorder_columns(sales)
+    elif product_map_rows:
         # Sin dtype=str: convertiría los None de JSON en el string "None";
         # prepare_product_map ya coerciona los campos numéricos/fecha.
         pm = pd.DataFrame(product_map_rows)
-        sales = npd.normalize(frames, pm)
+        sales = npd.normalize(consolidated, pm)
         # Productos nuevos que aún no están en el mapa quedan sin categoría:
         # caen a "Otros" en vez de romper el reporte.
         sales["Categoria Real"] = sales["Categoria Real"].fillna(FALLBACK_CATEGORY)
     else:
-        sales = npd.consolidate(frames)
+        sales = consolidated
         sales["Nombre Corregido"] = sales["Producto"]
         sales["Categoria Real"] = FALLBACK_CATEGORY
         sales["Sub Categoria Real"] = None
