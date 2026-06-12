@@ -27,12 +27,43 @@ const BASE_LAYOUT: Partial<Layout> = {
 
 const CONFIG = { responsive: true, displayModeBar: false };
 
-// Paleta para series por categoría (los colores por tenant llegarán con el
-// editor de mapa de productos; mientras tanto, paleta fija consistente).
+// Color estable por categoría: la misma categoría recibe el mismo color en
+// todos los reportes del tenant. Con índice secuencial el color dependía del
+// orden de aparición, que cambia entre meses y entre análisis. El color sale
+// de un hash del nombre, con sondeo lineal para que dos categorías del mismo
+// gráfico no choquen; "Otros" (el cajón de sastre) siempre va en gris neutro.
 const PALETTE = [
   "#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ef4444",
-  "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#6b7280",
+  "#06b6d4", "#ec4899", "#84cc16", "#f97316",
 ];
+const NEUTRAL = "#6b7280";
+const NEUTRAL_CATS = new Set(["otros", "sin categoría", "sin categoria"]);
+
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function categoryColors(cats: string[]): Map<string, string> {
+  const map = new Map<string, string>();
+  const taken = new Set<number>();
+  // Orden alfabético, no de aparición: el resultado es el mismo aunque las
+  // categorías lleguen en otro orden en el siguiente análisis.
+  for (const cat of [...cats].sort()) {
+    if (NEUTRAL_CATS.has(cat.trim().toLowerCase())) {
+      map.set(cat, NEUTRAL);
+      continue;
+    }
+    let idx = hashStr(cat) % PALETTE.length;
+    if (taken.size < PALETTE.length) {
+      while (taken.has(idx)) idx = (idx + 1) % PALETTE.length;
+    }
+    taken.add(idx);
+    map.set(cat, PALETTE[idx]);
+  }
+  return map;
+}
 
 function Chart({
   data,
@@ -173,17 +204,18 @@ export function MonthlyCatChart({
   rows: { category: string; month: string; revenue: number | null }[];
 }) {
   const cats = [...new Set(rows.map((r) => r.category))];
+  const colors = categoryColors(cats);
   return (
     <Chart
       height={280}
-      data={cats.map((cat, i) => {
+      data={cats.map((cat) => {
         const mine = rows.filter((r) => r.category === cat);
         return {
           x: mine.map((r) => r.month),
           y: mine.map((r) => r.revenue),
           type: "bar",
           name: trunc(cat, 18),
-          marker: { color: PALETTE[i % PALETTE.length] },
+          marker: { color: colors.get(cat) },
           hovertemplate: `${cat}<br>%{x}: $%{y:,.0f}<extra></extra>`,
         } as Partial<PlotData>;
       })}

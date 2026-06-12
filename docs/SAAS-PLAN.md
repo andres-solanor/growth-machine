@@ -295,8 +295,14 @@ vars del panel de Hostinger: `SMTP_USER`, `SMTP_PASS`, `APP_BASE_URL` (requerida
 sin ellas los correos se desactivan con un warn — dev local sigue funcionando), y
 opcionales `SMTP_HOST` (smtp.hostinger.com), `SMTP_PORT` (465), `MAIL_FROM`.
 
+**✅ Colores estables por categoría (2026-06-12):** en `report-charts.tsx` el color
+de cada categoría ya no depende del orden de aparición (cambiaba entre meses y
+entre análisis) sino de un hash del nombre — la misma categoría conserva su color
+en todos los reportes del tenant; "Otros"/"Sin categoría" siempre en gris neutro;
+sondeo lineal evita choques dentro del mismo gráfico.
+
 Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
-delta); colores por categoría del tenant en charts (hoy paleta fija).
+delta).
 
 **Nice-to-have (idea de Andrés, 2026-06-11) — enriquecimiento de categorías con IA:**
 la auto-sugerencia actual es por palabras clave (~15 categorías de comida LatAm), pero
