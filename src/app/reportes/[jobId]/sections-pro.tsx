@@ -1,5 +1,5 @@
 import type { GatedReport } from "@/lib/report";
-import { fmtMoney, fmtNum, fmtIsoDate } from "@/lib/format";
+import { fmtMoney, fmtNum } from "@/lib/format";
 import {
   CartDistChart,
   HourTicketChart,
@@ -19,6 +19,15 @@ const fmtPct = (v: number | null | undefined, decimals = 0) =>
 
 const fmtHour = (h: number | null | undefined) =>
   h == null ? "—" : `${String(h).padStart(2, "0")}:00`;
+
+// Los días atípicos llegan del motor ya formateados ("08 Mar", strftime
+// '%d %b' en locale C) — NO son ISO; solo traducimos el mes al español.
+const MES_ES: Record<string, string> = {
+  Jan: "ene", Feb: "feb", Mar: "mar", Apr: "abr", May: "may", Jun: "jun",
+  Jul: "jul", Aug: "ago", Sep: "sep", Oct: "oct", Nov: "nov", Dec: "dic",
+};
+const dayLabel = (s: string) =>
+  s.replace(/[A-Z][a-z]{2}/, (m) => MES_ES[m] ?? m);
 
 // "2026-04" → "abr 2026" (UTC para no correrse de mes por zona horaria).
 const monthLabel = (ym: string | null) => {
@@ -216,7 +225,7 @@ export function AnomaliesSection({ r }: { r: GatedReport }) {
       key={d.date}
       className="flex items-center justify-between gap-3 px-3 py-2 text-xs"
     >
-      <span className="text-zinc-300">{fmtIsoDate(d.date)}</span>
+      <span className="text-zinc-300">{dayLabel(d.date)}</span>
       <span className={good ? "text-emerald-400" : "text-red-400"}>
         {fmtMoney(d.revenue ?? 0, c)}
       </span>

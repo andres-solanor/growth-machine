@@ -228,6 +228,15 @@ product map editor (auto-suggest categories, margin entry → unlocks profitabil
 delta report flow (event picker → BuilderConfig → job → ported delta sections);
 transactional email (Hostinger SMTP); consulting lead inbox polish.
 
+**Nice-to-have (idea de Andrés, 2026-06-11) — teasers "semi-visibles" con blur:** en vez
+de la tarjeta de candado actual, las secciones bloqueadas mostrarían la parte superior
+del contenido real visible y el resto desvaneciéndose con blur, con un botón encima del
+área borrosa por sección ("Desbloquea con Pro" / "Desbloquea con Premium" según el módulo).
+OJO seguridad: el contenido borroso NO puede ser el dato real (el gating server-side jamás
+lo envía al navegador y eso no cambia) — debe ser una imagen estática de demo o datos
+sintéticos renderizados, con el teaser de dato real (1 cifra) como gancho. Hacerlo después
+del editor de product map.
+
 ### Phase 3 — Deferred
 
 Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript port of

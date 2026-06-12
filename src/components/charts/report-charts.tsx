@@ -204,13 +204,16 @@ export function TopProductsChart({
 }: {
   items: { name: string; revenue: number | null; revShare: number | null }[];
 }) {
-  const ordered = [...items].reverse(); // Plotly pinta de abajo hacia arriba
+  // El "1." del ranking también garantiza etiquetas únicas: si dos etiquetas
+  // coinciden (p. ej. tras truncar), Plotly las fusiona en una sola barra.
+  const labeled = items.map((p, i) => ({ ...p, label: `${i + 1}. ${trunc(p.name, 28)}` }));
+  const ordered = [...labeled].reverse(); // Plotly pinta de abajo hacia arriba
   return (
     <Chart
       height={items.length * 32 + 50}
       data={[
         {
-          y: ordered.map((p) => trunc(p.name, 28)),
+          y: ordered.map((p) => p.label),
           x: ordered.map((p) => p.revenue),
           type: "bar",
           orientation: "h",
@@ -239,7 +242,13 @@ export function PairsChart({
 }: {
   pairs: { a: string; b: string; count: number; lift: number | null }[];
 }) {
-  const ordered = [...pairs].reverse();
+  // Ranking visible + etiquetas únicas: pares distintos pueden truncar al
+  // mismo texto y Plotly fusionaría sus barras en una sola fila.
+  const labeled = pairs.map((p, i) => ({
+    ...p,
+    label: `${i + 1}. ${trunc(p.a, 18)} + ${trunc(p.b, 18)}`,
+  }));
+  const ordered = [...labeled].reverse();
   const liftColor = (lift: number | null) =>
     lift != null && lift >= 1.5
       ? "#10b981"
@@ -251,7 +260,7 @@ export function PairsChart({
       height={pairs.length * 36 + 50}
       data={[
         {
-          y: ordered.map((p) => `${trunc(p.a, 18)} + ${trunc(p.b, 18)}`),
+          y: ordered.map((p) => p.label),
           x: ordered.map((p) => p.count),
           type: "bar",
           orientation: "h",
@@ -313,7 +322,9 @@ export function TrendsChart({
       height={items.length * 30 + 50}
       data={[
         {
-          y: ordered.map((p) => trunc(p.product, 26)),
+          // Espacios de ancho cero: etiquetas únicas aunque dos nombres
+          // truncados coincidan (Plotly fusionaría las barras).
+          y: ordered.map((p, i) => trunc(p.product, 26) + "\u200B".repeat(i)),
           x: ordered.map((p) => p.pct),
           type: "bar",
           orientation: "h",

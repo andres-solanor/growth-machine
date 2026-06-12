@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
@@ -27,16 +28,20 @@ export async function cambiarTier(formData: FormData) {
     .from(schema.tenants)
     .where(eq(schema.tenants.id, tenantId))
     .limit(1);
-  if (prev.length === 0 || prev[0].tier === tier) return;
+  if (prev.length === 0) return;
 
-  await db.update(schema.tenants).set({ tier }).where(eq(schema.tenants.id, tenantId));
-  await db.insert(schema.auditLog).values({
-    actorUserId: admin.id,
-    tenantId,
-    action: "admin.tier_change",
-    detail: { from: prev[0].tier, to: tier },
-  });
+  if (prev[0].tier !== tier) {
+    await db.update(schema.tenants).set({ tier }).where(eq(schema.tenants.id, tenantId));
+    await db.insert(schema.auditLog).values({
+      actorUserId: admin.id,
+      tenantId,
+      action: "admin.tier_change",
+      detail: { from: prev[0].tier, to: tier },
+    });
+  }
   revalidatePath("/admin");
+  // El query param hace visible la confirmación ("✓ Guardado") en la fila.
+  redirect(`/admin?guardado=plan-${tenantId}`);
 }
 
 const leadSchema = z.object({
@@ -64,4 +69,5 @@ export async function cambiarEstadoLead(formData: FormData) {
     detail: { leadId: parsed.data.leadId, to: parsed.data.status },
   });
   revalidatePath("/admin");
+  redirect(`/admin?guardado=lead-${parsed.data.leadId}`);
 }

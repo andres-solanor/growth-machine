@@ -18,9 +18,12 @@ const JOB_STATUS_CLS: Record<string, string> = {
   timed_out: "text-amber-400",
 };
 
-export default async function AdminPage() {
+export default async function AdminPage(props: {
+  searchParams: Promise<{ guardado?: string }>;
+}) {
   const admin = await getAdminUser();
   if (!admin) redirect("/panel");
+  const { guardado } = await props.searchParams;
 
   const db = getDb();
   const [tenants, jobs, leads] = await Promise.all([
@@ -115,7 +118,11 @@ export default async function AdminPage() {
                   <td className="px-4 py-2.5">
                     <form action={cambiarTier} className="flex items-center gap-2">
                       <input type="hidden" name="tenantId" value={t.id} />
+                      {/* key con el tier guardado: tras la acción, React
+                          remonta el select mostrando el valor de la DB (sin
+                          key, el form se resetea al valor viejo del DOM). */}
                       <select
+                        key={`${t.id}-${t.tier}`}
                         name="tier"
                         defaultValue={t.tier}
                         className="rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs"
@@ -130,6 +137,11 @@ export default async function AdminPage() {
                       >
                         Guardar
                       </button>
+                      {guardado === `plan-${t.id}` && (
+                        <span className="text-xs font-medium text-emerald-400">
+                          ✓ Guardado
+                        </span>
+                      )}
                     </form>
                   </td>
                 </tr>
@@ -208,6 +220,7 @@ export default async function AdminPage() {
                   <form action={cambiarEstadoLead} className="flex items-center gap-2">
                     <input type="hidden" name="leadId" value={l.id} />
                     <select
+                      key={`${l.id}-${l.status}`}
                       name="status"
                       defaultValue={l.status}
                       className="rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs"
@@ -222,6 +235,11 @@ export default async function AdminPage() {
                     >
                       Guardar
                     </button>
+                    {guardado === `lead-${l.id}` && (
+                      <span className="text-xs font-medium text-emerald-400">
+                        ✓ Guardado
+                      </span>
+                    )}
                   </form>
                 </div>
                 {l.message && (
