@@ -1,9 +1,11 @@
 import { gunzipSync } from "node:zlib";
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { verifyWorkerRequest } from "@/lib/worker-auth";
 import { salesReportPayloadSchema } from "@/lib/payload-schema";
+import { sendReportReadyEmail } from "@/lib/email";
+import { fmtMoney, fmtNum } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -129,6 +131,33 @@ export async function POST(
       .set({ status: "succeeded", errorText: null, finishedAt: new Date() })
       .where(eq(schema.analysisJobs.id, id));
   });
+
+  // Aviso "tu reporte está listo" a los dueños con correo verificado.
+  // Nunca afecta la respuesta al worker: el reporte ya quedó guardado.
+  try {
+    const owners = await db
+      .select({ email: schema.users.email, name: schema.users.name })
+      .from(schema.memberships)
+      .innerJoin(schema.users, eq(schema.users.id, schema.memberships.userId))
+      .where(
+        and(
+          eq(schema.memberships.tenantId, job.tenantId),
+          eq(schema.memberships.role, "owner"),
+          isNotNull(schema.users.emailVerifiedAt),
+        ),
+      );
+    const resumen = {
+      storeName: data.meta.store_name ?? "tu negocio",
+      totalRevenue: fmtMoney(data.summary.total_revenue, data.meta.currency),
+      totalOrders: fmtNum(data.summary.total_orders),
+      dateRange: data.summary.date_range,
+    };
+    await Promise.all(
+      owners.map((o) => sendReportReadyEmail(o.email, o.name, id, resumen)),
+    );
+  } catch (err) {
+    console.error(`[worker-result] aviso por correo falló (job ${id}):`, err);
+  }
 
   return NextResponse.json({ ok: true });
 }

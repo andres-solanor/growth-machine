@@ -284,9 +284,19 @@ mayor parte del payload; (3) caché por proceso de los últimos 3 payloads parse
 (clave `report_payloads.id`, inmutable tras succeeded; un análisis nuevo = fila
 nueva = miss natural), con consulta previa solo del id para no traer el blob en hit.
 
+**✅ Email transaccional (2026-06-12):** `src/lib/email.ts` (nodemailer, buzón
+no-reply@analytikz.com.co). Dos correos en español con estilos inline fondo claro:
+verificación (registro genera token hex de 64 chars → `/verificar?token=...`, un solo
+uso; banner en `/panel` con botón de reenvío — la verificación NO bloquea ninguna
+función, solo habilita avisos) y "tu reporte está listo" (hook en el result route del
+worker, tras la transacción, solo a owners con correo verificado, con ventas/órdenes
+del summary; en try/catch — jamás falla la respuesta al worker). Config solo por env
+vars del panel de Hostinger: `SMTP_USER`, `SMTP_PASS`, `APP_BASE_URL` (requeridas;
+sin ellas los correos se desactivan con un warn — dev local sigue funcionando), y
+opcionales `SMTP_HOST` (smtp.hostinger.com), `SMTP_PORT` (465), `MAIL_FROM`.
+
 Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
-delta); transactional email (dominio listo ✓, buzón no-reply@analytikz.com.co creado ✓,
-falta cablear SMTP en la app); colores por categoría del tenant en charts (hoy paleta fija).
+delta); colores por categoría del tenant en charts (hoy paleta fija).
 
 **Nice-to-have (idea de Andrés, 2026-06-11) — enriquecimiento de categorías con IA:**
 la auto-sugerencia actual es por palabras clave (~15 categorías de comida LatAm), pero
@@ -362,3 +372,4 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-11 | JSON en DB con `customType` propio (JSON.parse en `fromDriver`) en vez del `json()` de drizzle; merges de `config_json` por lista blanca de claves, nunca spread | En MariaDB (Hostinger) JSON es LONGTEXT y mysql2 devuelve string — drizzle no parsea en lectura y todo `.campo` daba undefined en producción (sliders de margen "borrados", column_mapping del worker perdido en silencio). El spread de ese string además sembró claves basura "0","1","2"… que la lista blanca autolimpia en el siguiente guardado |
 | 2026-06-11 | Blur-teasers: las tarjetas bloqueadas muestran demos 100% SINTÉTICOS (`locked-demos.tsx`, datos inventados fijos) bajo blur, nunca una versión borrosa del dato real | El gating server-side es la garantía de seguridad del producto: lo bloqueado jamás se serializa al cliente, ni siquiera "borroso" (un blur CSS se quita con un click en DevTools). El gancho de venta sigue siendo la cifra real del teaser de `lib/gating.ts`, que sí es pública por diseño |
 | 2026-06-11 | Validación zod del payload SOLO al escribir (worker result route); la lectura parsea sin revalidar, suelta `interactive_base` y cachea los últimos 3 payloads por proceso | Revalidar varios MB con zod en cada vista (con copia profunda incluida) disparaba CPU/memoria/procesos en Hostinger → ráfagas de 503. La fila de un job succeeded nunca se sobreescribe, así que el caché por `report_payloads.id` no necesita invalidación. Cuando exista el filtrado interactivo, NO volver a cargar interactive_base en cada vista — diseñarlo aparte (endpoint propio o slice) |
+| 2026-06-12 | Email transaccional con nodemailer + buzón Hostinger (no SaaS de email); verificación NO bloquea funciones (solo banner + habilita avisos); "reporte listo" solo a owners verificados; si faltan `SMTP_USER`/`SMTP_PASS`/`APP_BASE_URL` los correos se desactivan con un warn | SMTP ya viene incluido en el plan de Hostinger (costo cero, sin tercero nuevo). Bloquear el producto por verificar correo mataría el "wow" del primer reporte. Enviar solo a verificados evita spamear direcciones mal escritas. El fallback silencioso mantiene dev local y registro funcionando aunque el correo falle — el correo nunca es camino crítico |

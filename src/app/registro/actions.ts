@@ -1,11 +1,13 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
+import { sendVerificationEmail } from "@/lib/email";
 
 const registroSchema = z.object({
   name: z.string().trim().min(2, "Escribe tu nombre"),
@@ -44,10 +46,11 @@ export async function registrar(
     }
 
     const passwordHash = await hashPassword(password);
+    const verificationToken = randomBytes(32).toString("hex");
     userId = await db.transaction(async (tx) => {
       const [u] = await tx
         .insert(schema.users)
-        .values({ name, email, passwordHash })
+        .values({ name, email, passwordHash, verificationToken })
         .$returningId();
       const [t] = await tx
         .insert(schema.tenants)
@@ -66,6 +69,10 @@ export async function registrar(
       });
       return u.id;
     });
+
+    // El correo de verificación nunca bloquea el registro: si el SMTP falla,
+    // el usuario puede reenviarlo desde el panel.
+    sendVerificationEmail(email, name, verificationToken).catch(() => {});
   } catch (err) {
     console.error("[registro] error:", err);
     return { error: "No pudimos crear tu cuenta. Intenta de nuevo en un momento." };

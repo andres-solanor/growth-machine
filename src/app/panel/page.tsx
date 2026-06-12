@@ -5,7 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/user";
 import { fmtDateTime } from "@/lib/format";
-import { cerrarSesion } from "./actions";
+import { cerrarSesion, reenviarVerificacion } from "./actions";
 
 export const metadata: Metadata = { title: "Panel — Analytikz" };
 
@@ -24,9 +24,14 @@ const JOB_STATUS: Record<string, { label: string; cls: string }> = {
   timed_out: { label: "Expiró", cls: "border-amber-700 bg-amber-950 text-amber-300" },
 };
 
-export default async function PanelPage() {
+export default async function PanelPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ verificacion?: string }>;
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/ingresar");
+  const { verificacion } = await searchParams;
 
   const jobs = await getDb()
     .select({
@@ -66,6 +71,33 @@ export default async function PanelPage() {
         <p className="mt-1 text-zinc-400">
           {user.tenant.name} · {user.tenant.currency}
         </p>
+
+        {/* Banner informativo: la verificación NO bloquea ninguna función,
+            solo habilita los avisos por correo (reporte listo, etc.). */}
+        {!user.emailVerifiedAt && (
+          <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-amber-800 bg-amber-950/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-amber-200">
+                Confirma tu correo
+              </p>
+              <p className="mt-0.5 text-xs text-amber-200/70">
+                {verificacion === "enviada"
+                  ? `Correo reenviado a ${user.email}. Revisa tu bandeja (y el spam).`
+                  : verificacion === "error"
+                    ? "No pudimos enviar el correo. Intenta de nuevo en unos minutos."
+                    : `Te enviamos un enlace a ${user.email} para poder avisarte cuando tus reportes estén listos.`}
+              </p>
+            </div>
+            <form action={reenviarVerificacion} className="shrink-0">
+              <button
+                type="submit"
+                className="rounded-lg border border-amber-700 px-3 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-900/50"
+              >
+                Reenviar correo
+              </button>
+            </form>
+          </div>
+        )}
 
         <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-center">
           <h2 className="text-lg font-semibold">Tu primer análisis de ventas</h2>
