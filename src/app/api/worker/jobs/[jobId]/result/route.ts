@@ -1,4 +1,6 @@
-import { gunzipSync } from "node:zlib";
+import { gunzip as _gunzip } from "node:zlib";
+import { promisify } from "node:util";
+const gunzip = promisify(_gunzip);
 import { NextResponse } from "next/server";
 import { and, eq, isNotNull } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
@@ -65,7 +67,7 @@ export async function POST(
   // Éxito: payload gzip
   let payload: unknown;
   try {
-    payload = JSON.parse(gunzipSync(body).toString("utf-8"));
+    payload = JSON.parse((await gunzip(body)).toString("utf-8"));
   } catch {
     await db
       .update(schema.analysisJobs)

@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
-import { gzipSync } from "node:zlib";
+import { gzip as _gzip } from "node:zlib";
+import { promisify } from "node:util";
+const gzip = promisify(_gzip);
 import { NextResponse } from "next/server";
 import { getDb, schema } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/user";
@@ -67,7 +69,7 @@ export async function POST(req: Request) {
     .values({
       tenantId: user.tenant.id,
       filename: file.name.slice(0, 255),
-      contentGz: gzipSync(buf),
+      contentGz: await gzip(buf),
       sha256: createHash("sha256").update(buf).digest("hex"),
       sizeBytes: buf.length,
     })

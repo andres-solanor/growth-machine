@@ -1,4 +1,6 @@
-import { gunzipSync } from "node:zlib";
+import { gunzip as _gunzip } from "node:zlib";
+import { promisify } from "node:util";
+const gunzip = promisify(_gunzip);
 import { and, desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import type { SalesReportPayload } from "@/lib/payload-schema";
@@ -22,9 +24,9 @@ export * from "./gating";
 const payloadCache = new Map<number, SalesReportPayload>();
 const CACHE_MAX = 3;
 
-function parseAndCache(rowId: number, gz: Buffer): SalesReportPayload {
+async function parseAndCache(rowId: number, gz: Buffer): Promise<SalesReportPayload> {
   const payload = JSON.parse(
-    gunzipSync(gz).toString("utf-8"),
+    (await gunzip(gz)).toString("utf-8"),
   ) as SalesReportPayload;
   delete payload.analyses.interactive_base;
   payloadCache.set(rowId, payload);
@@ -56,7 +58,7 @@ async function loadByRowId(rowId: number): Promise<SalesReportPayload | null> {
     .where(eq(schema.reportPayloads.id, rowId))
     .limit(1);
   if (rows.length === 0) return null;
-  return parseAndCache(rowId, rows[0].payloadGz);
+  return await parseAndCache(rowId, rows[0].payloadGz);
 }
 
 // Carga y descomprime el payload de un job exitoso del tenant.
