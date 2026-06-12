@@ -274,6 +274,17 @@ el usuario siempre confirma en el editor) cubriría la cola larga. Consideracion
 costo por análisis, API key en env de Hostinger, y que los nombres de producto viajan
 a un tercero (revisar privacidad/EULA antes). Después del blur-teaser.
 
+**Nice-to-have (idea de Andrés, 2026-06-11) — PDF "revista de insights", el marketing
+que camina:** además del email con resultados (contenido capado al tier, como el
+reporte web), un PDF de diseño top — una revista de insights que valga la pena
+imprimir a color y dejar sobre el mostrador. Cada copia impresa es publicidad
+ambulante: marca Analytikz + URL/QR en cada página, y un negocio mostrándola a otros
+negocios es el funnel físico. Nota técnica: encaja con la arquitectura actual
+generándolo en el worker de GitHub Actions (Python: WeasyPrint o Chromium headless —
+Hostinger managed no corre browsers) y guardándolo gzip en DB como los payloads;
+el contenido sale del mismo payload ya gateado por tier. Después del blur-teaser y
+del delta flow; el email de resultados va primero (necesita el buzón SMTP).
+
 **Idea a explorar (Andrés, 2026-06-11) — sección de "otros servicios de analítica":**
 una sección separada del sitio dedicada a otros servicios de analítica (más allá del
 reporte de ventas), diseñada alrededor de las habilidades, conocimiento y experiencia
