@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState } from "react";
 import Link from "next/link";
@@ -16,23 +16,23 @@ export function RegistroForm() {
         <label htmlFor="name" className={labelClass}>
           Tu nombre
         </label>
-        <input id="name" name="name" required className={inputClass} placeholder="AndrÃ©s Solano" />
+        <input id="name" name="name" required className={inputClass} placeholder="Andrés Solano" />
       </div>
       <div>
         <label htmlFor="businessName" className={labelClass}>
           Nombre de tu negocio
         </label>
-        <input id="businessName" name="businessName" required className={inputClass} placeholder="PanaderÃ­a La Espiga" />
+        <input id="businessName" name="businessName" required className={inputClass} placeholder="Panadería La Espiga" />
       </div>
       <div>
         <label htmlFor="email" className={labelClass}>
-          Correo electrÃ³nico
+          Correo electrónico
         </label>
         <input id="email" name="email" type="email" required className={inputClass} placeholder="tu@correo.com" />
       </div>
       <div>
         <label htmlFor="password" className={labelClass}>
-          ContraseÃ±a
+          Contraseña
         </label>
         <input
           id="password"
@@ -41,7 +41,7 @@ export function RegistroForm() {
           required
           minLength={8}
           className={inputClass}
-          placeholder="MÃ­nimo 8 caracteres"
+          placeholder="Mínimo 8 caracteres"
         />
       </div>
       {state.error && (
@@ -50,10 +50,10 @@ export function RegistroForm() {
         </p>
       )}
       <button type="submit" disabled={pending} className={buttonClass}>
-        {pending ? "Creando cuentaâ€¦" : "Crear cuenta gratis"}
+        {pending ? "Creando cuenta…" : "Crear cuenta gratis"}
       </button>
       <p className="text-center text-sm text-zinc-400">
-        Â¿Ya tienes cuenta?{" "}
+        ¿Ya tienes cuenta?{" "}
         <Link href="/ingresar" className="text-emerald-400 hover:underline">
           Ingresar
         </Link>

@@ -100,7 +100,11 @@ export default async function PanelPage({
         )}
 
         <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-center">
-          <h2 className="text-lg font-semibold">Tu primer análisis de ventas</h2>
+          <h2 className="text-lg font-semibold">
+            {jobs.length > 0
+              ? "Analiza un nuevo periodo de ventas"
+              : "Tu primer análisis de ventas"}
+          </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-zinc-400">
             Sube el archivo de ventas de tu punto de venta (Excel o CSV) y en
             ~1 minuto tendrás tu reporte: ventas, productos estrella, horarios

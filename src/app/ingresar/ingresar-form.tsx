@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState } from "react";
 import Link from "next/link";
@@ -14,13 +14,13 @@ export function IngresarForm() {
     <form action={action} className="mt-6 space-y-4">
       <div>
         <label htmlFor="email" className={labelClass}>
-          Correo electrÃ³nico
+          Correo electrónico
         </label>
         <input id="email" name="email" type="email" required className={inputClass} placeholder="tu@correo.com" />
       </div>
       <div>
         <label htmlFor="password" className={labelClass}>
-          ContraseÃ±a
+          Contraseña
         </label>
         <input id="password" name="password" type="password" required className={inputClass} />
       </div>
@@ -30,10 +30,10 @@ export function IngresarForm() {
         </p>
       )}
       <button type="submit" disabled={pending} className={buttonClass}>
-        {pending ? "Ingresandoâ€¦" : "Ingresar"}
+        {pending ? "Ingresando…" : "Ingresar"}
       </button>
       <p className="text-center text-sm text-zinc-400">
-        Â¿No tienes cuenta?{" "}
+        ¿No tienes cuenta?{" "}
         <Link href="/registro" className="text-emerald-400 hover:underline">
           Crear cuenta gratis
         </Link>

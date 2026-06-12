@@ -173,7 +173,7 @@ export function Wizard({
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-bold">Tu primer análisis</h1>
+      <h1 className="mb-1 text-2xl font-bold">Nuevo análisis</h1>
       <p className="mb-6 text-sm text-zinc-400">
         Tres pasos y tu reporte estará en camino.
       </p>

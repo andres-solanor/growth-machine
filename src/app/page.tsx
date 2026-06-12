@@ -23,6 +23,7 @@ const PLANES: {
   precio: string;
   nota: string;
   destacado?: boolean;
+  premium?: boolean;
   bullets: string[];
   cta: { label: string; href: string };
 }[] = [
@@ -59,6 +60,7 @@ const PLANES: {
     nombre: "Premium",
     precio: "$199.900/mes",
     nota: "precio de lanzamiento · normal $299.900",
+    premium: true,
     bullets: [
       "Todo lo del plan Pro",
       "Análisis ilimitados",
@@ -161,7 +163,9 @@ export default function Home() {
               className={`flex flex-col rounded-2xl border p-6 ${
                 plan.destacado
                   ? "border-emerald-600 bg-zinc-900"
-                  : "border-zinc-800 bg-zinc-900"
+                  : plan.premium
+                    ? "border-amber-700 bg-zinc-900"
+                    : "border-zinc-800 bg-zinc-900"
               }`}
             >
               <div className="flex items-center justify-between">
@@ -187,7 +191,9 @@ export default function Home() {
                 className={`mt-6 rounded-lg px-4 py-2.5 text-center text-sm font-semibold ${
                   plan.destacado
                     ? "bg-emerald-600 text-white hover:bg-emerald-500"
-                    : "border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                    : plan.premium
+                      ? "bg-gradient-to-r from-amber-400 to-orange-500 text-zinc-950 hover:from-amber-300 hover:to-orange-400"
+                      : "border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                 }`}
               >
                 {plan.cta.label}
