@@ -257,9 +257,22 @@ export function ProductMapEditor({
                     onChange={(e) => setCatMargin(cat, Number(e.target.value))}
                     className="h-1.5 flex-1 cursor-pointer accent-emerald-500"
                   />
-                  <span className="w-12 text-right text-sm tabular-nums text-zinc-300">
-                    {v != null ? `${v}%` : "—"}
-                  </span>
+                  {/* Caja numérica además del slider: para valores exactos */}
+                  <input
+                    type="number"
+                    min={0}
+                    max={99}
+                    step={1}
+                    inputMode="numeric"
+                    value={v ?? ""}
+                    onChange={(e) => {
+                      const n = parseMargin(e.target.value);
+                      setCatMargin(cat, n);
+                    }}
+                    placeholder="—"
+                    className="w-16 rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1 text-right text-sm tabular-nums placeholder:text-zinc-600"
+                  />
+                  <span className="text-sm text-zinc-500">%</span>
                   <button
                     type="button"
                     onClick={() => setCatMargin(cat, null)}

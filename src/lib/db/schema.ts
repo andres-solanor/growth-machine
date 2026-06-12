@@ -4,12 +4,10 @@
 
 import {
   bigint,
-  boolean,
   customType,
   date,
   decimal,
   int,
-  json,
   mysqlEnum,
   mysqlTable,
   text,
@@ -25,6 +23,28 @@ const longblob = customType<{ data: Buffer }>({
     return "longblob";
   },
 });
+
+// JSON con parse explícito en lectura. El json() de drizzle confía en que el
+// driver parsee, pero eso solo pasa en MySQL real: en MariaDB (Hostinger)
+// JSON es un alias de LONGTEXT y mysql2 devuelve un STRING — leer
+// `configJson.algo` daba undefined en producción.
+const json = (name: string) =>
+  customType<{ data: unknown; driverData: string }>({
+    dataType() {
+      return "json";
+    },
+    toDriver(value) {
+      return JSON.stringify(value);
+    },
+    fromDriver(value) {
+      if (typeof value !== "string") return value;
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    },
+  })(name);
 
 // No usar serial(): emite `serial AUTO_INCREMENT` y MariaDB (Hostinger) lo
 // rechaza; bigint unsigned autoincrement es válido en MySQL y MariaDB.

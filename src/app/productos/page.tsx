@@ -45,10 +45,14 @@ export default async function ProductosPage(props: {
   const products: EditorProduct[] = allProducts.map((p) => {
     const saved = byName.get(p["Nombre Corregido"]);
     byName.delete(p["Nombre Corregido"]);
+    // "Otros" guardado vuelve como "sin clasificar": así las sugerencias
+    // siguen visibles tras guardar a medias (clasificar por tandas es lo
+    // esperado — el corte Pareto invita justo a eso).
+    const savedCat = saved && saved.categoria !== "Otros" ? saved.categoria : "";
     return {
       sistema: p["Nombre Corregido"],
       categoria: saved
-        ? saved.categoria
+        ? savedCat
         : p.category && p.category !== "Otros"
           ? p.category
           : "",
@@ -63,7 +67,7 @@ export default async function ProductosPage(props: {
   for (const e of byName.values()) {
     products.push({
       sistema: e.sistema,
-      categoria: e.categoria,
+      categoria: e.categoria === "Otros" ? "" : e.categoria,
       margenPct: e.margenPct == null ? null : Number(e.margenPct),
       revenue: 0,
       revShare: 0,

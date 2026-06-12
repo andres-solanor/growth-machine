@@ -43,15 +43,21 @@ export async function guardarMapaProductos(formData: FormData) {
   const db = getDb();
   const tenantId = user.tenant.id;
 
-  // Config existente: se preserva todo (columns, currency…) y solo se
-  // actualiza category_margins. /api/jobs hace el merge simétrico.
+  // Config existente: se preservan las claves CONOCIDAS (columns, currency…)
+  // y se actualiza category_margins. Lista blanca en vez de spread: autolimpia
+  // filas con claves basura de un bug previo (spread de un string cuando
+  // MariaDB devolvía el JSON sin parsear). /api/jobs hace el merge simétrico.
   const prevCfg = await db
     .select({ configJson: schema.tenantConfigs.configJson })
     .from(schema.tenantConfigs)
     .where(eq(schema.tenantConfigs.tenantId, tenantId))
     .limit(1);
+  const prev = (prevCfg[0]?.configJson ?? {}) as Record<string, unknown>;
   const configJson = {
-    ...((prevCfg[0]?.configJson as Record<string, unknown>) ?? {}),
+    ...(prev.columns ? { columns: prev.columns } : {}),
+    ...(prev.currency ? { currency: prev.currency } : {}),
+    ...(prev.store_name ? { store_name: prev.store_name } : {}),
+    ...(prev.country ? { country: prev.country } : {}),
     category_margins: categoryMargins,
   };
 

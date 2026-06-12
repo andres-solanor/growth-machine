@@ -108,18 +108,25 @@ export async function POST(req: Request) {
   }
 
   // Merge sobre la config existente: el editor de productos guarda
-  // category_margins ahí y no debe perderse al crear un job.
+  // category_margins ahí y no debe perderse al crear un job. Lista blanca de
+  // claves (no spread): autolimpia filas con claves basura de un bug previo
+  // (se hacía spread de un string cuando MariaDB devolvía el JSON sin parsear).
   const prevCfg = await db
     .select({ configJson: schema.tenantConfigs.configJson })
     .from(schema.tenantConfigs)
     .where(eq(schema.tenantConfigs.tenantId, user.tenant.id))
     .limit(1);
+  const prev = (prevCfg[0]?.configJson ?? {}) as {
+    category_margins?: Record<string, number>;
+  };
   const configJson = {
-    ...((prevCfg[0]?.configJson as Record<string, unknown>) ?? {}),
     columns: mapping,
     currency: user.tenant.currency,
     store_name: user.tenant.name,
     country: user.tenant.country,
+    ...(prev.category_margins && typeof prev.category_margins === "object"
+      ? { category_margins: prev.category_margins }
+      : {}),
   };
 
   const jobId = await db.transaction(async (tx) => {

@@ -245,9 +245,40 @@ combos sugeridos (launch-ready/balanced con confianza, lift y margen) y plan de
 acción (recommendations del motor — antes sin render). Con esto TODO el contenido
 Premium del payload está renderizado. `check:gating`, golden pytest y build verdes.
 
+✅ 2026-06-11 (noche): **analytikz.com.co atado al sitio** (Andrés lo conectó en hPanel).
+Desbloquea el siguiente paso de email: crear buzón no-reply + SMTP → verificación de
+correo y transactional email.
+
+✅ 2026-06-11 (noche): **Fix crítico MariaDB + pulido del editor tras prueba de Andrés.**
+Los `json()` de drizzle no parsean en lectura: en MySQL real el driver lo hace, pero en
+MariaDB (Hostinger) JSON es LONGTEXT y mysql2 devuelve STRING → `configJson.category_margins`
+y `configSnapshot.columns` llegaban undefined en producción (los sliders de margen
+"se borraban" al guardar — sí se guardaban, no se podían releer; y el column_mapping
+del worker se perdía en silencio — funcionaba solo porque el .xls real ya trae las
+columnas canónicas). Fix: customType json con JSON.parse en `fromDriver` (schema.ts,
+mismo tipo SQL, sin migración) + merges de configJson por lista blanca de claves
+(autolimpia la basura de claves numéricas que dejó el spread de strings). Editor:
+las sugerencias sobreviven al guardado parcial ("Otros" guardado vuelve como sin
+clasificar — clasificar por tandas es el flujo esperado) y cada categoría tiene caja
+numérica además del slider para valores exactos.
+
 Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
-delta); teasers blur (nice-to-have de abajo); transactional email (bloqueado por
-dominio+SMTP); colores por categoría del tenant en charts (hoy paleta fija).
+delta); teasers blur (nice-to-have de abajo); transactional email (dominio listo ✓,
+falta buzón no-reply + SMTP); colores por categoría del tenant en charts (hoy paleta fija).
+
+**Nice-to-have (idea de Andrés, 2026-06-11) — enriquecimiento de categorías con IA:**
+la auto-sugerencia actual es por palabras clave (~15 categorías de comida LatAm), pero
+el sistema apunta a "casi cualquier producto del mercado" — imposible pre-mapear todo.
+Un paso de IA ligero (LLM batch: nombres de productos del tenant → categoría sugerida,
+el usuario siempre confirma en el editor) cubriría la cola larga. Consideraciones:
+costo por análisis, API key en env de Hostinger, y que los nombres de producto viajan
+a un tercero (revisar privacidad/EULA antes). Después del blur-teaser.
+
+**Idea a explorar (Andrés, 2026-06-11) — sección de "otros servicios de analítica":**
+una sección separada del sitio dedicada a otros servicios de analítica (más allá del
+reporte de ventas), diseñada alrededor de las habilidades, conocimiento y experiencia
+de Andrés. Pendiente: sesión de brainstorm con él para definir el catálogo de servicios
+antes de diseñar nada. Anotado como siguiente paso, sin fecha.
 
 **Nice-to-have (idea de Andrés, 2026-06-11) — teasers "semi-visibles" con blur:** en vez
 de la tarjeta de candado actual, las secciones bloqueadas mostrarían la parte superior
@@ -300,3 +331,4 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-11 | Gráficos con `plotly.js-cartesian-dist-min` (bundle cartesiano, ~⅓ del Plotly completo) vía `react-plotly.js`, cargado solo en el cliente (`next/dynamic`, sin SSR) | El reporte solo usa barras/líneas/heatmap; Plotly completo pesa ~4.5 MB. Plotly toca `window` al importarse → no soporta SSR. Mismo motor de gráficos que los reportes HTML originales de La Panettería (tema y colorscales portados) |
 | 2026-06-11 | Márgenes por categoría guardados en `tenant_configs.configJson.category_margins` (no tabla nueva); tanto el editor como `/api/jobs` hacen merge del JSON, nunca lo reemplazan | Cero migraciones; el `config_snapshot` del job congela los márgenes usados en cada análisis (reproducibilidad y etiqueta "margen estimado" por reporte). El mapa de productos sí vive en su tabla (`product_map_entries`, ya existía) |
 | 2026-06-11 | El worker inyecta `category_normalization` identidad (categorías del propio tenant) cuando la config no trae uno | El default de `ReportConfig` es el mapeo de La Panettería: cualquier categoría ajena caía a "Otros" y el editor de categorías no habría servido de nada. Identidad = lo que el tenant escribió es lo que ve |
+| 2026-06-11 | JSON en DB con `customType` propio (JSON.parse en `fromDriver`) en vez del `json()` de drizzle; merges de `config_json` por lista blanca de claves, nunca spread | En MariaDB (Hostinger) JSON es LONGTEXT y mysql2 devuelve string — drizzle no parsea en lectura y todo `.campo` daba undefined en producción (sliders de margen "borrados", column_mapping del worker perdido en silencio). El spread de ese string además sembró claves basura "0","1","2"… que la lista blanca autolimpia en el siguiente guardado |
