@@ -36,3 +36,18 @@ reports/prev_test/
 reports/input_data/*.csv
 !reports/input_data/sales_carts_sample.csv
 !reports/input_data/product_map.csv
+
+# Raw POS exports (customer sales data — never commit)
+reports/input_data/*.xls
+reports/input_data/*.xlsx
+
+# ── Next.js web app (Analytikz) ──
+/node_modules
+/.next/
+/out/
+/coverage
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.env*
+.vercel

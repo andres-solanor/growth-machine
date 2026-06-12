@@ -1,0 +1,46 @@
+{
+  "name": "analytikz",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "check:payload": "tsx scripts/check-payload.ts",
+    "check:gating": "tsx scripts/check-gating.ts",
+    "db:generate": "drizzle-kit generate && tsx scripts/embed-migrations.ts",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.3",
+    "mysql2": "^3.22.5",
+    "next": "16.2.9",
+    "nodemailer": "^8.0.11",
+    "plotly.js-cartesian-dist-min": "^3.6.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-plotly.js": "^3.0.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-plotly.js": "^2.6.4",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}
