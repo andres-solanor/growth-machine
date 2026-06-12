@@ -272,9 +272,21 @@ que lleva a `/#planes` (ancla nueva en la landing). SEGURIDAD: la vista borrosa 
 todos los tenants) — el gating server-side no cambió y `check:gating` sigue verde;
 el archivo de demos no importa nada del payload por diseño.
 
+✅ 2026-06-11 (noche): **Fix de las ráfagas de 503 — lectura de payloads barata.**
+Diagnóstico (confirmado con los datos de Hostinger/Kodee: Max Processes + memoria +
+I/O saltando juntos con `/reportes/*` como rutas top): cada vista del reporte traía
+el blob completo de la DB, lo descomprimía, lo parseaba Y lo revalidaba con zod
+(copia profunda de un objeto de varios MB), sin caché — requests solapados hacían
+que LiteSpeed multiplicara procesos Node hasta el límite del plan → 503. Fix en
+`src/lib/report.ts`: (1) sin zod en lectura — el payload ya se validó al guardarse;
+(2) `interactive_base` (filas crudas, sin UI todavía) se suelta al parsear: era la
+mayor parte del payload; (3) caché por proceso de los últimos 3 payloads parseados
+(clave `report_payloads.id`, inmutable tras succeeded; un análisis nuevo = fila
+nueva = miss natural), con consulta previa solo del id para no traer el blob en hit.
+
 Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
-delta); transactional email (dominio listo ✓, falta buzón no-reply + SMTP); colores
-por categoría del tenant en charts (hoy paleta fija).
+delta); transactional email (dominio listo ✓, buzón no-reply@analytikz.com.co creado ✓,
+falta cablear SMTP en la app); colores por categoría del tenant en charts (hoy paleta fija).
 
 **Nice-to-have (idea de Andrés, 2026-06-11) — enriquecimiento de categorías con IA:**
 la auto-sugerencia actual es por palabras clave (~15 categorías de comida LatAm), pero
@@ -349,3 +361,4 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-11 | El worker inyecta `category_normalization` identidad (categorías del propio tenant) cuando la config no trae uno | El default de `ReportConfig` es el mapeo de La Panettería: cualquier categoría ajena caía a "Otros" y el editor de categorías no habría servido de nada. Identidad = lo que el tenant escribió es lo que ve |
 | 2026-06-11 | JSON en DB con `customType` propio (JSON.parse en `fromDriver`) en vez del `json()` de drizzle; merges de `config_json` por lista blanca de claves, nunca spread | En MariaDB (Hostinger) JSON es LONGTEXT y mysql2 devuelve string — drizzle no parsea en lectura y todo `.campo` daba undefined en producción (sliders de margen "borrados", column_mapping del worker perdido en silencio). El spread de ese string además sembró claves basura "0","1","2"… que la lista blanca autolimpia en el siguiente guardado |
 | 2026-06-11 | Blur-teasers: las tarjetas bloqueadas muestran demos 100% SINTÉTICOS (`locked-demos.tsx`, datos inventados fijos) bajo blur, nunca una versión borrosa del dato real | El gating server-side es la garantía de seguridad del producto: lo bloqueado jamás se serializa al cliente, ni siquiera "borroso" (un blur CSS se quita con un click en DevTools). El gancho de venta sigue siendo la cifra real del teaser de `lib/gating.ts`, que sí es pública por diseño |
+| 2026-06-11 | Validación zod del payload SOLO al escribir (worker result route); la lectura parsea sin revalidar, suelta `interactive_base` y cachea los últimos 3 payloads por proceso | Revalidar varios MB con zod en cada vista (con copia profunda incluida) disparaba CPU/memoria/procesos en Hostinger → ráfagas de 503. La fila de un job succeeded nunca se sobreescribe, así que el caché por `report_payloads.id` no necesita invalidación. Cuando exista el filtrado interactivo, NO volver a cargar interactive_base en cada vista — diseñarlo aparte (endpoint propio o slice) |
