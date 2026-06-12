@@ -304,6 +304,13 @@ sondeo lineal evita choques dentro del mismo gráfico.
 Remaining Phase 2: delta report flow (event picker → BuilderConfig → job → secciones
 delta).
 
+**Estado 2026-06-12 (fin del sprint inicial):** app completa en producción con
+precios publicados — funnel entero funcional (registro → análisis → reporte gateado →
+upgrade/consultoría) + email transaccional verificado. Decisión: antes de la próxima
+feature, una sesión de **revisión y consolidación** (walkthrough completo del funnel,
+verificaciones pendientes de Andrés, deuda técnica, y priorización de lo que sigue:
+delta / IA de categorías / PDF revista / sección de servicios / primeros clientes).
+
 **Nice-to-have (idea de Andrés, 2026-06-11) — enriquecimiento de categorías con IA:**
 la auto-sugerencia actual es por palabras clave (~15 categorías de comida LatAm), pero
 el sistema apunta a "casi cualquier producto del mercado" — imposible pre-mapear todo.
