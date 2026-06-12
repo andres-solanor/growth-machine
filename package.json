@@ -21,8 +21,10 @@
     "jose": "^6.2.3",
     "mysql2": "^3.22.5",
     "next": "16.2.9",
+    "plotly.js-cartesian-dist-min": "^3.6.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-plotly.js": "^3.0.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^4.4.3"
   },
@@ -31,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-plotly.js": "^2.6.4",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",

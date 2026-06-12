@@ -168,6 +168,19 @@ gating quitó su módulo → subir el plan en /admin las desbloquea de inmediato
 contenido Pro está completo; Premium aún muestra teasers de rentabilidad/combos (Fase 2:
 editor de product map + márgenes).
 
+✅ 2026-06-11: **Upgrade visual del reporte: gráficos interactivos Plotly.** Tras el
+feedback de Andrés ("podemos trabajar mucho más en visuales y layout"), las secciones
+pasaron de barras CSS/SVG a Plotly con el tema oscuro del motor original:
+`src/components/charts/` (wrapper `plot.tsx` carga Plotly solo en el navegador con
+esqueleto anti-salto; `report-charts.tsx` tiene los 8 gráficos). Timeline: ventas diarias
++ media móvil, día de semana, **heatmap día × hora** (nuevo, colorscale del motor) y
+ventas por categoría mes a mes (nuevo). Productos: top-10 horizontal con % de
+participación. Pro: parejas de canasta coloreadas por lift (verde/ámbar/rojo como el
+motor), distribución del carrito, tendencias como barra divergente, ticket por hora con
+horas de oportunidad en ámbar. Hover en es, `dragmode` apagado (el zoom por arrastre
+secuestra el scroll en móvil), contenedor a `max-w-4xl`. `check:gating` sigue pasando:
+los gráficos son client components que reciben datos ya filtrados por el servidor.
+
 ✅ 2026-06-11: **Auth + onboarding wizard live.** Registration (`/registro`: user + tenant
 free + membership + audit in one tx), login (`/ingresar`), stateless JWT sessions (30 d,
 `AUTH_SECRET` env), protected `/panel`. Upload wizard `/analisis/nuevo` (3 pasos: negocio →
@@ -254,3 +267,4 @@ Mercado Pago subscriptions (webhooks → `tenants.tier`); incremental TypeScript
 | 2026-06-11 | GitHub **default branch** switched from `main` to `saas` | Hostinger's repo import scans the *default* branch for framework detection (no branch picker shown); `main` has no Node.js app, so detection failed with "el marco no es compatible". Changes no code — `main` and the weekly La Panettería workflow are untouched. `saas` stays default going forward (it is the production branch) |
 | 2026-06-11 | Admin gateado por env var `ADMIN_EMAILS` (lista de correos), no por rol en DB | Cero migraciones y cero UI extra para un solo admin; el correo vive solo en el panel de Hostinger. Si algún día hay más admins, migrar a rol en `memberships` |
 | 2026-06-11 | Landing publica los 3 planes SIN precio para Pro/Premium ("precio de lanzamiento — escríbenos" → /consultoria) | Los precios aún no están decididos; el CTA a consultoría convierte la duda de precio en conversación de venta. Cuando se decidan, actualizar `PLANES` en `src/app/page.tsx` |
+| 2026-06-11 | Gráficos con `plotly.js-cartesian-dist-min` (bundle cartesiano, ~⅓ del Plotly completo) vía `react-plotly.js`, cargado solo en el cliente (`next/dynamic`, sin SSR) | El reporte solo usa barras/líneas/heatmap; Plotly completo pesa ~4.5 MB. Plotly toca `window` al importarse → no soporta SSR. Mismo motor de gráficos que los reportes HTML originales de La Panettería (tema y colorscales portados) |

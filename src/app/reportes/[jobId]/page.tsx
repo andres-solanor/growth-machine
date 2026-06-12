@@ -65,12 +65,12 @@ export default async function ReportePage(props: {
         </Link>
       </header>
 
-      <div className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-6 py-10">
+      <div className="mx-auto w-full max-w-4xl flex-1 space-y-8 px-6 py-10">
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-3xl font-bold tracking-tight">
             Reporte de ventas — {r.meta.store_name ?? user.tenant.name}
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-2 text-sm text-zinc-400">
             {r.summary.date_range} · moneda {r.meta.currency}
           </p>
         </div>

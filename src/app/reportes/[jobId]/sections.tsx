@@ -1,9 +1,16 @@
 import Link from "next/link";
 import type { GatedReport } from "@/lib/report";
 import { fmtMoney, fmtNum, fmtIsoDate } from "@/lib/format";
+import {
+  DailyRevenueChart,
+  DowChart,
+  HeatmapChart,
+  MonthlyCatChart,
+  TopProductsChart,
+} from "@/components/charts/report-charts";
 
-// Secciones del reporte (server components puros: el cliente recibe HTML).
-// v1 sin Plotly: SVG/CSS livianos; gráficos interactivos llegan después.
+// Secciones del reporte. Server components que pasan datos YA filtrados por
+// el gating a los gráficos Plotly (client components en components/charts).
 
 const card = "rounded-2xl border border-zinc-800 bg-zinc-900 p-6";
 
@@ -60,79 +67,66 @@ export function QualitySection({ r }: { r: GatedReport }) {
   );
 }
 
-// ── Línea de tiempo (SVG liviano) ────────────────────────────────────────
+// ── Línea de tiempo ───────────────────────────────────────────────────────
 
 export function TimelineSection({ r }: { r: GatedReport }) {
   const t = r.analyses.timeline;
   if (!t) return null;
-  const c = r.meta.currency;
-
-  const revs = t.daily.map((d) => d.revenue ?? 0);
-  const max = Math.max(...revs, 1);
-  const W = 640;
-  const H = 120;
-  const step = revs.length > 1 ? W / (revs.length - 1) : W;
-  const points = revs
-    .map((v, i) => `${(i * step).toFixed(1)},${(H - (v / max) * H).toFixed(1)}`)
-    .join(" ");
-
-  const dowMax = Math.max(...t.dow.map((d) => d.revenue ?? 0), 1);
 
   return (
     <section className={card}>
       <h2 className="text-lg font-semibold">Ventas en el tiempo</h2>
-
-      <svg
-        viewBox={`0 0 ${W} ${H + 8}`}
-        className="mt-4 w-full"
-        preserveAspectRatio="none"
-        aria-label="Ventas diarias"
-      >
-        <polyline
-          points={`0,${H} ${points} ${W},${H}`}
-          fill="rgba(16,185,129,0.15)"
-          stroke="none"
-        />
-        <polyline points={points} fill="none" stroke="#10b981" strokeWidth="2" />
-      </svg>
-      <p className="mt-1 text-xs text-zinc-500">
-        Ventas diarias · {fmtIsoDate(r.summary.date_min_iso)} —{" "}
-        {fmtIsoDate(r.summary.date_max_iso)}
+      <p className="mt-1 text-sm text-zinc-400">
+        Ventas diarias del {fmtIsoDate(r.summary.date_min_iso)} al{" "}
+        {fmtIsoDate(r.summary.date_max_iso)}. La línea ámbar es tu promedio
+        móvil: si las barras quedan debajo varios días seguidos, algo cambió.
       </p>
+      <DailyRevenueChart daily={t.daily} />
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+      <div className="mt-8 grid gap-6 sm:grid-cols-2">
         <div>
-          <h3 className="mb-2 text-sm font-medium text-zinc-300">
+          <h3 className="text-sm font-medium text-zinc-300">
             Ventas por día de la semana
           </h3>
-          <ul className="space-y-1.5">
-            {t.dow.map((d) => (
-              <li key={d.day} className="flex items-center gap-2 text-xs">
-                <span className="w-8 shrink-0 text-zinc-400">{d.day}</span>
-                <div className="h-3 flex-1 rounded bg-zinc-800">
-                  <div
-                    className="h-3 rounded bg-emerald-600"
-                    style={{ width: `${((d.revenue ?? 0) / dowMax) * 100}%` }}
-                  />
-                </div>
-                <span className="w-20 shrink-0 text-right text-zinc-400">
-                  {fmtMoney(d.revenue ?? 0, c)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <DowChart dow={t.dow} />
         </div>
-        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+        <div className="flex flex-col justify-center rounded-xl border border-zinc-800 bg-zinc-950 p-5">
           <h3 className="text-sm font-medium text-zinc-300">Tu mejor momento</h3>
-          <p className="mt-2 text-2xl font-bold text-emerald-400">
+          <p className="mt-2 text-3xl font-bold tracking-tight text-emerald-400">
             {t.best_combo ?? "—"}
           </p>
-          <p className="mt-1 text-xs text-zinc-500">
-            La franja con más ventas del periodo. Asegura inventario y personal a
-            esa hora.
+          <p className="mt-2 text-xs text-zinc-500">
+            La franja con más ventas del periodo. Asegura inventario y personal
+            a esa hora.
           </p>
         </div>
       </div>
+
+      {t.heatmap_z.length > 0 && t.heatmap_hours.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-sm font-medium text-zinc-300">
+            Mapa de calor: día × hora
+          </h3>
+          <p className="mt-1 text-xs text-zinc-500">
+            Dónde se concentran tus órdenes. Las zonas ámbar son tus horas
+            pico; las oscuras, donde sobra personal o falta tráfico.
+          </p>
+          <HeatmapChart
+            days={t.heatmap_days}
+            hours={t.heatmap_hours}
+            z={t.heatmap_z}
+          />
+        </div>
+      )}
+
+      {t.monthly_cat.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-sm font-medium text-zinc-300">
+            Ventas por categoría, mes a mes
+          </h3>
+          <MonthlyCatChart rows={t.monthly_cat} />
+        </div>
+      )}
     </section>
   );
 }
@@ -142,38 +136,22 @@ export function TimelineSection({ r }: { r: GatedReport }) {
 export function ProductsSection({ r }: { r: GatedReport }) {
   const p = r.analyses.products;
   if (!p) return null;
-  const c = r.meta.currency;
   const top = p.top_n.slice(0, 10);
-  const maxRev = Math.max(...top.map((x) => x.revenue ?? 0), 1);
 
   return (
     <section className={card}>
       <h2 className="text-lg font-semibold">Tus productos estrella</h2>
       <p className="mt-1 text-sm text-zinc-400">
         {p.n_pareto} de tus {p.total_products} productos generan el 80% de las
-        ventas.
+        ventas. El porcentaje es la participación de cada uno en tus ventas.
       </p>
-      <ul className="mt-4 space-y-2">
-        {top.map((x, i) => (
-          <li key={x["Nombre Corregido"]} className="text-sm">
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="truncate text-zinc-200">
-                <span className="mr-2 text-zinc-500">{i + 1}.</span>
-                {x["Nombre Corregido"]}
-              </span>
-              <span className="shrink-0 text-zinc-400">
-                {fmtMoney(x.revenue ?? 0, c)}
-              </span>
-            </div>
-            <div className="mt-1 h-1.5 rounded bg-zinc-800">
-              <div
-                className="h-1.5 rounded bg-emerald-600"
-                style={{ width: `${((x.revenue ?? 0) / maxRev) * 100}%` }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <TopProductsChart
+        items={top.map((x) => ({
+          name: x["Nombre Corregido"],
+          revenue: x.revenue,
+          revShare: x.rev_share,
+        }))}
+      />
     </section>
   );
 }
